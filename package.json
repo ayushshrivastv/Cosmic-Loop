@@ -35,7 +35,7 @@
     "@solana/wallet-adapter-wallets": "^0.19.36",
     "@solana/web3.js": "^1.98.2",
     "@wagmi/chains": "^1.8.0",
-    "@web3modal/wagmi": "3.5.7",
+    "@web3modal/wagmi": "^3.4.0",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -54,8 +54,8 @@
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.0.1",
-    "viem": "^2.29.2",
-    "wagmi": "1.4.13",
+    "viem": "^1.21.4",
+    "wagmi": "^1.4.7",
     "zod": "^3.24.4"
   },
   "devDependencies": {
