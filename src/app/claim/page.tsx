@@ -20,15 +20,16 @@ export default function ClaimPage() {
             <div className="border border-border rounded-lg p-6 sticky top-24">
               <h2 className="text-xl font-semibold mb-4">About Token Claims</h2>
               <p className="text-muted-foreground mb-4">
-                Easily claim your proof-of-participation token by entering a claim code or scanning a QR code provided by the event organizer.
+                Easily claim your omnichain NFT-based attendance token by entering a claim code or scanning a QR code provided by the event organizer. These tokens work across Solana and all LayerZero-supported networks.
               </p>
 
               <h3 className="font-medium text-lg mt-6 mb-2">How to Claim</h3>
               <ol className="list-decimal pl-5 text-muted-foreground space-y-2">
-                <li>Connect your Solana wallet</li>
+                <li>Connect your wallet (Solana or any LayerZero-supported chain)</li>
                 <li>Enter the claim code or scan the QR code</li>
                 <li>Approve the transaction in your wallet</li>
-                <li>Receive your token in seconds</li>
+                <li>Receive your cross-chain attendance NFT in seconds</li>
+                <li>View your token across multiple blockchain networks</li>
               </ol>
 
               <div className="mt-6 pt-6 border-t border-border">

@@ -19,12 +19,12 @@ interface NavHeaderProps {
 export const NavHeader: React.FC<NavHeaderProps> = ({
   navItems,
   logo
-}) => {
+}: NavHeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isWalletButtonMounted, setIsWalletButtonMounted] = useState(false);
-  const walletButtonDelay = useRef<NodeJS.Timeout | null>(null);
+  const walletButtonDelay = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Client-side only initialization and cleanup
   useEffect(() => {
@@ -65,15 +65,15 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
           <div className="flex-shrink-0">
             {logo || (
               <Link href="/" className="text-white font-bold text-xl">
-                <span className="text-white">Scalable</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">cToken</span>
+                <span className="text-white">Cosmic</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Loop</span>
               </Link>
             )}
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
+            {navItems.map((item: NavItem) => (
               <Link 
                 key={item.href}
                 href={item.href}
@@ -116,7 +116,7 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
           >
             <div className="container mx-auto px-4 py-6 space-y-4">
               <nav className="flex flex-col space-y-4">
-                {navItems.map((item) => (
+                {navItems.map((item: NavItem) => (
                   <Link 
                     key={item.href}
                     href={item.href}

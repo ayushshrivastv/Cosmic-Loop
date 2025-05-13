@@ -41,12 +41,11 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           <div className="space-y-4">
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold tracking-tight flex items-center">
-                <span className="text-white">Scalable</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">cToken</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600">Cosmic Loop</span>
               </span>
             </Link>
             <p className="text-sm">
-              High throughput token issuance and distribution platform powered by Light Protocol's state compression technology.
+              Omnichain solution for NFT-based event attendance verification, connecting Solana with all LayerZero-supported networks.
             </p>
           </div>
           

@@ -20,15 +20,16 @@ export default function DashboardPage() {
             <div className="border border-border rounded-lg p-6 sticky top-24">
               <h2 className="text-xl font-semibold mb-4">Dashboard Overview</h2>
               <p className="text-muted-foreground mb-4">
-                Monitor your event tokens, track distributions, and manage recipients. This dashboard provides insights into your event&apos;s engagement and token distribution metrics.
+                Monitor your omnichain NFT-based attendance tokens, track cross-chain distributions, and manage recipients. This dashboard provides insights into your event&apos;s engagement across Solana and all LayerZero-supported networks.
               </p>
 
               <h3 className="font-medium text-lg mt-6 mb-2">Features</h3>
               <ul className="list-disc pl-5 text-muted-foreground space-y-1">
-                <li>Track token claims and distributions</li>
-                <li>Monitor recipient activity</li>
-                <li>View event analytics and statistics</li>
-                <li>Manage token supply and airdrops</li>
+                <li>Track cross-chain token claims and distributions</li>
+                <li>Monitor recipient activity across multiple networks</li>
+                <li>View comprehensive omnichain analytics</li>
+                <li>Manage token supply and cross-chain airdrops</li>
+                <li>Analyze attendance patterns across different blockchains</li>
               </ul>
 
               <div className="mt-6 pt-6 border-t border-border">
