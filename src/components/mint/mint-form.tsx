@@ -572,7 +572,6 @@ export function MintForm() {
                             render={({ field }) => {
                               return (
                                 <FormItem
-                                  key={chain}
                                   className="flex flex-row items-start space-x-3 space-y-0 border rounded-md p-3"
                                 >
                                   <FormControl>
