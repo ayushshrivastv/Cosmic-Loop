@@ -54,12 +54,12 @@ function BridgePageContent() {
                       <div key={chain} className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full overflow-hidden bg-background">
                           <img 
-                            src={CHAIN_CONFIGS[chain]?.logo || '/chains/unknown.svg'} 
-                            alt={CHAIN_CONFIGS[chain]?.name || chain} 
+                            src={CHAIN_CONFIGS[chain as keyof typeof CHAIN_CONFIGS]?.logo || '/chains/unknown.svg'} 
+                            alt={CHAIN_CONFIGS[chain as keyof typeof CHAIN_CONFIGS]?.name || chain} 
                             className="w-full h-full object-contain" 
                           />
                         </div>
-                        <span>{CHAIN_CONFIGS[chain]?.name || chain}</span>
+                        <span>{CHAIN_CONFIGS[chain as keyof typeof CHAIN_CONFIGS]?.name || chain}</span>
                       </div>
                     ))
                   ) : (

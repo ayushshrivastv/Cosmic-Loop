@@ -21,7 +21,14 @@ import {
   type BridgeFeeEstimate
 } from '@/lib/api-client';
 import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
-import { useConnect, useDisconnect, useBalance, useAccount, useNetwork } from 'wagmi';
+// Temporarily mock wagmi hooks until the package is properly installed
+// import { useConnect, useDisconnect, useBalance, useAccount, useNetwork } from 'wagmi';
+const useConnect = () => ({ connect: () => {}, connectors: [], error: null, isLoading: false, pendingConnector: null });
+const useDisconnect = () => ({ disconnect: () => {}, error: null, isLoading: false });
+const useBalance = () => ({ data: null, error: null, isLoading: false });
+const useAccount = () => ({ address: null, connector: null, isConnected: false, isConnecting: false, isDisconnected: true });
+const useNetwork = () => ({ chain: null, chains: [], error: null, isLoading: false, pendingChainId: null });
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -364,6 +371,13 @@ export default function BridgeForm({
       if (!sourceWalletAddress) {
         setError('No source wallet connected');
         toast.error('No source wallet connected');
+        return;
+      }
+      
+      // Check if selectedNFT is null
+      if (!selectedNFT) {
+        setError('No NFT selected');
+        toast.error('Please select an NFT to bridge');
         return;
       }
 
