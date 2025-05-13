@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="#111827"/>
+  <rect x="100" y="100" width="1000" height="475" rx="12" fill="#1F2937"/>
+  
+  <!-- QR Code placeholder -->
+  <rect x="700" y="150" width="300" height="300" rx="8" fill="#374151"/>
+  <rect x="750" y="200" width="200" height="200" rx="8" fill="#1F2937"/>
+  <rect x="770" y="220" width="40" height="40" fill="#4B5563"/>
+  <rect x="820" y="220" width="40" height="40" fill="#4B5563"/>
+  <rect x="870" y="220" width="40" height="40" fill="#4B5563"/>
+  <rect x="770" y="270" width="40" height="40" fill="#4B5563"/>
+  <rect x="870" y="270" width="40" height="40" fill="#4B5563"/>
+  <rect x="770" y="320" width="40" height="40" fill="#4B5563"/>
+  <rect x="820" y="320" width="40" height="40" fill="#4B5563"/>
+  <rect x="870" y="320" width="40" height="40" fill="#4B5563"/>
+
+  <!-- Form Elements -->
+  <rect x="150" y="150" width="400" height="50" rx="8" fill="#374151"/>
+  <rect x="150" y="230" width="200" height="40" rx="6" fill="#4B5563"/>
+  <rect x="150" y="290" width="200" height="40" rx="6" fill="#4B5563"/>
+  <rect x="150" y="350" width="200" height="40" rx="6" fill="#4B5563"/>
+  <rect x="380" y="230" width="250" height="40" rx="6" fill="#374151"/>
+  <rect x="380" y="290" width="250" height="40" rx="6" fill="#374151"/>
+  <rect x="380" y="350" width="250" height="40" rx="6" fill="#374151"/>
+  
+  <rect x="150" y="450" width="200" height="60" rx="30" fill="#8B5CF6"/>
+  <rect x="380" y="450" width="250" height="60" rx="30" fill="#1F2937" stroke="#6B7280" stroke-width="2"/>
+  
+  <rect x="150" y="600" width="900" height="1" fill="#4B5563"/>
+  <text x="600" y="640" font-family="Arial" font-size="24" text-anchor="middle" fill="#9CA3AF">Solana Pay QR Code Screen</text>
+</svg>

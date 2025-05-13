@@ -1,0 +1,52 @@
+[images]
+  remote_images = ["https://source.unsplash.com/.*", "https://images.unsplash.com/.*", "https://ext.same-assets.com/.*", "https://ugc.same-assets.com/.*"]
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NEXT_PUBLIC_API_ENDPOINT = "/.netlify/functions/graphql"
+  NEXT_PUBLIC_WS_ENDPOINT = "/.netlify/functions/ws"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Proxy API requests to serverless functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Redirect graphql requests to the graphql function
+[[redirects]]
+  from = "/graphql"
+  to = "/.netlify/functions/graphql"
+  status = 200
+
+# Redirect websocket connections
+[[redirects]]
+  from = "/ws"
+  to = "/.netlify/functions/ws"
+  status = 200
+
+# Redirect all other routes to Next.js
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Define serverless functions that will run the backend
+[functions]
+  directory = "backend/serverless"
+  node_bundler = "esbuild"
+  included_files = ["backend/**"]
+
+# Configure function environment variables
+[functions.graphql]
+  included_files = ["backend/**"]
+
+[functions.ws]
+  included_files = ["backend/**"]

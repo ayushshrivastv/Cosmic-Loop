@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme not used - we're focusing on dark theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 25%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 0%;
+    --radius: 0.5rem;
+  }
+
+  /* Apple-inspired dark theme */
+  .dark, :root {
+    /* Dark background slightly lighter than pure black (like macOS) */
+    --background: 220 20% 2.5%;
+    --foreground: 210 6% 96%;
+    
+    /* Subtle dark card background with slight blue tint */
+    --card: 224 22% 5%;
+    --card-foreground: 210 6% 96%;
+    
+    /* Popover slightly more prominent than cards */
+    --popover: 224 25% 6%;
+    --popover-foreground: 210 6% 96%;
+    
+    /* Apple-like primary colors */
+    --primary: 206 100% 50%; /* Apple blue */
+    --primary-foreground: 0 0% 100%;
+    
+    /* Subtle secondary colors */
+    --secondary: 224 20% 8%;
+    --secondary-foreground: 210 6% 90%;
+    
+    /* Muted elements */
+    --muted: 225 20% 12%;
+    --muted-foreground: 220 10% 65%;
+    
+    /* Accent colors */
+    --accent: 213 90% 45%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Destructive elements */
+    --destructive: 0 90% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Subtle borders */
+    --border: 225 15% 14%;
+    --input: 225 15% 14%;
+    --ring: 206 100% 50%;
+    
+    /* Apple-like rounded corners - more subtle */
+    --radius: 0.5rem;
+    
+    /* Gradient colors used for highlights */
+    --gradient-1: 206 100% 50%;
+    --gradient-2: 252 100% 65%;
+    --gradient-3: 328 100% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Card and button hover effects */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Improved focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for a more polished look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--secondary));
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
