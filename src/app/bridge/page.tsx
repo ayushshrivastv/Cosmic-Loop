@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AppleLayout } from '@/components/layouts/apple-layout';
-import { BridgeForm } from '@/components/bridge/bridge-form';
+import BridgeForm from '@/components/bridge/bridge-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SupportedChain } from '@/lib/utils/layer-zero';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CHAIN_CONFIGS } from '@/lib/layer-zero-config';
 
-export default function BridgePage() {
+// Create a separate component that uses useSearchParams
+function BridgePageContent() {
   const searchParams = useSearchParams();
   const [tokenMint, setTokenMint] = useState<string | null>(null);
   const [tokenName, setTokenName] = useState<string | null>(null);
@@ -28,7 +29,7 @@ export default function BridgePage() {
     if (event) setEventName(event);
     if (chains && chains.length > 0) setSupportedChains(chains);
   }, [searchParams]);
-
+  
   return (
     <AppleLayout>
       <div className="container mx-auto pt-32 pb-16 flex-1">
@@ -50,97 +51,86 @@ export default function BridgePage() {
                 <div className="space-y-2">
                   {supportedChains ? (
                     supportedChains.map((chain) => (
-                      <div key={chain} className="flex items-center space-x-2 p-2 bg-muted rounded">
-                        <img
-                          src={CHAIN_CONFIGS[chain].logo}
-                          alt={CHAIN_CONFIGS[chain].name}
-                          className="w-5 h-5"
-                        />
-                        <span>{CHAIN_CONFIGS[chain].name}</span>
+                      <div key={chain} className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full overflow-hidden bg-background">
+                          <img 
+                            src={CHAIN_CONFIGS[chain]?.logo || '/chains/unknown.svg'} 
+                            alt={CHAIN_CONFIGS[chain]?.name || chain} 
+                            className="w-full h-full object-contain" 
+                          />
+                        </div>
+                        <span>{CHAIN_CONFIGS[chain]?.name || chain}</span>
                       </div>
                     ))
                   ) : (
-                    Object.values(SupportedChain)
-                      .filter(chain => chain !== SupportedChain.Solana)
-                      .map((chain) => (
-                        <div key={chain} className="flex items-center space-x-2 p-2 bg-muted rounded">
-                          <img
-                            src={CHAIN_CONFIGS[chain].logo}
-                            alt={CHAIN_CONFIGS[chain].name}
-                            className="w-5 h-5"
+                    Object.entries(CHAIN_CONFIGS).map(([chain, config]) => (
+                      <div key={chain} className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full overflow-hidden bg-background">
+                          <img 
+                            src={config.logo || '/chains/unknown.svg'} 
+                            alt={config.name} 
+                            className="w-full h-full object-contain" 
                           />
-                          <span>{CHAIN_CONFIGS[chain].name}</span>
                         </div>
-                      ))
+                        <span>{config.name}</span>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
 
-              <Alert className="bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400">
-                <AlertTitle className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  Important
-                </AlertTitle>
-                <AlertDescription>
-                  Bridging tokens requires a small fee paid in SOL to cover the cost of cross-chain messaging. Make sure you have sufficient SOL in your wallet.
-                </AlertDescription>
-              </Alert>
-
-              <div className="pt-6 border-t border-border">
-                <h3 className="font-medium mb-2">How it works</h3>
-                <ol className="list-decimal pl-5 text-sm text-muted-foreground space-y-1">
-                  <li>Enter or confirm your token mint address</li>
-                  <li>Select a destination blockchain</li>
-                  <li>Enter your wallet address on the destination chain</li>
-                  <li>Pay a small network fee in SOL</li>
-                  <li>Wait for the token to appear in your destination wallet</li>
-                </ol>
-              </div>
+              {tokenMint && (
+                <Alert>
+                  <AlertTitle>Selected Token</AlertTitle>
+                  <AlertDescription className="mt-2">
+                    {tokenName || 'Event Token'}
+                    {eventName && <div className="text-sm text-muted-foreground mt-1">Event: {eventName}</div>}
+                    <div className="text-xs text-muted-foreground mt-1 font-mono truncate">{tokenMint}</div>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </div>
 
           {/* Right column - Bridge Form */}
           <div className="lg:col-span-2">
-            <BridgeForm
-              tokenMint={tokenMint || undefined}
-              tokenName={tokenName || undefined}
-              eventName={eventName || undefined}
-              supportedChains={supportedChains || undefined}
-            />
-
-            <Card className="mt-8 border-dashed">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg">About LayerZero</CardTitle>
+                <CardTitle>Bridge Your Token</CardTitle>
                 <CardDescription>
-                  The cross-chain infrastructure powering our bridging solution
+                  Move your event token between Solana and other supported blockchains
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  LayerZero is a secure cross-chain messaging protocol that enables seamless token transfers between different blockchains.
-                  It uses a decentralized network of validators to ensure messages are delivered accurately and securely across chains.
-                </p>
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div className="bg-muted p-3 rounded">
-                    <h4 className="font-medium text-sm">Security</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      LayerZero uses a decentralized Oracle and Relayer network to ensure message delivery with configurable security.
-                    </p>
-                  </div>
-                  <div className="bg-muted p-3 rounded">
-                    <h4 className="font-medium text-sm">Speed</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Transfers typically complete in 10-15 minutes, depending on blockchain congestion and confirmation times.
-                    </p>
-                  </div>
-                </div>
+                <BridgeForm 
+                  tokenMint={tokenMint || undefined}
+                  tokenName={tokenName || undefined}
+                  eventName={eventName || undefined}
+                  supportedChains={supportedChains || undefined}
+                />
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
     </AppleLayout>
+  );
+}
+
+// Main component that wraps the content in a Suspense boundary
+export default function BridgePage() {
+  return (
+    <Suspense fallback={
+      <AppleLayout>
+        <div className="container mx-auto pt-32 pb-16 flex-1">
+          <h1 className="text-3xl font-bold mb-8">Bridge Your Tokens</h1>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </AppleLayout>
+    }>
+      <BridgePageContent />
+    </Suspense>
   );
 }

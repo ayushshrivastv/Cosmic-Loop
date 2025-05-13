@@ -26,10 +26,25 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
+ * Props for the BridgeForm component
+ */
+interface BridgeFormProps {
+  tokenMint?: string;
+  tokenName?: string;
+  eventName?: string;
+  supportedChains?: SupportedChain[];
+}
+
+/**
  * Enhanced bridge form with better loading states and error handling
  * Properly handles LayerZero cross-chain transactions with real-time updates
  */
-export default function BridgeForm() {
+export default function BridgeForm({
+  tokenMint: initialTokenMint,
+  tokenName: initialTokenName,
+  eventName: initialEventName,
+  supportedChains: initialSupportedChains
+}: BridgeFormProps) {
   // State variables
   const [sourceChain, setSourceChain] = useState<SupportedChain>(SupportedChain.Solana);
   const [destinationChain, setDestinationChain] = useState<SupportedChain>(SupportedChain.Ethereum);

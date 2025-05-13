@@ -11,13 +11,13 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
-  BackpackWalletAdapter,
-  GlowWalletAdapter,
-  TorusWalletAdapter
+  TorusWalletAdapter,
+  // BackpackWalletAdapter and GlowWalletAdapter are not available in the current version
+  // Using only the available adapters
 } from '@solana/wallet-adapter-wallets';
 import { DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
 import { toast } from 'sonner';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+// Using local implementation of useLocalStorage instead of importing
 
 interface WalletAdapterProviderProps {
   children: ReactNode;
@@ -96,8 +96,7 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
-    new BackpackWalletAdapter(),
-    new GlowWalletAdapter(),
+    // BackpackWalletAdapter and GlowWalletAdapter removed as they're not available in the current version
     new TorusWalletAdapter()
   ], []);
 
