@@ -16,52 +16,57 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
   
   return (
     <footer className={`bg-black text-zinc-400 py-12 ${className}`}>
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="px-4 md:px-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-8">
           {/* Logo and brief description */}
-          <div className="space-y-4">
+          <div className="space-y-5 p-4">
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold tracking-tight flex items-center">
-                <span className="text-white">Scalable</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">cToken</span>
+                <span className="text-white">Cosmic</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Loop</span>
               </span>
             </Link>
-            <p className="text-sm">
-              High throughput token issuance and distribution platform powered by Light Protocol's state compression technology.
+            <p className="text-sm leading-relaxed">
+              Omnichain solution for NFT-based event attendance verification, connecting Solana with all LayerZero-supported networks.
             </p>
           </div>
           
           {/* Resources links */}
-          <div>
-            <h3 className="text-white font-medium mb-4">Resources</h3>
-            <ul className="space-y-2">
+          <div className="p-4">
+            <h3 className="text-white font-medium mb-5">Resources</h3>
+            <ul className="space-y-3">
               <li>
                 <Link href="https://solana.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
                   Solana
                 </Link>
               </li>
               <li>
-                <Link href="https://lightprotocol.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
-                  Light Protocol
+                <Link href="https://layerzero.network" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
+                  LayerZero
                 </Link>
               </li>
               <li>
-                <Link href="https://solanapay.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
-                  Solana Pay
+                <Link href="https://layerzerolabs.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
+                  LayerZero Labs
                 </Link>
               </li>
               <li>
-                <Link href="https://github.com/ayushshrivastv/Scalable-cToken/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
+                <Link href="https://github.com/ayushshrivastv/Cosmic-Loop/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
                   MIT License
+                </Link>
+              </li>
+              <li>
+                <Link href="https://github.com/ayushshrivastv/Cosmic-Loop" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
+                  GitHub Repository
                 </Link>
               </li>
             </ul>
           </div>
           
           {/* Connect section */}
-          <div>
-            <h3 className="text-white font-medium mb-4">Connect</h3>
-            <div className="flex space-x-4">
+          <div className="p-4">
+            <h3 className="text-white font-medium mb-5">Connect</h3>
+            <div className="flex space-x-5">
               <Link 
                 href="https://x.com/ayushsrivastv" 
                 target="_blank" 
@@ -87,7 +92,7 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
         </div>
         
         {/* Copyright */}
-        <div className="border-t border-zinc-800 mt-10 pt-6 text-center text-xs">
+        <div className="border-t border-zinc-800 mt-8 pt-8 text-center text-xs">
           <p>&copy; {currentYear} Ayush Srivastava</p>
         </div>
       </div>

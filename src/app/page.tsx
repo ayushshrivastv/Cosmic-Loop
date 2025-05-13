@@ -146,7 +146,8 @@ export default function Home() {
         transition={{ duration: 0.8 }}
         className="text-5xl md:text-7xl font-bold tracking-tight text-white"
       >
-        Scalable <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600">cToken</span>
+        <span className="text-white">Cosmic</span>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Loop</span>
       </motion.h1>
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
@@ -166,7 +167,7 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection
         title={heroTitle}
-        subtitle="High throughput token issuance and distribution powered by Light Protocol's state compression technology"
+        subtitle="The Future of Event Attendance with NFTs"
       />
 
       {/* Project Overview Section */}
@@ -181,9 +182,9 @@ export default function Home() {
               className="space-y-3"
             >
               <h1 className="text-3xl md:text-4xl font-bold text-white">
-                Scalable cToken Decentralized Token System
+                Cosmic Loop where Solana Meets the World
               </h1>
-              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Posted by Ayush Srivastava · May 12</div>
+              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Posted by Ayush Srivastava · May 14</div>
             </motion.div>
 
             <motion.div
@@ -194,19 +195,49 @@ export default function Home() {
               className="space-y-6"
             >
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Imagine a world where distributing digital tokens is as simple as sharing smiles at your event. That's the vision I've brought to life with Scalable cToken. Born from countless conversations with event organizers who struggled with complex token systems, I've crafted a platform that transforms the way digital tokens flow through the Solana ecosystem. At its heart lies an elegantly simple process: connect your wallet, breathe life into your event details, and watch as tokens spring to life through Light Protocol's groundbreaking compression technology. I've distilled the entire claiming process down to a single scan of a QR code – because I believe technology should fade into the background while human connections take center stage.
+                In today's increasingly digital world, where the lines between virtual and physical experiences are constantly blurring, a new kind of platform is emerging—one that captures not just data, but moments, memories, and presence. That platform is Cosmic Loop, a groundbreaking omnichain solution that is quietly but powerfully transforming how we engage with events, one attendance token at a time.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                The magic happens in my innovative use of Zero-Knowledge compression – think of it as digital origami, where instead of thousands of separate pieces, I fold everything into a single, beautiful, verifiable on-chain record. This isn't just about numbers; it's about making the impossible possible. I've slashed storage costs by an astounding 1000x and opened the doors to distributing up to 1,000 tokens in a single heartbeat. Even when your event swells to 100,000+ attendees, every interaction remains swift and secure, ensuring your community stays connected without breaking the bank.
+                At its heart, Cosmic Loop is a celebration of showing up. Whether you're standing in the crowd at a packed music festival or tuning into a webinar from across the globe, your participation matters. And now, thanks to blockchain technology, there's a way to honor that moment in time—permanently and meaningfully. Cosmic Loop specializes in NFT-based event attendance verification, a new way to mark your presence not with paper tickets or check-ins, but with a digital artifact that lives forever on the blockchain.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                My journey began with a simple question: what if I could make token distribution as natural as greeting guests at your event? Today, that dream has become reality. Whether you're orchestrating an intimate hackathon or conducting a symphony of interactions at a global conference, my platform stands ready as your trusted partner. I've woven together instant verification, fraud prevention, and real-time analytics into a seamless tapestry that adapts to your needs. Event organizers can shape their digital experiences with the same care they put into crafting physical ones – customizing metadata, defining parameters, and monitoring engagement through an intuitive dashboard that feels like a natural extension of their vision.
+                These NFTs aren't just novelty items; they're unique, verifiable proof that you were there. They represent a shared moment in time, a digital badge of belonging. For attendees, these tokens serve as collectible memories, potential access passes to future opportunities, or even the beginning of deeper engagement with a community. For organizers, they're a powerful new tool for audience connection and post-event outreach.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                The beauty of my system lies in its flexibility and human-centered design. For organizers, I've created a canvas where creativity knows no bounds – distribute tokens through elegant QR codes at in-person gatherings or bridge digital distances with direct wallet addresses. Schedule airdrops that feel like digital rain or craft personalized claiming experiences, all while maintaining rock-solid security through thoughtfully designed verification systems. For participants, I've eliminated the technological barriers that often stand between people and their digital memories. A simple scan connects them to their tokens, working harmoniously with familiar wallets like Phantom, Backpack, and Solflare. Tokens appear in wallets like magic, creating lasting digital mementos of shared experiences.
+                But what really sets Cosmic Loop apart is its omnichain architecture. Built with cutting-edge V2 contracts and seamlessly integrating Solana with all LayerZero-supported networks, Cosmic Loop is designed from the ground up to be flexible, accessible, and future-proof. This isn't just a Solana tool or an Ethereum alternative—it's a universal passport for event engagement across blockchains.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                In crafting Scalable cToken, I've done more than build a platform – I've created a bridge between the technical complexity of blockchain and the warmth of human interaction. Every feature, from the instant token receipt to the comprehensive event tracking, has been lovingly designed with one goal in mind: to let event organizers focus on what truly matters – creating meaningful connections and memorable experiences. I've hidden the complex blockchain machinery behind a curtain of simplicity, ensuring that whether you're a tech-savvy developer or a first-time token distributor, you'll find a welcoming home in this ecosystem. Welcome to the future of token distribution – where technology serves humanity, not the other way around.
+                This omnichain capability matters. In a fragmented blockchain landscape, Cosmic Loop bridges gaps that typically separate users, wallets, and networks. Whether you're an organizer planning your event on one chain or an attendee using another, Cosmic Loop ensures everyone connects with ease. It's about removing friction, and instead of forcing users to choose a side, it invites them all in.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                The platform's participation mechanisms are designed with real-world use in mind. For in-person events, Cosmic Loop uses simple QR code distribution. Attendees can scan and instantly claim their attendance NFT—quick, intuitive, and seamless. For remote or virtual events, the system offers direct wallet airdrops, automatically delivering proof-of-attendance tokens to users wherever they are in the world. It's elegant, adaptable, and entirely inclusive.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                Perhaps one of the most impressive innovations under Cosmic Loop's hood is its use of compressed token technology. Traditional NFT minting can be expensive, especially when scaled to large events. But with Cosmic Loop's advanced compression, minting costs are reduced by up to 1000x, enabling mass distribution without sacrificing quality or authenticity. This makes it not only practical but financially viable to issue unique tokens for events with tens of thousands—even hundreds of thousands—of participants.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                Behind the scenes, Cosmic Loop provides a powerful suite of tools for organizers. The platform isn't just built for developers or crypto veterans—it's designed to be approachable and intuitive for anyone planning an event. Organizers can create, customize, and distribute their NFTs with ease, as well as access insights and engagement data to better understand their audience. It turns event management into an interactive, data-rich experience, where every attendee counts and every interaction can lead to something more.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                From a user's perspective, Cosmic Loop turns event participation into an ongoing journey. The NFT you receive isn't just a static file—it's a living token that could unlock exclusive content, provide access to future events, or serve as a reputation badge within a growing ecosystem. The value of these tokens doesn't stop at the event's end; it can grow and evolve as the community around it does.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                What Cosmic Loop really represents is a broader shift in how we interact with digital and physical experiences. In a time where people crave authenticity, connection, and recognition, this platform offers a beautiful blend of all three. It respects the energy it takes to attend, to engage, to be present—and it gives that effort a permanent home on the blockchain.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                And while blockchain technology can often feel cold or complicated, Cosmic Loop's approach is refreshingly human. It's not about hype or speculation. It's about memories. About participation. About being there and having something to show for it—something real, even if it lives in a digital wallet.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                Looking forward, the potential applications are exciting. Imagine a future where your wallet holds a timeline of your life's most meaningful events—from the concerts you danced at, to the conferences that sparked new ideas, to the community gatherings that built lasting relationships. Cosmic Loop makes that future possible, and more importantly, it makes it personal.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                In many ways, Cosmic Loop is a quiet revolution. It doesn't try to replace how we experience events; it simply enhances them. It preserves our presence, deepens our connection, and builds a bridge between moments we cherish and the technology that can help us honor them.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                In the grand cosmic loop of life, where memories are fleeting and time moves fast, having a way to mark the moments that matter feels more important than ever. With this platform, we don't just remember—we own those moments.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                And that's something truly worth showing up for.
               </p>
             </motion.div>
           </article>

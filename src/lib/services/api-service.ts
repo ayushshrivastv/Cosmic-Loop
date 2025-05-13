@@ -106,6 +106,11 @@ export class ApiCache {
 }
 
 /**
+ * WebSocket message handler type
+ */
+export type WebSocketMessageHandler<T> = (data: T) => void;
+
+/**
  * Request options for API calls
  */
 export interface ApiRequestOptions {
@@ -312,10 +317,8 @@ export class ApiService {
     }
   }
 
-  /**
-   * WebSocket message handler type
-   */
-  type WebSocketMessageHandler<T> = (data: T) => void;
+  // WebSocket message handler reference
+  private messageHandlers: Map<string, Function> = new Map();
 
   /**
    * Create a WebSocket subscription for real-time updates
