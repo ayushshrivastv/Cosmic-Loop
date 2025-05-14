@@ -4,6 +4,7 @@ import "./globals.css";
 import ClientProvider from "@/components/providers/client-provider";
 // import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"; // Removed - now in shared/header
 import { APP_NAME, APP_DESCRIPTION } from '@/lib/constants';
+import { ChatPopup } from "@/components/shared/chat-popup";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({
           <main className="flex-grow">
             {children}
           </main>
+          <ChatPopup />
         </ClientProvider>
       </body>
     </html>

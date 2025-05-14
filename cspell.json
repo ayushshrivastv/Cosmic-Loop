@@ -33,7 +33,9 @@
     "computeUnitPrice",
     "computeUnitLimit",
     "sendAndConfirmTx",
-    "txError"
+    "txError",
+    "Omnichain",
+    "omnichain"
   ],
   "ignorePaths": [
     "node_modules/**",
