@@ -9,10 +9,6 @@
 
 Cosmic Loop is an innovative omnichain NFT solution that seamlessly integrates Solana with LayerZero-supported networks using V2 contracts. The platform enables event organizers to distribute NFT-based attendance tokens that can move freely between blockchains, providing a unified experience for attendees regardless of their preferred network.
 
-<p align="center">
-  <img src="public/images/cosmic-loop-banner.png" alt="Cosmic Loop Banner" width="800">
-</p>
-
 ### Key Features
 
 - **Omnichain NFT Bridging**: Transfer NFTs between Solana and EVM chains via LayerZero

@@ -15,26 +15,26 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className={`bg-black text-zinc-400 py-12 ${className}`}>
-      <div className="px-4 md:px-6 max-w-3xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-8">
+    <footer className={`bg-black text-zinc-400 py-10 ${className}`}>
+      <div className="container max-w-5xl mx-auto text-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-16 mb-6">
           {/* Logo and brief description */}
-          <div className="space-y-5 p-4">
+          <div className="space-y-5 p-4 flex flex-col items-center md:items-start">
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold tracking-tight flex items-center">
                 <span className="text-white">Cosmic</span>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Loop</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed text-center md:text-left">
               Omnichain solution for NFT-based event attendance verification, connecting Solana with all LayerZero-supported networks.
             </p>
           </div>
           
           {/* Resources links */}
-          <div className="p-4">
-            <h3 className="text-white font-medium mb-5">Resources</h3>
-            <ul className="space-y-3">
+          <div className="p-4 flex flex-col items-center md:items-center">
+            <h3 className="text-white font-medium mb-4 text-lg">Resources</h3>
+            <ul className="space-y-2 text-center md:text-center">
               <li>
                 <Link href="https://solana.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
                   Solana
@@ -64,9 +64,9 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
           </div>
           
           {/* Connect section */}
-          <div className="p-4">
-            <h3 className="text-white font-medium mb-5">Connect</h3>
-            <div className="flex space-x-5">
+          <div className="p-4 flex flex-col items-center md:items-center">
+            <h3 className="text-white font-medium mb-4 text-lg">Connect</h3>
+            <div className="flex space-x-4 justify-center">
               <Link 
                 href="https://x.com/ayushsrivastv" 
                 target="_blank" 
@@ -92,7 +92,7 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
         </div>
         
         {/* Copyright */}
-        <div className="border-t border-zinc-800 mt-8 pt-8 text-center text-xs">
+        <div className="border-t border-zinc-800 mt-6 pt-6 text-center text-xs">
           <p>&copy; {currentYear} Ayush Srivastava</p>
         </div>
       </div>

@@ -31,4 +31,5 @@ export const ROUTES = {
   CLAIM: "/claim",
   BRIDGE: "/bridge",
   PROFILE: "/profile",
+  OPENAPI: "/openapi",
 };

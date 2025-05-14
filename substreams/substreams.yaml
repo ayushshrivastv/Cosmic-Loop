@@ -1,0 +1,72 @@
+specVersion: v0.1.0
+package:
+  name: cosmic_loop_solana_substreams
+  version: v0.1.0
+
+imports:
+  solana: https://github.com/streamingfast/substreams-solana/releases/download/v0.2.0/substreams-solana-v0.2.0.spkg
+
+protobuf:
+  files:
+    - nft.proto
+    - bridge.proto
+    - marketplace.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_nft_events
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:nft.v1.NFTEvents
+
+  - name: map_bridge_events
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:bridge.v1.BridgeEvents
+
+  - name: map_marketplace_events
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:marketplace.v1.MarketplaceEvents
+
+  - name: store_nft_activities
+    kind: store
+    updatePolicy: set
+    valueType: proto:nft.v1.NFTActivity
+    inputs:
+      - map: map_nft_events
+
+  - name: store_bridge_activities
+    kind: store
+    updatePolicy: set
+    valueType: proto:bridge.v1.BridgeActivity
+    inputs:
+      - map: map_bridge_events
+
+  - name: store_marketplace_activities
+    kind: store
+    updatePolicy: set
+    valueType: proto:marketplace.v1.MarketplaceActivity
+    inputs:
+      - map: map_marketplace_events
+
+  - name: graph_out
+    kind: map
+    inputs:
+      - store: store_nft_activities
+      - store: store_bridge_activities
+      - store: store_marketplace_activities
+    output:
+      type: proto:entity.changes.v1.EntityChanges

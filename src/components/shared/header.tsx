@@ -77,6 +77,17 @@ export const Header: FC<HeaderProps> = ({ activePage }) => {
 
         {/* Right section - actions */}
         <div className="flex items-center gap-4">
+          {/* OpenAPI Button */}
+          <Button
+            variant="outline"
+            className="hidden sm:flex items-center gap-2 bg-[#303030] text-white hover:bg-[#202020] border-none"
+            onClick={() => window.location.href = '/openapi'}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 12L8 4M8 4L5 7M8 4L11 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+            </svg>
+            <span>OpenAPI</span>
+          </Button>
           <Link
             href="https://www.linkedin.com/in/ayushshrivastv/"
             target="_blank"

@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package marketplace.v1;
+
+message MarketplaceEvents {
+  repeated ListingEvent listing_events = 1;
+  repeated SaleEvent sale_events = 2;
+  repeated BidEvent bid_events = 3;
+  repeated CancelEvent cancel_events = 4;
+}
+
+message ListingEvent {
+  string transaction_hash = 1;
+  string block_hash = 2;
+  uint64 block_number = 3;
+  string block_timestamp = 4;
+  string marketplace = 5; // "magiceden", "tensor", etc.
+  string seller = 6;
+  string token_address = 7;
+  uint64 price = 8;
+  string price_token = 9; // usually "SOL" but could be others
+  string listing_id = 10;
+  optional string collection = 11;
+  optional string auction_house = 12;
+  uint64 end_time = 13; // Unix timestamp for auction end, 0 for no end
+  map<string, string> extra_data = 14;
+}
+
+message SaleEvent {
+  string transaction_hash = 1;
+  string block_hash = 2;
+  uint64 block_number = 3;
+  string block_timestamp = 4;
+  string marketplace = 5;
+  string seller = 6;
+  string buyer = 7;
+  string token_address = 8;
+  uint64 price = 9;
+  string price_token = 10;
+  string listing_id = 11;
+  optional string collection = 12;
+  optional string auction_house = 13;
+  uint64 marketplace_fee = 14;
+  uint64 royalty_fee = 15;
+  map<string, string> extra_data = 16;
+}
+
+message BidEvent {
+  string transaction_hash = 1;
+  string block_hash = 2;
+  uint64 block_number = 3;
+  string block_timestamp = 4;
+  string marketplace = 5;
+  string bidder = 6;
+  string token_address = 7;
+  uint64 bid_amount = 8;
+  string price_token = 9;
+  string listing_id = 10;
+  optional string collection = 11;
+  optional string auction_house = 12;
+  uint64 expiry_time = 13; // Unix timestamp when bid expires
+  map<string, string> extra_data = 14;
+}
+
+message CancelEvent {
+  string transaction_hash = 1;
+  string block_hash = 2;
+  uint64 block_number = 3;
+  string block_timestamp = 4;
+  string marketplace = 5;
+  string initiator = 6;
+  string token_address = 7;
+  string action = 8; // "cancel_listing", "cancel_bid"
+  string listing_id = 9;
+  optional string collection = 10;
+  optional string auction_house = 11;
+  map<string, string> extra_data = 12;
+}
+
+message MarketplaceActivity {
+  string id = 1; // composite key
+  string activity_type = 2; // "listing", "sale", "bid", "cancel"
+  string transaction_hash = 3;
+  uint64 block_number = 4;
+  string block_timestamp = 5;
+  string marketplace = 6;
+  string token_address = 7;
+  optional string seller = 8;
+  optional string buyer = 9;
+  optional string bidder = 10;
+  optional string initiator = 11;
+  optional uint64 price = 12;
+  optional string price_token = 13;
+  string listing_id = 14;
+  optional string collection = 15;
+  optional string auction_house = 16;
+  optional uint64 marketplace_fee = 17;
+  optional uint64 royalty_fee = 18;
+  optional uint64 bid_amount = 19;
+  optional uint64 expiry_time = 20;
+  optional string action = 21;
+  map<string, string> extra_data = 22;
+}

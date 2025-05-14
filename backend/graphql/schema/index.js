@@ -8,9 +8,13 @@ const userTypeDefs = require('./user');
 const nftTypeDefs = require('./nft');
 const bridgeTypeDefs = require('./bridge');
 const eventTypeDefs = require('./event');
+const aiAssistantTypeDefs = require('./ai-assistant');
 
 // Base schema with Query and Mutation types
 const baseTypeDefs = gql`
+  # Scalar for complex data
+  scalar JSON
+
   type Query {
     _empty: String
   }
@@ -30,4 +34,5 @@ module.exports = [
   nftTypeDefs,
   bridgeTypeDefs,
   eventTypeDefs,
+  aiAssistantTypeDefs,
 ];

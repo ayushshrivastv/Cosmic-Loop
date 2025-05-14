@@ -6,8 +6,6 @@ This document provides a detailed overview of the Cosmic Loop architecture, expl
 
 Cosmic Loop is an omnichain NFT solution that bridges Solana and EVM-compatible chains using LayerZero's cross-chain messaging protocol and Light Protocol's compressed token technology. The system enables efficient creation, distribution, and bridging of NFTs across multiple blockchains.
 
-![System Architecture Diagram](https://mermaid.ink/img/pako:eNqVVMtu2zAQ_BXC5zrIS7ZbNIZ76KFFijRIDMOHFVlKBPRYkpQdw9C_d0nKduoHkPYgibvDmZ0ZUecgdY0QwXOjcm5xsGUdm6xsW7QWv-sGrSm4lRgRV6XYYPCgFyexlGWzmTBdClU3sXg5CVNToJxP4G8sjNJmK3FZ6qo2EYmUKJV96M95a2gAcXgSYD_eU5M1jd7CnXRLzGYFn7fwU6J_pPbxdtbpVD9l0Wbx5NMRWltU9w0JsYrIGt7RNTnKXGIJHynGC09kzWPcauJc1xRbbbHNdSnKOiNYMpNlCjNWgdKz5F2iJGuoGFXHQlLhxlGYx-3adKrq1ipTGHHXkfCEzCpxuBM5_gOZSTfdnJQkuUqvWa4TmqRJOsmvL88vJkmS_1kVdL3Ck4gXdLudEojjXSyHLqZTk8HcaC6NDXG52J2-aPZTLXfcfDqbJmmSMBYYjaI5jZD2WaYf_0GxQTpWg-sDKZF73ueVVONHKHZoXa3l1o3mj-G8E1a67HaA8xNMNvNu6Pu-Fw2Pw-FwRCZxDJFTshY6Qkg8hJmOoalKiGIXwdZ6jX44K9Bg52_Dg9DQ02Fh-OVGWgofImfXVWnGmwvzxlm8bU3zW2rLfg2jDtMj2xPlYdiE0PsDP7O9bQ)
-
 ## Architecture Components
 
 ### 1. Frontend Application

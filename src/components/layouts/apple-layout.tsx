@@ -14,6 +14,7 @@ const navItems = [
   { label: 'Dashboard', href: ROUTES.DASHBOARD },
   { label: 'Create Event', href: ROUTES.MINT },
   { label: 'Claim Token', href: ROUTES.CLAIM },
+  { label: 'OpenAPI', href: ROUTES.OPENAPI, external: false },
 ];
 
 export const AppleLayout: React.FC<AppleLayoutProps> = ({ children }) => {
