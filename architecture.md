@@ -1,24 +1,24 @@
-# Cosmic Loop - Architecture Documentation
+# Solana OpenAPI - Architecture Documentation
 
-This document provides a detailed overview of the Cosmic Loop architecture, explaining how the system components interact to create a seamless omnichain NFT experience.
+This document provides a detailed overview of the Solana OpenAPI architecture, explaining how the system components interact to deliver real-time blockchain data access.
 
 ## System Overview
 
-Cosmic Loop is an omnichain NFT solution that bridges Solana and EVM-compatible chains using LayerZero's cross-chain messaging protocol and Light Protocol's compressed token technology. The system enables efficient creation, distribution, and bridging of NFTs across multiple blockchains.
+Solana OpenAPI is a blockchain data interface that provides real-time access to Solana's on-chain data through The Graph's Substreams technology. The system enables efficient querying, processing, and analysis of blockchain data with a natural language interface.
 
 ## Architecture Components
 
 ### 1. Frontend Application
 
-The frontend is built with Next.js 15 using the App Router architecture and React 18. It provides a modern, responsive user interface for interacting with the Cosmic Loop ecosystem.
+The frontend is built with Next.js 15 using the App Router architecture and React 18. It provides a modern, responsive user interface for interacting with the Solana OpenAPI ecosystem.
 
 #### Key Frontend Components:
 
-- **Wallet Integration**: Supports multiple wallet providers for both Solana and EVM chains
-- **NFT Creation Interface**: UI for creating compressed tokens using Light Protocol
-- **Bridging Interface**: UI for transferring NFTs between chains
-- **QR Code Generation**: Creates QR codes for token distribution
-- **Real-time Updates**: WebSocket connections for live event updates
+- **Natural Language Interface**: AI-powered input for querying blockchain data
+- **Data Visualization**: Interactive charts and graphs for blockchain analytics
+- **Real-time Updates**: WebSocket connections for live blockchain events
+- **Search History**: Tracks and manages previous queries
+- **Response Formatting**: Presents blockchain data in a readable format
 
 #### Frontend Technology Stack:
 
@@ -55,7 +55,7 @@ The backend uses a microservices architecture to provide scalable, maintainable 
 
 ### 3. Blockchain Integration
 
-Cosmic Loop integrates with multiple blockchains to provide a seamless omnichain experience.
+Solana OpenAPI integrates with Solana blockchain to provide a seamless data access experience.
 
 #### Key Blockchain Components:
 
@@ -124,7 +124,7 @@ Redis is used for caching frequently accessed data and for pub/sub messaging bet
 
 ## Scalability Considerations
 
-Cosmic Loop is designed for high scalability, capable of handling events with 10,000+ attendees:
+Solana OpenAPI is designed for high scalability, capable of handling thousands of concurrent queries:
 
 - **Microservices Architecture**: Allows independent scaling of services
 - **Compressed Tokens**: Reduces on-chain storage by up to 1000x
@@ -135,7 +135,7 @@ Cosmic Loop is designed for high scalability, capable of handling events with 10
 
 ## Security Considerations
 
-Security is a top priority for Cosmic Loop:
+Security is a top priority for Solana OpenAPI:
 
 - **JWT Authentication**: Secure user authentication
 - **Input Validation**: Zod validation for all inputs
@@ -166,7 +166,7 @@ The system can be deployed in various configurations:
 
 ## Future Enhancements
 
-Planned enhancements for the Cosmic Loop platform:
+Planned enhancements for the Solana OpenAPI platform:
 
 1. Support for additional blockchains
 2. Enhanced analytics dashboard

@@ -41,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           <div className="space-y-4">
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold tracking-tight flex items-center">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600">Cosmic Loop</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600">Solana OpenAPI</span>
               </span>
             </Link>
             <p className="text-sm">

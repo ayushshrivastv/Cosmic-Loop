@@ -1,6 +1,6 @@
 /**
  * @file api-client.ts
- * @description GraphQL API client for the Cosmic Loop frontend
+ * @description GraphQL API client for the Solana OpenAPI frontend
  * Enhanced with caching, improved error handling, and retry logic
  */
 

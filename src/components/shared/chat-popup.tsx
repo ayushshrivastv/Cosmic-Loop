@@ -10,7 +10,27 @@ import { ArrowUp, X, RefreshCw, Image, FileText, BarChart2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
+// Helper function to check if we're on the OpenAPI page
+function useIsOpenAPIPage() {
+  const pathname = usePathname();
+  return pathname === '/openapi';
+}
+
 export default function ChatPopup() {
+  // Check if we're on the OpenAPI page - if so, don't render the chat popup
+  const isOpenAPIPage = useIsOpenAPIPage();
+  
+  // Early return if we're on the OpenAPI page
+  if (isOpenAPIPage) {
+    return null;
+  }
+  
+  // If we're not on the OpenAPI page, render the normal chat popup
+  return <ChatPopupContent />;
+}
+
+// Separate component for the chat popup content to avoid hooks issues
+function ChatPopupContent() {
   const { toast } = useToast();
   const pathname = usePathname();
   const isHomePage = pathname === '/' || pathname === '/home';
@@ -270,7 +290,7 @@ export default function ChatPopup() {
             ref={expandedButtonRef}
             className="bg-primary-100 text-secondary-100 disabled:bg-primary-44 disabled:text-secondary-60 relative h-7 w-7 flex-none rounded-full p-0 hover:opacity-70 disabled:hover:opacity-100 flex items-center justify-center"
             type="submit"
-            aria-label="Send prompt to Cosmic AI"
+            aria-label="Send prompt to Solana OpenAPI"
             style={{
               backgroundColor: '#303030',
               color: 'white',
@@ -299,7 +319,7 @@ export default function ChatPopup() {
           <DialogContent className="bg-white text-black sm:max-w-md md:max-w-2xl max-h-[80vh] flex flex-col">
 
           <DialogHeader className="flex justify-between items-center">
-            <DialogTitle>Cosmic AI Assistant</DialogTitle>
+            <DialogTitle>Solana OpenAPI Assistant</DialogTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -321,7 +341,7 @@ export default function ChatPopup() {
               <div className="flex-1 overflow-y-auto p-4 space-y-4 mb-4 max-h-[50vh]">
                 {!currentConversation || !(currentConversation as Conversation | undefined)?.messages || (currentConversation as Conversation).messages.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    <h3 className="text-lg font-medium mb-2">Welcome to Cosmic AI Assistant!</h3>
+                    <h3 className="text-lg font-medium mb-2">Welcome to Solana OpenAPI Assistant!</h3>
                     <p className="mb-4">
                       I can help you with information about Solana NFTs, cross-chain bridging,
                       and marketplace activities. What would you like to know?

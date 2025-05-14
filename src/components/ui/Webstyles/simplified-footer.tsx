@@ -22,12 +22,12 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
           <div className="space-y-5 p-4 flex flex-col items-center md:items-start">
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold tracking-tight flex items-center">
-                <span className="text-white">Cosmic</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Loop</span>
+                <span className="text-white">Solana</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">OpenAPI</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-center md:text-left">
-              Omnichain solution for NFT-based event attendance verification, connecting Solana with all LayerZero-supported networks.
+              AI-powered interface for querying on-chain Solana data through The Graph Substreams, providing real-time blockchain insights.
             </p>
           </div>
           

@@ -1,4 +1,4 @@
-# Cosmic Loop - Omnichain NFT Solution
+# Solana OpenAPI - Real-time Blockchain Data Access
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.2-black)](https://nextjs.org/)
@@ -7,16 +7,16 @@
 
 ## Overview
 
-Cosmic Loop is an innovative omnichain NFT solution that seamlessly integrates Solana with LayerZero-supported networks using V2 contracts. The platform enables event organizers to distribute NFT-based attendance tokens that can move freely between blockchains, providing a unified experience for attendees regardless of their preferred network.
+Solana OpenAPI is an innovative blockchain data interface that provides real-time access to Solana's on-chain data through The Graph's Substreams technology. The platform enables developers, analysts, and users to query blockchain data using natural language, receiving structured responses about NFTs, marketplace activities, wallet histories, and cross-chain operations.
 
 ### Key Features
 
-- **Omnichain NFT Bridging**: Transfer NFTs between Solana and EVM chains via LayerZero
-- **Compressed Tokens**: Ultra-efficient token creation using Light Protocol
-- **QR Code Distribution**: Easy token distribution through QR codes
-- **Real-time Updates**: WebSocket integration for live blockchain events
-- **Scalable Architecture**: Support for high-volume events with 10,000+ attendees
-- **Multi-wallet Support**: Integration with popular Solana and EVM wallets
+- **Natural Language Queries**: AI-powered interface for querying blockchain data in plain English
+- **Substreams Integration**: Parallel processing of blockchain data with minimal latency
+- **Real-time Data Access**: Immediate access to on-chain events and transactions
+- **NFT Analytics**: Comprehensive data on NFT mints, transfers, and marketplace activities
+- **Cross-chain Monitoring**: Track bridge transactions and cross-chain asset movements
+- **Developer API**: Easy integration for applications requiring blockchain data
 - **Modern UI**: Responsive design with dark/light mode using Tailwind CSS
 
 ## Documentation

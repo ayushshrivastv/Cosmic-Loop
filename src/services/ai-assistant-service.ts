@@ -281,7 +281,7 @@ export class AIAssistantService {
    */
   private async processGeneralQuery(query: string): Promise<AIAssistantResponse> {
     return {
-      text: 'I\'m your Cosmic Loop AI assistant, powered by Solana Substreams! I can help you with: \n' +
+      text: 'I\'m your Solana OpenAPI assistant, powered by Solana Substreams! I can help you with: \n' +
             '- NFT information and metadata\n' +
             '- Wallet activity tracking\n' +
             '- Marketplace analysis\n' +

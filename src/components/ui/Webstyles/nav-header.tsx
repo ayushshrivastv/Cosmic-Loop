@@ -66,8 +66,8 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
           <div className="flex-shrink-0">
             {logo || (
               <Link href="/" className="text-white font-bold text-xl">
-                <span className="text-white">Cosmic</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Loop</span>
+                <span className="text-white">Solana</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">OpenAPI</span>
               </Link>
             )}
           </div>

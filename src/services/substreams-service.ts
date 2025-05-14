@@ -202,7 +202,7 @@ export class SubstreamsService {
           symbol: 'COSMIC',
           uri: `https://arweave.net/${Math.random().toString(36).substring(2, 10)}`,
           image: `https://picsum.photos/seed/${Math.random()}/200/200`,
-          description: 'A Cosmic Loop NFT',
+          description: 'A Solana OpenAPI NFT',
           attributes: [
             { trait_type: 'Background', value: ['Red', 'Blue', 'Green', 'Yellow', 'Purple'][Math.floor(Math.random() * 5)] },
             { trait_type: 'Rarity', value: ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'][Math.floor(Math.random() * 5)] }

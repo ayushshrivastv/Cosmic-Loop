@@ -146,8 +146,8 @@ export default function Home() {
         transition={{ duration: 0.8 }}
         className="text-5xl md:text-7xl font-bold tracking-tight text-white"
       >
-        <span className="text-white">Cosmic</span>
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Loop</span>
+        <span className="text-white">Solana</span>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">OpenAPI</span>
       </motion.h1>
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
@@ -182,7 +182,7 @@ export default function Home() {
               className="space-y-3"
             >
               <h1 className="text-3xl md:text-4xl font-bold text-white">
-                Cosmic Loop where Solana Meets the World
+                Solana OpenAPI: Real-time Blockchain Data Access
               </h1>
               <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Posted by Ayush Srivastava · May 14</div>
             </motion.div>
@@ -195,46 +195,46 @@ export default function Home() {
               className="space-y-6"
             >
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                In today's increasingly digital world, where the lines between virtual and physical experiences are constantly blurring, a new kind of platform is emerging—one that captures not just data, but moments, memories, and presence. That platform is Cosmic Loop, a groundbreaking omnichain solution that is quietly but powerfully transforming how we engage with events, one attendance token at a time.
+                In the rapidly evolving world of blockchain technology, access to real-time data has become a critical factor for developers, analysts, and users alike. Introducing Solana OpenAPI, a groundbreaking interface that is transforming how we interact with on-chain data, providing unprecedented access to the Solana blockchain's rich ecosystem.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                At its heart, Cosmic Loop is a celebration of showing up. Whether you're standing in the crowd at a packed music festival or tuning into a webinar from across the globe, your participation matters. And now, thanks to blockchain technology, there's a way to honor that moment in time—permanently and meaningfully. Cosmic Loop specializes in NFT-based event attendance verification, a new way to mark your presence not with paper tickets or check-ins, but with a digital artifact that lives forever on the blockchain.
+                At its core, Solana OpenAPI is about democratizing blockchain data. Whether you're a developer building the next generation of DeFi applications, an analyst tracking market trends, or a user wanting insights about your digital assets, having immediate access to accurate blockchain data is essential. Solana OpenAPI specializes in real-time data retrieval and analysis, powered by The Graph's Substreams technology.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                These NFTs aren't just novelty items; they're unique, verifiable proof that you were there. They represent a shared moment in time, a digital badge of belonging. For attendees, these tokens serve as collectible memories, potential access passes to future opportunities, or even the beginning of deeper engagement with a community. For organizers, they're a powerful new tool for audience connection and post-event outreach.
+                This isn't just another blockchain explorer or API endpoint. Solana OpenAPI provides an AI-powered interface that understands natural language queries, translating them into precise data requests. Users can ask questions about NFTs, marketplace activities, wallet histories, and cross-chain operations in plain English, receiving structured, accurate responses in seconds.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                But what really sets Cosmic Loop apart is its omnichain architecture. Built with cutting-edge V2 contracts and seamlessly integrating Solana with all LayerZero-supported networks, Cosmic Loop is designed from the ground up to be flexible, accessible, and future-proof. This isn't just a Solana tool or an Ethereum alternative—it's a universal passport for event engagement across blockchains.
+                What truly sets Solana OpenAPI apart is its integration with Substreams technology. Built to handle Solana's impressive throughput of over 65,000 transactions per second, Substreams enables parallel processing of blockchain data with minimal latency. This means users get near-instant responses to their queries, even when requesting complex analytics or historical data.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                This omnichain capability matters. In a fragmented blockchain landscape, Cosmic Loop bridges gaps that typically separate users, wallets, and networks. Whether you're an organizer planning your event on one chain or an attendee using another, Cosmic Loop ensures everyone connects with ease. It's about removing friction, and instead of forcing users to choose a side, it invites them all in.
+                This capability matters tremendously in the fast-paced world of blockchain. When market conditions change in seconds, having to wait minutes or hours for data processing can mean missed opportunities. Solana OpenAPI ensures everyone has access to the same high-quality, real-time information, leveling the playing field between institutional players and individual users.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                The platform's participation mechanisms are designed with real-world use in mind. For in-person events, Cosmic Loop uses simple QR code distribution. Attendees can scan and instantly claim their attendance NFT—quick, intuitive, and seamless. For remote or virtual events, the system offers direct wallet airdrops, automatically delivering proof-of-attendance tokens to users wherever they are in the world. It's elegant, adaptable, and entirely inclusive.
+                The platform's interface is designed with real-world use cases in mind. Developers can integrate Solana OpenAPI directly into their applications, analysts can perform complex queries without writing code, and everyday users can ask simple questions about their assets or market conditions. It's intuitive, responsive, and remarkably powerful.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Perhaps one of the most impressive innovations under Cosmic Loop's hood is its use of compressed token technology. Traditional NFT minting can be expensive, especially when scaled to large events. But with Cosmic Loop's advanced compression, minting costs are reduced by up to 1000x, enabling mass distribution without sacrificing quality or authenticity. This makes it not only practical but financially viable to issue unique tokens for events with tens of thousands—even hundreds of thousands—of participants.
+                Perhaps one of the most impressive innovations behind Solana OpenAPI is its modular architecture. The system leverages custom Substreams modules written in Rust, which transform raw blockchain data into clean, usable streams. These modules can be combined and reused, allowing for complex data transformations without duplicating effort or resources.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Behind the scenes, Cosmic Loop provides a powerful suite of tools for organizers. The platform isn't just built for developers or crypto veterans—it's designed to be approachable and intuitive for anyone planning an event. Organizers can create, customize, and distribute their NFTs with ease, as well as access insights and engagement data to better understand their audience. It turns event management into an interactive, data-rich experience, where every attendee counts and every interaction can lead to something more.
+                Behind the scenes, Solana OpenAPI provides a powerful suite of tools for developers and data analysts. The platform isn't just built for blockchain experts or crypto veterans—it's designed to be approachable and intuitive for anyone who needs access to on-chain data. Users can query complex blockchain information without writing a single line of code, while developers can build sophisticated applications on top of the API with minimal effort.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                From a user's perspective, Cosmic Loop turns event participation into an ongoing journey. The NFT you receive isn't just a static file—it's a living token that could unlock exclusive content, provide access to future events, or serve as a reputation badge within a growing ecosystem. The value of these tokens doesn't stop at the event's end; it can grow and evolve as the community around it does.
+                From a user's perspective, Solana OpenAPI transforms blockchain data access into an intuitive experience. The natural language interface isn't just a convenience—it's a paradigm shift that makes blockchain data accessible to everyone, regardless of technical background. Ask a question about NFT trading volumes, bridge transaction status, or wallet activity, and receive clear, actionable insights immediately.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                What Cosmic Loop really represents is a broader shift in how we interact with digital and physical experiences. In a time where people crave authenticity, connection, and recognition, this platform offers a beautiful blend of all three. It respects the energy it takes to attend, to engage, to be present—and it gives that effort a permanent home on the blockchain.
+                What Solana OpenAPI truly represents is a democratization of blockchain data. In a space where information asymmetry can create significant advantages, this platform levels the playing field by giving everyone access to the same high-quality, real-time data. It respects that data-driven decision making should be available to all participants in the ecosystem, not just those with technical expertise or expensive infrastructure.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                And while blockchain technology can often feel cold or complicated, Cosmic Loop's approach is refreshingly human. It's not about hype or speculation. It's about memories. About participation. About being there and having something to show for it—something real, even if it lives in a digital wallet.
+                And while blockchain technology can often feel complex or intimidating, Solana OpenAPI's approach is refreshingly accessible. It's not about technical jargon or complicated queries. It's about answers. About insights. About understanding what's happening on-chain and making informed decisions based on that knowledge.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Looking forward, the potential applications are exciting. Imagine a future where your wallet holds a timeline of your life's most meaningful events—from the concerts you danced at, to the conferences that sparked new ideas, to the community gatherings that built lasting relationships. Cosmic Loop makes that future possible, and more importantly, it makes it personal.
+                Looking forward, the potential applications are vast. Imagine a future where DeFi protocols automatically adjust based on real-time market data, NFT marketplaces provide instant analytics to creators and collectors, and cross-chain bridges optimize for efficiency using historical transaction patterns. Solana OpenAPI makes these futures possible by providing the data foundation they require.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                In many ways, Cosmic Loop is a quiet revolution. It doesn't try to replace how we experience events; it simply enhances them. It preserves our presence, deepens our connection, and builds a bridge between moments we cherish and the technology that can help us honor them.
+                In many ways, Solana OpenAPI represents a quiet revolution in blockchain infrastructure. It doesn't try to replace existing systems; it enhances them by making their data more accessible, usable, and valuable. It bridges the gap between raw blockchain data and actionable insights that drive innovation and growth.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                In the grand cosmic loop of life, where memories are fleeting and time moves fast, having a way to mark the moments that matter feels more important than ever. With this platform, we don't just remember—we own those moments.
+                In the fast-moving world of blockchain, where every second counts and information is power, having immediate access to accurate, comprehensive data is essential. With Solana OpenAPI, we don't just see the blockchain—we understand it.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
                 And that's something truly worth showing up for.
