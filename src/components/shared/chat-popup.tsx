@@ -218,34 +218,25 @@ function ChatPopupContent() {
     );
   };
 
-  // Handle expanding the input field
+  // Handle clicking on the Ask Anything form
   const handleExpandClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isExpanded) {
-      setIsExpanded(true);
-      setTimeout(() => {
-        expandedInputRef.current?.focus();
-      }, 300);
-    }
+    // Immediately redirect to OpenAPI page
+    window.location.href = '/openapi';
   };
 
-  // Handle submitting the expanded input
+  // Handle submitting the form
   const handleExpandedSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // If there's input, use it as the query
     if (expandedInputValue.trim()) {
-      setIsExpanded(false);
-      setIsOpen(true);
-      setInputValue(expandedInputValue);
-      setExpandedInputValue('');
-      // After dialog opens, we'll send the message
-      // Store the message to send after dialog is open
       const messageToSend = expandedInputValue.trim();
-      setExpandedInputValue('');
-      
-      // Wait for dialog to open before sending message
-      setTimeout(() => {
-        sendMessage(messageToSend, currentConversation ? (currentConversation as Conversation).id : undefined);
-      }, 500);
+      const encodedMessage = encodeURIComponent(messageToSend);
+      window.location.href = `/openapi?query=${encodedMessage}`;
+    } else {
+      // If no input, just redirect to the OpenAPI page
+      window.location.href = '/openapi';
     }
   };
 
@@ -255,42 +246,28 @@ function ChatPopupContent() {
       right: '1.5rem'
     }}>
       <div className="relative">
-        <form onSubmit={handleExpandedSubmit} data-chat-popup="true" className="shadow-black-4 bg-tertiary-60 relative flex w-full rounded-[20px] px-1 shadow-sm backdrop-blur-xl" style={{
-          padding: '6px',
-          width: isExpanded ? '300px' : '180px',
-          maxWidth: '90vw',
-          backgroundColor: '#F7F7F8',
-          transition: 'all 0.3s ease'
-        }}>
-          {isExpanded ? (
-            <input
-              ref={expandedInputRef}
-              value={expandedInputValue}
-              onChange={(e) => setExpandedInputValue(e.target.value)}
-              className="ml-3 w-full bg-transparent focus:outline-none text-[14px] text-black placeholder:text-gray-500 placeholder:opacity-80"
-              placeholder="Ask Anything"
-              aria-label="Ask Anything"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleExpandedSubmit(e);
-                }
-              }}
-            />
-          ) : (
-            <div className="ml-2 w-full flex items-center justify-start h-full" onClick={handleExpandClick}>
-              <span className="text-[14px] text-[#303030] opacity-75 py-1">Ask Anything</span>
-            </div>
-          )}
+        <form 
+          data-chat-popup="true" 
+          className="shadow-black-4 bg-tertiary-60 relative flex w-full rounded-[20px] px-1 shadow-sm backdrop-blur-xl" 
+          style={{
+            padding: '6px',
+            width: '180px',
+            maxWidth: '90vw',
+            backgroundColor: '#F7F7F8',
+            transition: 'all 0.3s ease'
+          }}
+          onClick={() => {
+            // Immediately redirect to OpenAPI page when clicked
+            window.location.href = '/openapi';
+          }}
+        >
+          <div className="ml-2 w-full flex items-center justify-start h-full">
+            <span className="text-[14px] text-[#303030] opacity-75 py-1">Ask Anything</span>
+          </div>
           <button 
-            ref={expandedButtonRef}
-            className="bg-primary-100 text-secondary-100 disabled:bg-primary-44 disabled:text-secondary-60 relative h-7 w-7 flex-none rounded-full p-0 hover:opacity-70 disabled:hover:opacity-100 flex items-center justify-center"
-            type="submit"
-            aria-label="Send prompt to Solana OpenAPI"
+            className="bg-primary-100 text-secondary-100 relative h-7 w-7 flex-none rounded-full p-0 hover:opacity-70 flex items-center justify-center"
+            type="button"
+            aria-label="Go to Solana OpenAPI"
             style={{
               backgroundColor: '#303030',
               color: 'white',
@@ -298,14 +275,10 @@ function ChatPopupContent() {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            disabled={isExpanded && !expandedInputValue.trim()}
             onClick={(e) => {
-              e.preventDefault();
-              if (!isExpanded) {
-                handleExpandClick(e);
-              } else if (expandedInputValue.trim()) {
-                handleExpandedSubmit(e as unknown as React.FormEvent);
-              }
+              e.stopPropagation();
+              // Immediately redirect to OpenAPI page
+              window.location.href = '/openapi';
             }}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform translate-y-0">

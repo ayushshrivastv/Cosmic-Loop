@@ -55,6 +55,53 @@ export default function OpenAPIPage() {
     };
   }, []);
   
+  // Check for query parameter and start conversation
+  useEffect(() => {
+    const handleQueryParam = async () => {
+      // Get the query parameter from the URL
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get('query');
+      
+      if (query) {
+        // Process the query and start a conversation
+        const userMessage: Message = {
+          id: Date.now().toString(),
+          text: query,
+          sender: 'user',
+          timestamp: new Date()
+        };
+        
+        setMessages([userMessage]);
+        setIsLoading(true);
+        
+        try {
+          // Create a new conversation and send the message
+          const newConversation = await startNewConversation();
+          await sendMessage(query, newConversation.id);
+          
+          // Add assistant response (simulated for now)
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: 'This is a simulated response. In a real implementation, this would come from the AI assistant API.',
+            sender: 'assistant',
+            timestamp: new Date()
+          };
+          
+          setMessages(prev => [...prev, assistantMessage]);
+          
+          // Clear the URL parameter without refreshing the page
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+          console.error('Error processing query parameter:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    handleQueryParam();
+  }, []);
+  
   // Scroll to bottom of chat container when messages change
   useEffect(() => {
     if (chatContainerRef.current) {
