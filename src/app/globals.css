@@ -1,3 +1,4 @@
+/* Tailwind CSS directives - processed by the Tailwind compiler */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -76,10 +77,13 @@
   }
 }
 
+/* Tailwind layer directive with @apply rules */
 @layer base {
+  /* Apply border color to all elements */
   * {
     @apply border-border;
   }
+  /* Apply background and text colors to body */
   body {
     @apply bg-background text-foreground;
   }
