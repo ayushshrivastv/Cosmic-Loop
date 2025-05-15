@@ -36,6 +36,7 @@ Comprehensive documentation is available in the [docs](/docs) directory:
 - npm or yarn
 - PostgreSQL database
 - Redis server (optional for development)
+- Gemini API key (get one from [Google AI Studio](https://ai.google.dev/))
 
 ### Installation
 
@@ -58,13 +59,31 @@ npm install
 cp .env.example .env.local
 ```
 
-4. Start the development server
+4. Add your Gemini API key to the `.env.local` file
+
+```
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+5. Start the development server
 
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Deployment
+
+When deploying to Vercel or other hosting platforms:
+
+1. **Never commit your API keys to the repository**
+2. Set the `NEXT_PUBLIC_GEMINI_API_KEY` as an environment variable in your hosting platform's dashboard
+3. For Vercel specifically:
+   - Go to your project settings
+   - Navigate to the "Environment Variables" section
+   - Add `NEXT_PUBLIC_GEMINI_API_KEY` with your Gemini API key
+   - Deploy your project
 
 ## Technology Stack
 

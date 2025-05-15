@@ -10,6 +10,9 @@
   NEXT_PUBLIC_API_ENDPOINT = "/.netlify/functions/graphql"
   NEXT_PUBLIC_WS_ENDPOINT = "/.netlify/functions/ws"
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  # NOTE: This project is primarily deployed on Vercel
+  # If deploying on Netlify, add the Gemini API key as an environment variable:
+  # NEXT_PUBLIC_GEMINI_API_KEY = "your-api-key-here"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
