@@ -42,7 +42,13 @@
     "sendAndConfirmTx",
     "txError",
     "Omnichain",
-    "omnichain"
+    "omnichain",
+    "ayushshrivastv",
+    "Serper",
+    "SERPER",
+    "Anatoly",
+    "Yakovenko",
+    "Gemini"
   ],
   "ignorePaths": [
     "node_modules/**",

@@ -8,9 +8,11 @@ const AppleLayout = dynamic(() => import('@/components/layouts/apple-layout').th
 });
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Send, User } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { Send, User, Code, Info } from 'lucide-react';
+import React, { useState, useRef, useEffect, ReactNode } from 'react';
 import { useAIAssistant } from '@/hooks/use-ai-assistant';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Custom CSS for the chat container scrollbar
 const scrollbarStyles = `
@@ -87,7 +89,7 @@ export default function OpenAPIPage() {
             timestamp: new Date()
           };
           
-          setMessages(prev => [...prev, assistantMessage]);
+          setMessages((prev: Message[]) => [...prev, assistantMessage]);
           
           // Clear the URL parameter without refreshing the page
           window.history.replaceState({}, document.title, window.location.pathname);
@@ -149,33 +151,74 @@ export default function OpenAPIPage() {
       timestamp: new Date()
     };
     
-    setMessages(prev => [...prev, userMessage]);
+    // Store the input value before clearing it
+    const currentInputValue = inputValue;
+    
+    // Clear input immediately for better UX
+    setInputValue('');
+    
+    // Add user message to chat
+    setMessages((prev: Message[]) => [...prev, userMessage]);
     setIsLoading(true);
+    
     // Scroll to bottom after adding user message
     scrollToBottom();
     
+    // Create a placeholder message for the assistant that will be updated
+    const assistantMessageId = (Date.now() + 1).toString();
+    const initialAssistantMessage: Message = {
+      id: assistantMessageId,
+      text: 'Thinking...',
+      sender: 'assistant',
+      timestamp: new Date()
+    };
+    
+    // Add the initial assistant message
+    setMessages((prev: Message[]) => [...prev, initialAssistantMessage]);
+    
     try {
-      // Create a new conversation and send the message
+      // Create a new conversation
       const newConversation = await startNewConversation();
-      await sendMessage(inputValue, newConversation.id);
       
-      // Add assistant response (simulated for now)
-      // In a real implementation, you would get this from the API response
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'This is a simulated response. In a real implementation, this would come from the AI assistant API.',
-        sender: 'assistant',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-      setInputValue('');
-      // Scroll to bottom after adding assistant message
-      scrollToBottom();
+      // Send the message with streaming updates
+      await sendMessage(currentInputValue, newConversation.id, (partialResponse: any) => {
+        // Update the assistant message with each partial response
+        setMessages((prev: Message[]) => {
+          // Find the assistant message by ID and update it
+          return prev.map(msg => {
+            if (msg.id === assistantMessageId) {
+              return {
+                ...msg,
+                text: partialResponse.text || 'Processing...',
+                timestamp: new Date()
+              };
+            }
+            return msg;
+          });
+        });
+        
+        // Scroll to bottom with each update
+        scrollToBottom();
+      });
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Update the assistant message with an error
+      setMessages((prev: Message[]) => {
+        return prev.map(msg => {
+          if (msg.id === assistantMessageId) {
+            return {
+              ...msg,
+              text: 'Sorry, I encountered an error processing your request.',
+              timestamp: new Date()
+            };
+          }
+          return msg;
+        });
+      });
     } finally {
       setIsLoading(false);
+      scrollToBottom();
     }
   };
   
@@ -228,6 +271,8 @@ export default function OpenAPIPage() {
         ) : (
           /* Layout for when messages exist */
           <div className="w-full max-w-2xl mx-auto flex-grow flex flex-col">
+            {/* Add padding between header and chat container */}
+            <div className="pt-6"></div>
             {/* Chat container with scrolling - starts after header */}
             <div className="w-full">
               <div 
@@ -245,34 +290,88 @@ export default function OpenAPIPage() {
                 }}
               >
                 <div className="space-y-4">
-                  {messages.map((message) => (
+                  {messages.map((message: Message) => (
                     <div 
                       key={message.id} 
                       className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div 
-                        className={`max-w-[80%] p-3 rounded-2xl ${
+                        className={`max-w-[85%] p-3 rounded-2xl break-words ${
                           message.sender === 'user' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-800 text-white'
+                            ? 'bg-white text-black' 
+                            : 'bg-white text-black'
                         }`}
                       >
                         <div className="flex items-center mb-1">
                           {message.sender === 'assistant' && (
-                            <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center mr-2">
-                              <span className="text-xs">AI</span>
+                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                              <span className="text-xs text-black">AI</span>
                             </div>
                           )}
                           {message.sender === 'user' && (
-                            <div className="w-6 h-6 rounded-full bg-blue-700 flex items-center justify-center mr-2">
-                              <User className="h-3 w-3" />
+                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                              <User className="h-3 w-3 text-blue-600" />
                             </div>
                           )}
-                          <span className="text-xs opacity-75">
+                          <span className="text-xs text-gray-500">
                             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <p className="text-sm">{message.text}</p>
+                        {message.sender === 'assistant' ? (
+                          <div className="markdown-content text-sm max-w-full overflow-hidden">
+                            <ReactMarkdown 
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                h1: ({...props}) => <h1 className="text-lg font-bold my-2 text-black" {...props} />,
+                                h2: ({...props}) => <h2 className="text-md font-bold my-2 text-black" {...props} />,
+                                h3: ({...props}) => <h3 className="text-sm font-bold my-1 text-black" {...props} />,
+                                p: ({children, ...props}) => {
+                                  // Check if any child is a React element (not just text)
+                                  const hasComponentChildren = React.Children.toArray(children).some(
+                                    child => React.isValidElement(child)
+                                  );
+                                  // If it has component children, use div instead of p to avoid nesting issues
+                                  return hasComponentChildren ? 
+                                    <div className="my-2 text-black" {...props}>{children}</div> : 
+                                    <p className="my-2 text-black" {...props}>{children}</p>;
+                                },
+                                ul: ({...props}) => <ul className="list-disc pl-5 my-2 text-black" {...props} />,
+                                ol: ({...props}) => <ol className="list-decimal pl-5 my-2 text-black" {...props} />,
+                                li: ({...props}) => <li className="my-1 text-black" {...props} />,
+                                a: ({...props}) => <a className="text-blue-600 hover:text-blue-800 underline break-words" target="_blank" rel="noopener noreferrer" {...props} />,
+                                code: ({node, ...props}: any) => {
+                                  const isInline = props.inline || false;
+                                  return isInline ? (
+                                    <code className="bg-gray-700 text-blue-200 px-1 rounded text-xs font-medium" {...props} />
+                                  ) : (
+                                    <pre className="bg-gray-900 border border-gray-700 rounded-md p-3 my-3 overflow-x-auto w-full max-w-full">
+                                      <div className="flex items-center mb-2">
+                                        <Code className="h-4 w-4 mr-2 text-blue-400" />
+                                        <span className="text-xs font-mono text-blue-400">Code</span>
+                                      </div>
+                                      <code className="block text-xs font-mono text-gray-200 whitespace-pre-wrap break-all" {...props} />
+                                    </pre>
+                                  );
+                                },
+                                blockquote: ({...props}) => (
+                                  <aside className="border-l-2 border-blue-500 bg-gray-700 pl-3 my-3 py-2 rounded-r">
+                                    <div className="flex items-center mb-1">
+                                      <Info className="h-4 w-4 mr-2 text-blue-400" />
+                                      <span className="text-xs text-blue-300 font-medium">Note</span>
+                                    </div>
+                                    <div className="text-gray-200">
+                                      <blockquote {...props} />
+                                    </div>
+                                  </aside>
+                                ),
+                              }}
+                            >
+                              {message.text}
+                            </ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="text-sm">{message.text}</p>
+                        )}
                       </div>
                     </div>
                   ))}

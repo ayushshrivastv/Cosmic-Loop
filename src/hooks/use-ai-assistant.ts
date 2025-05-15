@@ -66,7 +66,7 @@ const GET_CHAT_CONVERSATION = gql`
 `;
 
 const CREATE_CHAT_CONVERSATION = gql`
-  mutation CreateChatConversation($title: String) {
+  mutation CreateChatConversation($title: String!) {
     createChatConversation(title: $title) {
       id
       title
@@ -86,36 +86,40 @@ const ADD_CHAT_MESSAGE = gql`
   }
 `;
 
-export interface AIComponent {
+// Define component types
+type AIComponent = {
   type: 'TEXT' | 'CODE' | 'DATA' | 'TABLE' | 'CHART' | 'TOKEN' | 'LINK';
   content?: string;
   data?: any;
   headers?: string[];
   address?: string;
   url?: string;
-}
+};
 
-export interface AIResponse {
+// Define AI response type
+type AIResponse = {
   text: string;
   components?: AIComponent[];
   error?: string;
-}
+};
 
-export interface ChatMessage {
+// Define chat message type
+type ChatMessage = {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: string;
   components?: AIComponent[];
-}
+};
 
-export interface Conversation {
+// Define conversation type
+type Conversation = {
   id: string;
   title: string;
   messages: ChatMessage[];
   createdAt: string;
   updatedAt: string;
-}
+};
 
 export const useAIAssistant = () => {
   const { toast } = useToast();
@@ -158,60 +162,116 @@ export const useAIAssistant = () => {
     return Promise.resolve({ data: mockConversationData });
   }, []);
 
-  // Mock askAssistant implementation
+  // Mock askAssistant implementation with streaming support
   const [askLoading, setAskLoading] = useState(false);
-  const askAssistant = useCallback(({ variables }: { variables: { question: string, conversationId?: string } }) => {
+  const askAssistant = useCallback(({ 
+    variables, 
+    onUpdate 
+  }: { 
+    variables: { question: string, conversationId?: string },
+    onUpdate?: (partialResponse: AIResponse) => void 
+  }) => {
     console.log('Mock ask assistant:', variables);
     setAskLoading(true);
     
-    // Simulate API call with a delay
+    // If onUpdate callback is provided, use streaming response
+    if (onUpdate) {
+      // Send initial thinking state
+      onUpdate({
+        text: 'Thinking...',
+        components: []
+      });
+      
+      // Process the query with streaming updates
+      // Using a separate function call for streaming to avoid type issues
+      (async () => {
+        try {
+          const response = await aiAssistantService.processQuery(variables.question, (partialAIResponse) => {
+            // This is a callback that will be called with partial responses
+            onUpdate({
+              text: partialAIResponse.text,
+              components: partialAIResponse.data ? [{
+                type: 'DATA',
+                data: partialAIResponse.data
+              }] : []
+            });
+            // Return nothing from the callback
+            return undefined;
+          });
+        } catch (error) {
+          console.error('Error in streaming response:', error);
+        }
+      })();
+    }
+    
+    // Still return a promise for compatibility with existing code
     return new Promise<{ data: { askAssistant: AIResponse } }>((resolve) => {
-      setTimeout(() => {
+      // Process the query and resolve when complete
+      aiAssistantService.processQuery(variables.question).then(response => {
         setAskLoading(false);
         resolve({
           data: {
             askAssistant: {
-              text: `Mock response to: ${variables.question}`,
-              components: [{
-                type: 'TEXT',
-                content: 'This is a mock response from the AI assistant.'
-              }]
+              text: response.text,
+              components: response.data ? [{
+                type: 'DATA',
+                data: response.data
+              }] : [],
+              error: undefined
             }
           }
         });
-      }, 1000);
+      }).catch(error => {
+        console.error('Error in ask assistant:', error);
+        setAskLoading(false);
+        resolve({
+          data: {
+            askAssistant: {
+              text: 'Sorry, I encountered an error. Please try again.',
+              components: [],
+              error: String(error)
+            }
+          }
+        });
+      });
     });
   }, []);
 
   // Mock createConversation implementation
-  const createConversation = useCallback(({ variables }: { variables: { title?: string } }) => {
-    const newId = `conv-${Date.now()}`;
-    const newConversation = {
-      id: newId,
-      title: variables.title || 'New Conversation',
-      createdAt: new Date().toISOString()
-    };
+  const [createLoading, setCreateLoading] = useState(false);
+  const createConversation = useCallback(({ variables }: { variables: { title: string } }) => {
+    console.log('Mock create conversation:', variables);
+    setCreateLoading(true);
     
-    console.log('Mock create conversation:', newConversation);
-    
-    // Update the conversations list
-    setConversationsData(prev => ({
-      getChatConversations: [
-        ...prev.getChatConversations,
-        newConversation
-      ]
-    }));
-    
-    setCurrentConversationId(newId);
-    
-    return Promise.resolve({
-      data: {
-        createChatConversation: newConversation
-      }
+    // Simulate API call with a delay
+    return new Promise<{ data: { createChatConversation: { id: string; title: string; createdAt: string } } }>((resolve) => {
+      setTimeout(() => {
+        setCreateLoading(false);
+        const newConversation = {
+          id: `conversation-${Date.now()}`,
+          title: variables.title,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Update the conversations data
+        setConversationsData(prev => ({
+          getChatConversations: [...prev.getChatConversations, newConversation]
+        }));
+        
+        // Set as current conversation
+        setCurrentConversationId(newConversation.id);
+        
+        resolve({
+          data: {
+            createChatConversation: newConversation
+          }
+        });
+      }, 300);
     });
   }, []);
 
   // Mock addMessage implementation
+  const [addMessageLoading, setAddMessageLoading] = useState(false);
   const addMessage = useCallback(({ variables }: { 
     variables: { 
       conversationId: string, 
@@ -235,79 +295,98 @@ export const useAIAssistant = () => {
   }, []);
 
   /**
-   * Send a message to the AI assistant
+   * Send a message to the AI assistant with support for streaming responses
+   * @param message The message to send
+   * @param conversationId Optional conversation ID
+   * @param updateCallback Optional callback for streaming updates
+   * @returns The final AI response
    */
-  const sendMessage = useCallback(async (message: string, conversationId?: string) => {
+  const sendMessage = useCallback(async (
+    message: string, 
+    conversationId?: string,
+    updateCallback?: (partialResponse: AIResponse) => void
+  ): Promise<AIResponse | null> => {
     setIsLoading(true);
-
     try {
-      // Create a new conversation if needed
-      let activeConversationId = conversationId || currentConversationId;
-
+      const activeConversationId = conversationId || currentConversationId;
+      
       if (!activeConversationId) {
-        const result = await createConversation({
-          variables: { title: message.slice(0, 30) + (message.length > 30 ? '...' : '') }
-        });
-        activeConversationId = result.data.createChatConversation.id;
+        throw new Error('No active conversation');
       }
-
-      // Add the user message to the conversation
-      await addMessage({
-        variables: {
-          conversationId: activeConversationId,
-          message: {
-            role: 'user',
-            content: message
+      
+      // Create a function to convert AI assistant responses to the expected format
+      const createResponse = (aiResponse: any): AIResponse => {
+        const components: AIComponent[] = [];
+        
+        // Add related events as components if available
+        if (aiResponse.relatedEvents && aiResponse.relatedEvents.length > 0) {
+          // Add a data component with the events
+          components.push({
+            type: 'DATA',
+            data: aiResponse.relatedEvents
+          });
+          
+          // If we have NFT events with metadata and images, add them as components
+          const nftEvents = aiResponse.relatedEvents.filter((event: any) => 
+            'metadata' in event && event.metadata?.image
+          );
+          
+          if (nftEvents.length > 0) {
+            // Add up to 3 NFT images as components
+            nftEvents.slice(0, 3).forEach((event: any) => {
+              if ('metadata' in event && event.metadata?.image) {
+                components.push({
+                  type: 'TOKEN',
+                  content: event.metadata.name || 'NFT',
+                  url: event.metadata.image
+                });
+              }
+            });
           }
         }
-      });
-
-      // Process the message using the AI assistant service that leverages Substreams data
-      const aiResponse = await aiAssistantService.processQuery(message);
-      
-      // Convert the AI assistant response to the expected format
-      const components: AIComponent[] = [];
-      
-      // Add related events as components if available
-      if (aiResponse.relatedEvents && aiResponse.relatedEvents.length > 0) {
-        // Add a data component with the events
-        components.push({
-          type: 'DATA',
-          data: aiResponse.relatedEvents
-        });
         
-        // If we have NFT events with metadata and images, add them as components
-        const nftEvents = aiResponse.relatedEvents.filter(event => 
-          'metadata' in event && event.metadata?.image
-        );
+        // Create a response object in the expected format
+        return {
+          text: aiResponse.text,
+          components: components.length > 0 ? components : undefined
+        };
+      };
+      
+      let finalResponse: AIResponse;
+      
+      // Handle streaming or non-streaming response generation
+      if (updateCallback) {
+        // For streaming responses, we need to handle partial updates
+        let lastResponse: any = null;
         
-        if (nftEvents.length > 0) {
-          // Add up to 3 NFT images as components
-          nftEvents.slice(0, 3).forEach(event => {
-            if ('metadata' in event && event.metadata?.image) {
-              components.push({
-                type: 'TOKEN',
-                content: event.metadata.name || 'NFT',
-                url: event.metadata.image
-              });
-            }
-          });
-        }
+        // Create a wrapper function that captures the partial responses
+        const streamHandler = (partialAIResponse: any) => {
+          lastResponse = partialAIResponse;
+          const formattedResponse = createResponse(partialAIResponse);
+          updateCallback(formattedResponse);
+          return undefined; // Explicitly return undefined to satisfy TypeScript
+        };
+        
+        // Process the query with streaming updates
+        await aiAssistantService.processQuery(message, streamHandler);
+        
+        // Use the last response as the final response
+        finalResponse = lastResponse ? createResponse(lastResponse) : {
+          text: 'Sorry, I encountered an error processing your request.'
+        };
+      } else {
+        // For non-streaming responses, just wait for the complete response
+        const aiResponse = await aiAssistantService.processQuery(message);
+        finalResponse = createResponse(aiResponse);
       }
       
-      // Create a response object in the expected format
-      const response: AIResponse = {
-        text: aiResponse.text,
-        components: components.length > 0 ? components : undefined
-      };
-
       // Simulate adding the assistant's response to the conversation
       await addMessage({
         variables: {
           conversationId: activeConversationId,
           message: {
             role: 'assistant',
-            content: response.text
+            content: finalResponse.text
           }
         }
       });
@@ -317,22 +396,23 @@ export const useAIAssistant = () => {
         variables: { id: activeConversationId }
       });
 
-      return response;
+      return finalResponse;
     } catch (error) {
       console.error('Error in sendMessage:', error);
       toast({
         title: 'Error',
         description: 'Failed to send message',
-        variant: 'destructive',
+        variant: 'destructive'
       });
-      return { text: 'Sorry, something went wrong. Please try again.', error: String(error) };
+      return null;
     } finally {
       setIsLoading(false);
     }
-  }, [addMessage, createConversation, currentConversationId, getConversation, toast]);
+  }, [addMessage, currentConversationId, getConversation, toast]);
 
   /**
    * Load a specific conversation
+   * @param id The conversation ID to load
    */
   const loadConversation = useCallback((id: string) => {
     setCurrentConversationId(id);
@@ -369,8 +449,7 @@ export const useAIAssistant = () => {
     // Actions
     sendMessage,
     loadConversation,
-    setCurrentConversationId,
     startNewConversation,
-    refetchConversations,
+    refetchConversations
   };
 };
