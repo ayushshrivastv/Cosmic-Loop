@@ -1,4 +1,4 @@
-# Solana OpenAPI - Real-time Blockchain Data Access
+# Solana OpenAPI - Realtime Blockchain Data Access
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.2-black)](https://nextjs.org/)
