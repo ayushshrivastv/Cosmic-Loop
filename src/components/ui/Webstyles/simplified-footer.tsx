@@ -18,17 +18,14 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
     <footer className={`bg-black text-zinc-400 py-10 ${className}`}>
       <div className="container max-w-5xl mx-auto text-center">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-16 mb-6">
-          {/* Logo and brief description */}
-          <div className="space-y-5 p-4 flex flex-col items-center md:items-start">
+          {/* Logo only - no description */}
+          <div className="p-4 flex flex-col items-center md:items-start">
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold tracking-tight flex items-center">
                 <span className="text-white">Solana</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">OpenAPI</span>
+                <span className="text-white ml-1">OpenAPI</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed text-center md:text-left">
-              AI-powered interface for querying on-chain Solana data through The Graph Substreams, providing real-time blockchain insights.
-            </p>
           </div>
           
           {/* Resources links */}

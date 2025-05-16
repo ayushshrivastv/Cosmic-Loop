@@ -5,8 +5,34 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useAIAssistant, type ChatMessage, type Conversation } from '@/hooks/use-ai-assistant';
-import { ArrowUp, X, RefreshCw, Image, FileText, BarChart2 } from 'lucide-react';
+import { useAIAssistant } from '@/hooks/use-ai-assistant';
+import { ArrowUp, X, RefreshCw, Image, FileText, BarChart2, Send } from 'lucide-react';
+
+// Define types based on the AI assistant hook
+interface AIComponent {
+  type: 'TEXT' | 'CODE' | 'DATA' | 'TABLE' | 'CHART' | 'TOKEN' | 'LINK';
+  content?: string;
+  data?: any;
+  headers?: string[];
+  address?: string;
+  url?: string;
+}
+
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+  components?: AIComponent[];
+}
+
+interface Conversation {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
@@ -135,7 +161,7 @@ function ChatPopupContent() {
           <div className="whitespace-pre-wrap">{message.content}</div>
 
           {/* Render additional components if available */}
-          {message.components?.map((component, index) => {
+          {message.components?.map((component: AIComponent, index: number) => {
             switch (component.type) {
               case 'CODE':
                 return (
@@ -155,7 +181,7 @@ function ChatPopupContent() {
                     <table className="min-w-full bg-white border border-gray-200">
                       <thead>
                         <tr>
-                          {component.headers?.map((header, i) => (
+                          {component.headers?.map((header: string, i: number) => (
                             <th key={i} className="py-2 px-4 border-b text-left font-medium">
                               {header}
                             </th>
@@ -165,7 +191,7 @@ function ChatPopupContent() {
                       <tbody>
                         {component.data?.map((row: any, i: number) => (
                           <tr key={i}>
-                            {component.headers?.map((header, j) => (
+                            {component.headers?.map((header: string, j: number) => (
                               <td key={j} className="py-2 px-4 border-b">
                                 {row[header]}
                               </td>
@@ -356,23 +382,29 @@ function ChatPopupContent() {
               </div>
 
               {/* Input area */}
-              <div className="border-t p-4 flex gap-2">
-                <Input
-                  ref={inputRef}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask about NFTs, bridging, or marketplace activities..."
-                  className="flex-1"
-                  disabled={isLoading}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isLoading}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
+              <div className="border-t p-4">
+                <div className="bg-white rounded-3xl shadow-md border border-gray-200 p-3 relative">
+                  <div className="relative">
+                    <Input
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Ask about NFTs, bridging, or marketplace activities..."
+                      className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-900 bg-transparent"
+                      disabled={isLoading}
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!inputValue.trim() || isLoading}
+                        className={`rounded-full w-8 h-8 flex items-center justify-center ${inputValue.trim() ? 'bg-black text-white hover:bg-gray-800' : 'bg-transparent text-gray-300'}`}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
 

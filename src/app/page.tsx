@@ -244,88 +244,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Feature Sections Container */}
-      <section className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Airdrop Capabilities Section */}
-        <article className="space-y-16">
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-semibold text-white text-center">
-              Airdrop Capabilities
-            </h2>
-            <p className="text-lg md:text-xl text-zinc-400 leading-relaxed">
-              Revolutionize your event token distribution with our advanced airdrop system. Seamlessly manage large-scale token distributions while maintaining security and cost-effectiveness.
-            </p>
-          </div>
+      {/* Feature Sections Container removed */}
 
-          <div className="space-y-16">
-            <div className="space-y-6">
-              <h3 className="text-2xl md:text-3xl font-semibold text-white text-center">
-                Bulk Distribution
-              </h3>
-              <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
-                Transform event token distribution with our revolutionary bulk transfer system. Send tokens to thousands of recipients simultaneously while maintaining security and reducing costs. Perfect for large-scale events and community airdrops.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="text-2xl md:text-3xl font-semibold text-white text-center">
-                Cost Efficiency
-              </h3>
-              <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
-                Experience unprecedented savings with our compression technology. Reduce storage costs by 1000x compared to traditional methods, making large-scale token distribution accessible to events of any size.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="text-2xl md:text-3xl font-semibold text-white text-center">
-                Real-time Analytics
-              </h3>
-              <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
-                Monitor your token distribution with precision through our comprehensive dashboard. Track claim rates, engagement metrics, and distribution progress in real-time, ensuring complete visibility over your event's success.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-semibold text-white text-center">
-              Solana Pay Integration
-            </h2>
-            <p className="text-lg md:text-xl text-zinc-400 leading-relaxed">
-              Leverage the power of Solana's high-performance blockchain for instant, secure token transfers. Our integration ensures smooth, reliable transactions with minimal fees and maximum efficiency.
-            </p>
-          </div>
-
-          <div className="space-y-16">
-            <div className="space-y-6">
-              <h3 className="text-2xl md:text-3xl font-semibold text-white text-center">
-                Secure by Design
-              </h3>
-              <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
-                Built with security at its core, our platform leverages state-of-the-art cryptography to protect every transaction. Your tokens remain safe from creation to distribution, with built-in verification at every step.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="text-2xl md:text-3xl font-semibold text-white text-center">
-                Instant Settlement
-              </h3>
-              <p className="text-base md:text-lg text-zinc-400 leading-relaxed">
-                Experience the speed of Solana with instant token transfers and immediate settlement. No more waiting for confirmations or dealing with slow networks. Your tokens arrive in wallets within seconds.
-              </p>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      {/* CTA Section */}
-      <CTASection
-        title="Ready to get started?"
-        description="Create your first proof-of-participation token in minutes."
-        primaryButtonText="Create Event Token"
-        primaryButtonLink={ROUTES.MINT}
-        secondaryButtonText="Claim Your Token"
-        secondaryButtonLink={ROUTES.CLAIM}
-      />
+      {/* CTA Section removed */}
     </AppleLayout>
   );
 }
