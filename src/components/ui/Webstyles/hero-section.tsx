@@ -246,35 +246,37 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             )}
           </div>
 
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-xl md:text-2xl text-zinc-400 max-w-2xl mb-8"
-          >
-            {subtitle}
-          </motion.p>
+          {/* Subtitle - only show if not empty */}
+          {subtitle && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="text-xl md:text-2xl text-zinc-400 max-w-2xl mb-8"
+            >
+              {subtitle}
+            </motion.p>
+          )}
           
           {/* Action buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex flex-col sm:flex-row gap-4 mb-12"
+            className="flex flex-col sm:flex-row gap-4 mb-8 mt-2"
+            style={{ transform: 'scale(0.99)' }}
           >
             <Link 
               href={ROUTES.MINT} 
-              className="rounded-full bg-white hover:bg-white/90 px-8 py-3 text-base font-semibold text-black shadow-lg hover:shadow-white/25 transition-all duration-300 flex items-center justify-center min-w-[180px] group"
+              className="rounded-full bg-transparent hover:bg-white/10 px-8 py-3 text-base font-semibold text-white shadow-none border border-white/20 hover:border-white/30 transition-all duration-300 flex items-center justify-center min-w-[180px] group"
+              style={{ transform: 'scale(0.99)' }}
             >
               Create Event
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
             </Link>
             <Link 
               href={ROUTES.CLAIM} 
               className="px-8 py-3 text-base font-semibold text-white/80 hover:text-white transition-all duration-300 flex items-center justify-center min-w-[180px] group"
+              style={{ transform: 'scale(0.99)' }}
             >
               Claim Token
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">

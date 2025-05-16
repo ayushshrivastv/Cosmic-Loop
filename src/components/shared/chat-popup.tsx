@@ -287,8 +287,8 @@ function ChatPopupContent() {
             window.location.href = '/openapi';
           }}
         >
-          <div className="ml-2 w-full flex items-center justify-start h-full">
-            <span className="text-[14px] text-[#303030] opacity-75 py-1">Ask Anything</span>
+          <div className="ml-2 w-full flex items-center justify-start h-full bg-gray-200 rounded-md">
+            <span className="text-[14px] text-[#505050] opacity-90 py-1 px-2">Coming Soon..</span>
           </div>
           <button 
             className="bg-primary-100 text-secondary-100 relative h-7 w-7 flex-none rounded-full p-0 hover:opacity-70 flex items-center justify-center"

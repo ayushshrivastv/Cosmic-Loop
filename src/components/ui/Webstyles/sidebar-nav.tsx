@@ -35,11 +35,11 @@ export const SidebarNav = ({
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-[260px] bg-black z-50 flex-col hidden md:flex">
+      <aside className="fixed left-0 top-0 h-full w-[180px] bg-black z-50 flex-col hidden md:flex">
         {/* Logo */}
         <div className="p-6 mb-4">
           {logo || (
-            <Link href="/" className="text-white font-bold text-xl block">
+            <Link href="/" className="text-white font-bold text-xl block" style={{ fontSize: '99%' }}>
               <span className="text-white">Solana</span>
               <span className="text-white ml-1">OpenAPI</span>
             </Link>
@@ -47,7 +47,7 @@ export const SidebarNav = ({
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 py-2">
+        <nav className="flex-1 py-2" style={{ fontSize: '99%' }}>
           <ul className="space-y-1 px-4">
             {navItems.map((item: NavItem) => {
               const isActive = pathname === item.href;

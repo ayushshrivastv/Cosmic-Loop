@@ -27,10 +27,10 @@ export const AppleLayout = ({ children }: AppleLayoutProps): React.JSX.Element =
       </div>
       
       <SidebarNav navItems={navItems} />
-      <main className="flex-grow md:pl-[260px] pt-16 md:pt-6 px-4 md:px-8 max-w-screen-xl mx-auto"> {/* Match OpenAI's content layout */}
+      <main className="flex-grow md:pl-[180px] pt-16 md:pt-6 px-4 md:px-8 max-w-screen-xl mx-auto"> {/* Match OpenAI's content layout */}
         {children}
       </main>
-      <SimplifiedFooter className="md:pl-[260px]" /> {/* Add left padding to the footer on desktop only */}
+      <SimplifiedFooter className="md:pl-[180px]" /> {/* Add left padding to the footer on desktop only */}
     </div>
   );
 };

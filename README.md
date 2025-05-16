@@ -9,6 +9,23 @@
 
 Solana OpenAPI is an innovative blockchain data interface that provides real-time access to Solana's on-chain data through The Graph's Substreams technology. The platform enables developers, analysts, and users to query blockchain data using natural language, receiving structured responses about NFTs, marketplace activities, wallet histories, and cross-chain operations.
 
+## LayerZero V2 Integration
+
+Our platform leverages LayerZero V2 contracts to enable seamless cross-chain operations with enhanced security and efficiency. These contracts facilitate trustless message passing between Solana and other blockchains, allowing for interoperable NFT minting, token bridging, and multi-chain data synchronization. The V2 protocol's improved security model with decentralized verification, optimized gas efficiency, and enhanced message delivery guarantees robust cross-chain functionality while maintaining Solana's high performance standards.
+
+### Benefits of LayerZero V2 Integration
+
+| Feature | Traditional Cross-Chain | With LayerZero V2 |
+|---------|------------------------|-------------------|
+| Security | Relies on centralized bridges | Decentralized verification with DVNs |
+| Speed | Minutes to hours | Seconds to minutes |
+| Cost | High gas fees | Optimized for efficiency |
+| Reliability | Subject to bridge failures | Enhanced message delivery guarantees |
+| Interoperability | Limited to specific chains | Connects to 30+ blockchains |
+| Developer Experience | Complex integration | Simplified API and SDK |
+| User Experience | Multiple transaction approvals | Seamless single-transaction flows |
+
+
 ### Key Features
 
 - **Natural Language Queries**: AI-powered interface for querying blockchain data in plain English

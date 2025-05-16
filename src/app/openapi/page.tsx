@@ -140,7 +140,10 @@ export default function OpenAPIPage() {
     }
   };
 
+  // Disabled send message functionality
   const handleSendMessage = async () => {
+    // Early return to prevent any message sending
+    return;
     if (!inputValue.trim() || isLoading) return;
     
     // Add user message to chat
@@ -222,11 +225,10 @@ export default function OpenAPIPage() {
     }
   };
   
+  // Disabled key down handler
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
+    // Do nothing - functionality disabled
+    return;
   };
   
   return (
@@ -244,14 +246,14 @@ export default function OpenAPIPage() {
             <h1 className="text-4xl font-medium text-center mb-8">What can I help with?</h1>
             
             {/* Input area - centered in page */}
-            <div className="bg-white rounded-3xl shadow-md border border-gray-200 p-3 mx-auto" style={{ width: '80%' }}>
+            <div className="bg-gray-200 rounded-3xl shadow-md border border-gray-300 p-3 mx-auto" style={{ width: '80%' }}>
               <div className="relative">
                 <input 
-                  className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-900 bg-transparent" 
-                  placeholder="Ask anything about Solana..."
+                  className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-600 bg-transparent" 
+                  placeholder="Coming Soon.."
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
+                  disabled={true}
                 />
                 
                 <div className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -381,14 +383,14 @@ export default function OpenAPIPage() {
             
             {/* Input area at bottom */}
             <div className="w-full mb-8">
-              <div className="bg-white rounded-3xl shadow-md border border-gray-200 p-3 w-full">
+              <div className="bg-gray-200 rounded-3xl shadow-md border border-gray-300 p-3 w-full">
                 <div className="relative">
                   <input 
-                    className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-900 bg-transparent" 
-                    placeholder="Ask anything about Solana..."
+                    className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-600 bg-transparent" 
+                    placeholder="Coming Soon.."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    disabled={true}
                   />
                   
                   <div className="absolute right-2 top-1/2 -translate-y-1/2">
