@@ -3,6 +3,8 @@
  * @description WebSocket service for real-time cross-chain message updates
  */
 
+"use client";
+
 import { useEffect, useState } from 'react';
 
 // Define message status types

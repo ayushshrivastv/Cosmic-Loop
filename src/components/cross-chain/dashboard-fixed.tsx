@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { CrossChainQueryForm } from './query-form';
 import { MessageStatus } from './message-status';
 import { TrackedMessages } from './tracked-messages';
-import { useWebSocket, ConnectionState } from '@/services/websocket-service';
+import { useWebSocket, ConnectionState, MessageUpdate } from '@/services/websocket-service';
 import { ArrowRightLeft, Activity, History, Settings, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { SupportedChain } from '@/lib/utils/layer-zero';
 
@@ -25,34 +25,95 @@ type DashboardStats = {
   supportedChains: number;
 };
 
+// Define message metadata type
+type MessageMetadata = {
+  sourceChain: string;
+  destinationChain: string;
+  messageType: string;
+  timestamp: string;
+};
+
 export function CrossChainDashboard() {
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [showChainConfig, setShowChainConfig] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { connectionState, messages, trackMessage } = useWebSocket();
   
-  // Initialize with some test messages for demonstration
+  // Check if this is a new user (no previous interactions)
+  const [isNewUser, setIsNewUser] = useState<boolean>(true);
+  
+  // Check localStorage in useEffect to avoid SSR issues
   useEffect(() => {
-    // Create a few test messages when the component mounts
-    const createTestMessages = async () => {
-      const { WebSocketService } = await import('@/services/websocket-service');
-      
-      // Generate unique message IDs and track them
-      const testIds = [
-        `test-${Date.now()}-1`,
-        `test-${Date.now()}-2`,
-        `test-${Date.now()}-3`,
-        `test-${Date.now()}-4`
-      ];
-      
-      // Track each message with a slight delay to simulate real activity
-      testIds.forEach((id, index) => {
-        setTimeout(() => {
-          WebSocketService.trackMessage(id);
-        }, index * 500);
-      });
+    // Only run in browser environment
+    if (typeof window !== 'undefined') {
+      setIsNewUser(localStorage.getItem('lz_first_time_user') !== 'false');
+    }
+  }, []);
+  
+  // Fetch real messages from LayerZero endpoints
+  useEffect(() => {
+    const fetchLayerZeroMessages = async () => {
+      try {
+        setIsLoading(true);
+        // Import the WebSocketService to track messages
+        const { WebSocketService } = await import('@/services/websocket-service');
+        
+        // Fetch recent messages from your API endpoint with new user flag if applicable
+        const url = isNewUser ? '/api/cross-chain/messages?new_user=true' : '/api/cross-chain/messages';
+        const response = await fetch(url);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // If we got data, this user is no longer considered new
+          if (data.messages && data.messages.length > 0) {
+            setIsNewUser(false);
+            localStorage.setItem('lz_first_time_user', 'false');
+          }
+          
+          // Get existing messages to avoid duplicates
+          const existingMessages = messages.map(msg => msg.messageId);
+          
+          // Track each message with the WebSocketService, but only if it doesn't already exist
+          data.messages.forEach((message: any) => {
+            // Skip if we already have this message
+            if (existingMessages.includes(message.id)) {
+              return;
+            }
+            
+            // The WebSocketService.trackMessage only accepts a messageId
+            WebSocketService.trackMessage(message.id);
+            
+            // Store additional message metadata in localStorage for reference
+            // Make sure we have all the necessary data
+            const messageMetadata: MessageMetadata = {
+              sourceChain: message.sourceChain || 'Solana',
+              destinationChain: message.destinationChain || 'Ethereum',
+              messageType: message.messageType || 'Cross-Chain Query',
+              timestamp: message.timestamp || new Date().toISOString()
+            };
+            
+            // Store in localStorage with browser check
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(`message_${message.id}`, JSON.stringify(messageMetadata));
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching LayerZero messages:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    createTestMessages();
+    fetchLayerZeroMessages();
+    
+    // Set up polling to refresh messages every 30 seconds
+    const intervalId = setInterval(() => {
+      fetchLayerZeroMessages();
+    }, 30000);
+    
+    return () => clearInterval(intervalId);
   }, []);
   
   const [stats, setStats] = useState<DashboardStats>({
@@ -66,12 +127,12 @@ export function CrossChainDashboard() {
   // Update stats based on WebSocket messages
   useEffect(() => {
     // Calculate stats based on real-time message data
-    const pendingCount = messages.filter(msg => 
+    const pendingCount = messages.filter((msg: MessageUpdate) => 
       msg.status !== 'COMPLETED' && msg.status !== 'FAILED'
     ).length;
     
-    const completedCount = messages.filter(msg => msg.status === 'COMPLETED').length;
-    const failedCount = messages.filter(msg => msg.status === 'FAILED').length;
+    const completedCount = messages.filter((msg: MessageUpdate) => msg.status === 'COMPLETED').length;
+    const failedCount = messages.filter((msg: MessageUpdate) => msg.status === 'FAILED').length;
     
     setStats(prev => ({
       ...prev,
@@ -107,15 +168,105 @@ export function CrossChainDashboard() {
             </div>
           )}
           
-          <Dialog>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-2"
+              onClick={() => {
+                const fetchLayerZeroMessages = async () => {
+                  try {
+                    setIsLoading(true);
+                    const { WebSocketService } = await import('@/services/websocket-service');
+                    
+                    // Fetch real messages from the API endpoint with new user flag if applicable
+                    const url = isNewUser ? '/api/cross-chain/messages?new_user=true' : '/api/cross-chain/messages';
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                      const data = await response.json();
+                      
+                      // Get existing messages to avoid duplicates
+                      const existingMessages = messages.map(msg => msg.messageId);
+                      
+                      // Track each message with the WebSocketService, but only if it doesn't already exist
+                      data.messages.forEach((message: any) => {
+                        // Skip if we already have this message
+                        if (existingMessages.includes(message.id)) {
+                          return;
+                        }
+                        
+                        // The WebSocketService.trackMessage only accepts a messageId
+                        WebSocketService.trackMessage(message.id);
+                        
+                        // Store additional message metadata in localStorage for reference
+                        // Make sure we have all the necessary data
+                        const messageMetadata: MessageMetadata = {
+                          sourceChain: message.sourceChain || 'Solana',
+                          destinationChain: message.destinationChain || 'Ethereum',
+                          messageType: message.messageType || 'Cross-Chain Query',
+                          timestamp: message.timestamp || new Date().toISOString()
+                        };
+                        
+                        // Store in localStorage with browser check
+                        if (typeof window !== 'undefined') {
+                          localStorage.setItem(`message_${message.id}`, JSON.stringify(messageMetadata));
+                        }
+                      });
+                    }
+                  } catch (error) {
+                    console.error('Error refreshing messages:', error);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                };
+                
+                fetchLayerZeroMessages();
+              }}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            
+            {/* Reset button to simulate new user experience */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-2"
+              onClick={() => {
+                // Clear localStorage items related to messages
+                if (typeof window !== 'undefined') {
+                  Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('message_') || key === 'lz_first_time_user') {
+                      localStorage.removeItem(key);
+                    }
+                  });
+                }
+                
+                // Reset WebSocket service
+                const resetWebSocket = async () => {
+                  const { WebSocketService } = await import('@/services/websocket-service');
+                  WebSocketService.disconnect();
+                  
+                  // Set new user flag
+                  setIsNewUser(true);
+                  
+                  // Reload the page to reset the state completely
+                  window.location.reload();
+                };
+                
+                resetWebSocket();
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+          <Dialog open={showChainConfig} onOpenChange={setShowChainConfig}>
             <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-2"
-              >
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                Configure Chains
+                Config
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -307,14 +458,36 @@ export function CrossChainDashboard() {
                     const date = new Date(message.timestamp);
                     const formattedDate = `${date.toLocaleDateString()} • ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
                     
-                    // Generate random source and destination chains for demo
-                    const chains = Object.keys(SupportedChain).filter(key => isNaN(Number(key)));
-                    const sourceChain = chains[Math.floor(Math.random() * chains.length)];
-                    const destChain = chains[Math.floor(Math.random() * chains.length)];
+                    // Get message metadata from localStorage if available
+                    let sourceChain = 'Unknown';
+                    let destChain = 'Unknown';
+                    let queryType = 'Data Query';
                     
-                    // Determine query type based on message ID
-                    const queryTypes = ['NFT Data Query', 'Wallet History Query', 'Market Activity Query'];
-                    const queryType = queryTypes[Math.floor(Math.random() * queryTypes.length)];
+                    try {
+                      // First try to get metadata from the message object directly
+                      if (message.data && message.data.sourceChain && message.data.destinationChain) {
+                        sourceChain = message.data.sourceChain;
+                        destChain = message.data.destinationChain;
+                        queryType = message.data.messageType || 'Data Query';
+                      } else {
+                        // Fall back to localStorage if not in the message object
+                        if (typeof window !== 'undefined') {
+                          const metadataStr = localStorage.getItem(`message_${message.messageId}`);
+                          if (metadataStr) {
+                            try {
+                              const metadata = JSON.parse(metadataStr) as MessageMetadata;
+                              sourceChain = metadata.sourceChain || 'Solana';
+                              destChain = metadata.destinationChain || 'Ethereum';
+                              queryType = metadata.messageType || 'Cross-Chain Query';
+                            } catch (e) {
+                              console.error('Error parsing message metadata:', e);
+                            }
+                          }
+                        }
+                      }
+                    } catch (error) {
+                      console.error('Error retrieving message metadata:', error);
+                    }
                     
                     // Set badge color based on status
                     let badgeClass = '';

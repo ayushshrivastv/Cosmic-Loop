@@ -36,18 +36,37 @@ export function TrackedMessages() {
   // Get all message IDs
   const messageIds = messages.map(msg => msg.messageId);
 
-  // Track demo messages if none exist (for demonstration purposes)
+  // Fetch real messages from the API endpoint
   useEffect(() => {
+    const fetchRealMessages = async () => {
+      try {
+        // Fetch messages from the API
+        const response = await fetch('/api/cross-chain/messages');
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Track these messages in the WebSocket service
+          if (data.messages && data.messages.length > 0) {
+            data.messages.forEach((msg: any) => trackMessage(msg.id));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching real messages:', error);
+      }
+    };
+    
+    // Only fetch if we don't already have messages
     if (messages.length === 0) {
-      // Create some demo messages for testing
-      const demoMessageIds = [
-        'demo-message-1-' + Math.random().toString(36).substring(2, 10),
-        'demo-message-2-' + Math.random().toString(36).substring(2, 10),
-      ];
-      
-      // Track these messages in the WebSocket service
-      demoMessageIds.forEach(id => trackMessage(id));
+      fetchRealMessages();
     }
+    
+    // Set up polling to refresh messages every 15 seconds
+    const intervalId = setInterval(() => {
+      fetchRealMessages();
+    }, 15000);
+    
+    return () => clearInterval(intervalId);
   }, [messages.length, trackMessage]);
 
   // No messages to display
@@ -119,9 +138,36 @@ export function TrackedMessages() {
                 <div className="flex items-center space-x-3">
                   {getStatusIcon(message.status)}
                   <span className="text-gray-200 font-medium">
-                    {message.data?.messageType !== undefined
-                      ? getMessageTypeName(message.data.messageType)
-                      : 'Cross-Chain Query'
+                    {(() => {
+                      // Try to get the message type from various sources
+                      let messageType = 'Cross-Chain Query';
+                      
+                      try {
+                        // First check message.data
+                        if (message.data?.messageType) {
+                          messageType = getMessageTypeName(message.data.messageType);
+                        } else {
+                          // Then check localStorage (only in browser)
+                          if (typeof window !== 'undefined') {
+                            const metadataStr = localStorage.getItem(`message_${messageId}`);
+                            if (metadataStr) {
+                              try {
+                                const metadata = JSON.parse(metadataStr);
+                                if (metadata.messageType) {
+                                  messageType = metadata.messageType;
+                                }
+                              } catch (e) {
+                                console.error('Error parsing message metadata:', e);
+                              }
+                            }
+                          }
+                        }
+                      } catch (error) {
+                        console.error('Error getting message type:', error);
+                      }
+                      
+                      return messageType;
+                    })()
                     }
                   </span>
                   <span className="text-xs font-mono text-gray-400">
