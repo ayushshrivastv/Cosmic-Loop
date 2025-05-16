@@ -2,52 +2,39 @@
   remote_images = ["https://source.unsplash.com/.*", "https://images.unsplash.com/.*", "https://ext.same-assets.com/.*", "https://ugc.same-assets.com/.*"]
 
 [build]
-  command = "npm run build"
+  command = "bun run build"
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
-  NEXT_PUBLIC_API_ENDPOINT = "/.netlify/functions/graphql"
-  NEXT_PUBLIC_WS_ENDPOINT = "/.netlify/functions/ws"
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
-  # NOTE: This project is primarily deployed on Vercel
-  # If deploying on Netlify, add the Gemini API key as an environment variable:
-  # NEXT_PUBLIC_GEMINI_API_KEY = "your-api-key-here"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Proxy API requests to serverless functions
+[functions]
+  node_bundler = "esbuild"
+
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
+  force = true
 
-# Redirect graphql requests to the graphql function
 [[redirects]]
   from = "/graphql"
   to = "/.netlify/functions/graphql"
   status = 200
 
-# Redirect websocket connections
 [[redirects]]
   from = "/ws"
   to = "/.netlify/functions/ws"
   status = 200
 
-# Redirect all other routes to Next.js
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Define serverless functions that will run the backend
-[functions]
-  directory = "backend/serverless"
-  node_bundler = "esbuild"
-  included_files = ["backend/**"]
-
-# Configure function environment variables
 [functions.graphql]
   included_files = ["backend/**"]
 

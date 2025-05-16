@@ -2,7 +2,6 @@
 
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
-import { AppleLayout } from '@/components/layouts/apple-layout';
 import { HeroSection } from '@/components/ui/Webstyles/hero-section';
 import { FeatureSection } from '@/components/ui/Webstyles/feature-section';
 import { SpecGrid } from '@/components/ui/Webstyles/spec-grid';
@@ -162,9 +161,7 @@ export default function Home() {
   );
 
   return (
-    <AppleLayout>
-      {/* Animated particles background */}
-      <ParticlesBackground />
+    <div>
       {/* Hero Section */}
       <HeroSection
         title={heroTitle}
@@ -325,6 +322,6 @@ export default function Home() {
       {/* Feature Sections Container removed */}
 
       {/* CTA Section removed */}
-    </AppleLayout>
+    </div>
   );
 }

@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Dashboard', href: ROUTES.DASHBOARD },
   { label: 'Create Event', href: ROUTES.MINT },
   { label: 'Claim Token', href: ROUTES.CLAIM },
+  { label: 'Cross Chain', href: ROUTES.CROSS_CHAIN },
   { label: 'OpenAPI', href: ROUTES.OPENAPI, external: false },
 ];
 

@@ -108,7 +108,6 @@ export const ParticlesBackground: React.FC = () => {
     <canvas 
       ref={canvasRef} 
       className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"
-      style={{ background: 'linear-gradient(to bottom, #0f172a, #111827)' }}
     />
   );
 };
