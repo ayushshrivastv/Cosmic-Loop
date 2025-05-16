@@ -425,10 +425,10 @@ export default function OpenAPIPage() {
       {/* Cross-Chain Section - Removed to avoid duplication with dedicated Cross-Chain page */}
 
       {/* Documentation Section */}
-      <section className="py-8 md:py-16 bg-black/30 backdrop-blur-sm">
+      <section className="py-12 md:py-20 bg-black/30 backdrop-blur-sm">
         <div className="flex flex-col items-center max-w-3xl mx-auto px-6 md:px-8">
           <article className="space-y-6 text-left w-full">
-            <div className="space-y-3">
+            <div className="space-y-3 mt-8">
               <h2 className="text-3xl md:text-4xl font-bold text-white">Streaming the Chain: How Solana's Substreams Are Rewriting Web3 Infrastructure</h2>
               <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Technology Overview</div>
             </div>

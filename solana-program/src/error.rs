@@ -53,6 +53,10 @@ pub enum SolanaOpenApiError {
     /// Payload too large
     #[error("Payload too large")]
     PayloadTooLarge,
+    
+    /// Invalid message options
+    #[error("Invalid message options")]
+    InvalidMessageOptions,
 }
 
 impl From<SolanaOpenApiError> for ProgramError {

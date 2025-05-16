@@ -1,6 +1,6 @@
 /**
  * @file instructions/query_data.rs
- * @description Instruction handler for querying cross-chain data
+ * @description Instruction handler for querying cross-chain data via LayerZero V2
  */
 
 use solana_program::{
@@ -14,8 +14,17 @@ use solana_program::{
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::error::SolanaOpenApiError;
-use crate::layerzero::{CrossChainMessage, send_to_endpoint};
+use crate::layerzero::{CrossChainMessage, MessageOptions, send_to_endpoint, get_fee_quote};
 use crate::state::{MessageRecord, ProgramConfig, QueryParams};
+
+/// Query data instruction parameters
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct QueryDataParams {
+    pub destination_chain_id: u32,
+    pub destination_address: Vec<u8>,
+    pub query_params: QueryParams,
+    pub gas_limit: u64,
+}
 
 /// Process a cross-chain data query instruction
 pub fn process(
@@ -39,21 +48,8 @@ pub fn process(
     }
 
     // Deserialize the query parameters from instruction data
-    let query_params = QueryParams::try_from_slice(instruction_data)
+    let query_data = QueryDataParams::try_from_slice(instruction_data)
         .map_err(|_| SolanaOpenApiError::InvalidInstructionData)?;
-
-    // Get destination chain ID (must be passed as the next u32 after the query params)
-    let params_size = instruction_data.len();
-    if params_size < 4 {
-        return Err(SolanaOpenApiError::InvalidInstructionData.into());
-    }
-    
-    let destination_chain_id = u32::from_le_bytes([
-        instruction_data[params_size - 4],
-        instruction_data[params_size - 3],
-        instruction_data[params_size - 2],
-        instruction_data[params_size - 1],
-    ]);
 
     // Get program config
     let config = ProgramConfig::try_from_slice(&config_account.data.borrow())
@@ -69,17 +65,36 @@ pub fn process(
         return Err(SolanaOpenApiError::InvalidEndpoint.into());
     }
 
+    // Verify destination chain ID is valid
+    if query_data.destination_chain_id == 0 {
+        return Err(SolanaOpenApiError::InvalidDestinationChain.into());
+    }
+
     // Get current timestamp for nonce
     let clock = Clock::from_account_info(clock_sysvar)?;
     let timestamp = clock.unix_timestamp as u64;
 
+    // Create message options
+    let options = MessageOptions {
+        gas_limit: query_data.gas_limit,
+        refund_address: *sender_account.key,
+        executor_options: Vec::new(), // Default options
+        receiver_options: Vec::new(), // Default options
+    };
+
+    // Serialize the query parameters as the payload
+    let mut payload = Vec::new();
+    query_data.query_params.serialize(&mut payload)
+        .map_err(|_| ProgramError::InvalidInstructionData)?;
+
     // Create cross-chain message
     let message = CrossChainMessage::new(
         config.solana_chain_id,
-        destination_chain_id,
-        query_params.query_type,
-        query_params.target_address.clone(),
+        query_data.destination_chain_id,
+        query_data.query_params.query_type,
+        payload,
         timestamp, // Use timestamp as nonce
+        Some(options.clone()),
     );
 
     // Generate message ID
@@ -89,8 +104,8 @@ pub fn process(
     let message_record = MessageRecord::new(
         message_id,
         config.solana_chain_id,
-        destination_chain_id,
-        query_params.query_type,
+        query_data.destination_chain_id,
+        query_data.query_params.query_type,
         *sender_account.key,
         timestamp,
     );
@@ -99,6 +114,17 @@ pub fn process(
     message_record.serialize(&mut *message_account.data.borrow_mut())
         .map_err(|_| ProgramError::AccountDataTooSmall)?;
 
+    // Get fee quote
+    let fee = get_fee_quote(
+        program_id,
+        layerzero_endpoint,
+        query_data.destination_chain_id,
+        payload.len(),
+        &options,
+    )?;
+
+    msg!("Estimated fee for cross-chain query: {} lamports", fee);
+
     // Send message to LayerZero endpoint
     send_to_endpoint(
         program_id,
@@ -106,12 +132,14 @@ pub fn process(
         fee_account,
         sender_account,
         &message,
+        query_data.destination_address,
     )?;
 
-    msg!("Cross-chain query sent successfully");
+    msg!("Cross-chain query sent successfully via LayerZero V2");
     msg!("Message ID: {:?}", message_id);
-    msg!("Query Type: {}", query_params.query_type);
-    msg!("Destination Chain: {}", destination_chain_id);
+    msg!("Query Type: {}", query_data.query_params.query_type);
+    msg!("Destination Chain: {}", query_data.destination_chain_id);
+    msg!("Target Address: {:?}", query_data.query_params.target_address);
 
     Ok(())
 }

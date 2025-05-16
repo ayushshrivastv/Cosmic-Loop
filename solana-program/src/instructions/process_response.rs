@@ -1,6 +1,6 @@
 /**
  * @file instructions/process_response.rs
- * @description Instruction handler for processing cross-chain query responses
+ * @description Instruction handler for processing cross-chain query responses via LayerZero V2
  */
 
 use solana_program::{
@@ -14,8 +14,17 @@ use solana_program::{
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::error::SolanaOpenApiError;
-use crate::layerzero::{CrossChainMessage, verify_from_endpoint};
+use crate::layerzero::{CrossChainMessage, verify_from_endpoint, LayerZeroInstruction};
 use crate::state::{MessageRecord, ProgramConfig, MessageStatus};
+
+/// Response data instruction parameters
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct ResponseData {
+    pub source_chain_id: u32,
+    pub source_address: Vec<u8>,
+    pub response_payload: Vec<u8>,
+    pub original_message_id: [u8; 32],
+}
 
 /// Process a cross-chain response instruction
 pub fn process(
@@ -37,8 +46,8 @@ pub fn process(
         return Err(SolanaOpenApiError::Unauthorized.into());
     }
 
-    // Deserialize the message from instruction data
-    let message = CrossChainMessage::try_from_slice(instruction_data)
+    // Deserialize the response data from instruction data
+    let response_data = ResponseData::try_from_slice(instruction_data)
         .map_err(|_| SolanaOpenApiError::InvalidInstructionData)?;
 
     // Get program config
@@ -55,6 +64,17 @@ pub fn process(
         return Err(SolanaOpenApiError::InvalidEndpoint.into());
     }
 
+    // Create a cross-chain message for verification
+    let nonce = 0; // Nonce is not relevant for received responses
+    let message = CrossChainMessage::new(
+        response_data.source_chain_id,
+        config.solana_chain_id, // destination is this chain
+        0, // Message type is not relevant for verification
+        response_data.response_payload.clone(),
+        nonce,
+        None, // No options needed for verification
+    );
+
     // Verify message from LayerZero endpoint
     verify_from_endpoint(
         program_id,
@@ -62,36 +82,40 @@ pub fn process(
         &message,
     )?;
 
-    // Generate message ID
-    let message_id = message.generate_id();
-
     // Get current timestamp
     let clock = Clock::from_account_info(clock_sysvar)?;
-    let _timestamp = clock.unix_timestamp as u64;
+    let timestamp = clock.unix_timestamp as u64;
 
     // Get message record
     let mut message_record = MessageRecord::try_from_slice(&message_account.data.borrow())
         .map_err(|_| SolanaOpenApiError::InvalidAccountData)?;
 
-    // Verify message record is for the same query
-    if message_record.source_chain_id != message.destination_chain_id ||
-       message_record.destination_chain_id != message.source_chain_id ||
-       message_record.message_type != message.message_type {
-        return Err(SolanaOpenApiError::InvalidAccountData.into());
+    // Verify message record exists and matches the original message ID
+    if message_record.message_id != response_data.original_message_id {
+        msg!("Message ID mismatch: expected {:?}, got {:?}", 
+             response_data.original_message_id, message_record.message_id);
+        return Err(SolanaOpenApiError::MessageNotFound.into());
+    }
+
+    // Verify message is not already completed
+    if message_record.status == MessageStatus::Completed as u8 {
+        return Err(SolanaOpenApiError::MessageAlreadyProcessed.into());
     }
 
     // Update message record with response data
-    message_record.set_response(message.payload.clone());
+    message_record.set_response(response_data.response_payload.clone());
     message_record.update_status(MessageStatus::Completed);
 
     // Serialize updated record back to the account
     message_record.serialize(&mut *message_account.data.borrow_mut())
         .map_err(|_| ProgramError::AccountDataTooSmall)?;
 
-    msg!("Cross-chain response processed successfully");
-    msg!("Message ID: {:?}", message_id);
-    msg!("Source Chain: {}", message.source_chain_id);
-    msg!("Response Size: {}", message.payload.len());
+    msg!("Cross-chain response processed successfully via LayerZero V2");
+    msg!("Original Message ID: {:?}", response_data.original_message_id);
+    msg!("Source Chain: {}", response_data.source_chain_id);
+    msg!("Source Address: {:?}", response_data.source_address);
+    msg!("Response Size: {} bytes", response_data.response_payload.len());
+    msg!("Response received at: {} (unix timestamp)", timestamp);
 
     Ok(())
 }

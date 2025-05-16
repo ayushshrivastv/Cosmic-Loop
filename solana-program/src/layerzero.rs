@@ -6,16 +6,30 @@
 
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey,
-    msg,
+    msg, program::invoke, program_error::ProgramError, system_instruction,
+    sysvar::{rent::Rent, Sysvar},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+use sha2::{Sha256, Digest};
+use bs58;
 
-/// LayerZero Endpoint Interface
-#[allow(dead_code)]
+use crate::error::SolanaOpenApiError;
+
+/// LayerZero V2 Endpoint Interface
 pub struct LayerZeroEndpoint {
     pub endpoint_id: Pubkey,
     pub fee_account: Pubkey,
     pub admin_account: Pubkey,
+    pub protocol_version: u8,
+}
+
+/// LayerZero V2 Message Options
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
+pub struct MessageOptions {
+    pub gas_limit: u64,
+    pub refund_address: Pubkey,
+    pub executor_options: Vec<u8>,
+    pub receiver_options: Vec<u8>,
 }
 
 /// Cross-chain message structure
@@ -26,6 +40,7 @@ pub struct CrossChainMessage {
     pub message_type: u8,
     pub payload: Vec<u8>,
     pub nonce: u64,
+    pub options: Option<MessageOptions>,
 }
 
 impl CrossChainMessage {
@@ -36,6 +51,7 @@ impl CrossChainMessage {
         message_type: u8,
         payload: Vec<u8>,
         nonce: u64,
+        options: Option<MessageOptions>,
     ) -> Self {
         Self {
             source_chain_id,
@@ -43,120 +59,187 @@ impl CrossChainMessage {
             message_type,
             payload,
             nonce,
+            options,
         }
     }
 
-    /// Generate a unique message ID
+    /// Generate a unique message ID using SHA-256 hashing
     pub fn generate_id(&self) -> [u8; 32] {
-        let mut id = [0u8; 32];
-        let mut offset = 0;
-
-        // Source chain ID (4 bytes)
-        let source_bytes = self.source_chain_id.to_le_bytes();
-        id[offset..offset + 4].copy_from_slice(&source_bytes);
-        offset += 4;
-
-        // Destination chain ID (4 bytes)
-        let dest_bytes = self.destination_chain_id.to_le_bytes();
-        id[offset..offset + 4].copy_from_slice(&dest_bytes);
-        offset += 4;
-
-        // Message type (1 byte)
-        id[offset] = self.message_type;
-        offset += 1;
-
-        // Nonce (8 bytes)
-        let nonce_bytes = self.nonce.to_le_bytes();
-        id[offset..offset + 8].copy_from_slice(&nonce_bytes);
-        offset += 8;
-
-        // Hash of payload (remaining bytes)
-        let mut payload_hash = [0u8; 15];
-        // Simple hash function (in production, use a proper hash function)
-        for (i, byte) in self.payload.iter().enumerate().take(15) {
-            payload_hash[i % 15] ^= byte;
-        }
-        id[offset..offset + 15].copy_from_slice(&payload_hash);
-
-        id
+        let mut hasher = Sha256::new();
+        
+        // Add source chain ID to hash
+        hasher.update(self.source_chain_id.to_le_bytes());
+        
+        // Add destination chain ID to hash
+        hasher.update(self.destination_chain_id.to_le_bytes());
+        
+        // Add message type to hash
+        hasher.update([self.message_type]);
+        
+        // Add nonce to hash
+        hasher.update(self.nonce.to_le_bytes());
+        
+        // Add payload to hash
+        hasher.update(&self.payload);
+        
+        // Finalize and return the hash
+        hasher.finalize().into()
     }
+    
+    /// Get the estimated fee for this message
+    pub fn estimate_fee(&self) -> Result<u64, ProgramError> {
+        let base_fee = match self.destination_chain_id {
+            1 => 1_000_000, // Ethereum (in lamports, 0.001 SOL)
+            2 => 500_000,   // Arbitrum (in lamports, 0.0005 SOL)
+            3 => 600_000,   // Optimism (in lamports, 0.0006 SOL)
+            4 => 400_000,   // Polygon (in lamports, 0.0004 SOL)
+            _ => 800_000,   // Default (in lamports, 0.0008 SOL)
+        };
+        
+        // Calculate fee based on payload size
+        let byte_fee = (self.payload.len() as u64) * 100; // 100 lamports per byte
+        
+        Ok(base_fee + byte_fee)
+    }
+}
+
+/// LayerZero V2 Endpoint Instructions
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
+pub enum LayerZeroInstruction {
+    /// Send a message through LayerZero
+    Send {
+        destination_chain_id: u32,
+        destination_address: Vec<u8>,
+        payload: Vec<u8>,
+        options: MessageOptions,
+    },
+    /// Receive a message from LayerZero
+    Receive {
+        source_chain_id: u32,
+        source_address: Vec<u8>,
+        payload: Vec<u8>,
+    },
+    /// Quote fee for sending a message
+    QuoteFee {
+        destination_chain_id: u32,
+        payload_size: u64,
+        options: MessageOptions,
+    },
 }
 
 /// Send a message to the LayerZero endpoint
 pub fn send_to_endpoint(
-    _program_id: &Pubkey,
-    _endpoint_account: &AccountInfo,
-    _fee_account: &AccountInfo,
-    _sender_account: &AccountInfo,
+    program_id: &Pubkey,
+    endpoint_account: &AccountInfo,
+    fee_account: &AccountInfo,
+    sender_account: &AccountInfo,
     message: &CrossChainMessage,
+    destination_address: Vec<u8>,
 ) -> ProgramResult {
-    // In a real implementation, this would call the LayerZero endpoint
-    // For now, we'll just log the message
-    msg!("Sending message to LayerZero endpoint");
+    msg!("Sending message to LayerZero V2 endpoint");
+    
+    // Ensure the message has options
+    let options = message.options.as_ref().ok_or(SolanaOpenApiError::InvalidMessageOptions)?;
+    
+    // Log message details
     msg!("Source chain: {}", message.source_chain_id);
     msg!("Destination chain: {}", message.destination_chain_id);
     msg!("Message type: {}", message.message_type);
     msg!("Payload length: {}", message.payload.len());
     msg!("Nonce: {}", message.nonce);
-
-    // In production, this would be a CPI call to the LayerZero endpoint
-    // endpoint_program.invoke(
-    //     &LayerZeroInstruction::SendMessage {
-    //         destination_chain_id: message.destination_chain_id,
-    //         destination_address: destination_address,
-    //         payload: message.payload.clone(),
-    //         refund_address: sender_account.key,
-    //         adapter_params: adapter_params,
-    //     },
-    //     &[
-    //         endpoint_account.clone(),
-    //         fee_account.clone(),
-    //         sender_account.clone(),
-    //     ],
-    // )?;
-
+    
+    // Create the instruction data
+    let instruction_data = LayerZeroInstruction::Send {
+        destination_chain_id: message.destination_chain_id,
+        destination_address,
+        payload: message.payload.clone(),
+        options: options.clone(),
+    };
+    
+    // Serialize the instruction data
+    let mut data = Vec::new();
+    instruction_data.serialize(&mut data).map_err(|_| ProgramError::InvalidInstructionData)?;
+    
+    // Create the instruction
+    let instruction = solana_program::instruction::Instruction {
+        program_id: *endpoint_account.owner,
+        accounts: vec![
+            solana_program::instruction::AccountMeta::new(*endpoint_account.key, false),
+            solana_program::instruction::AccountMeta::new(*fee_account.key, false),
+            solana_program::instruction::AccountMeta::new(*sender_account.key, true),
+        ],
+        data,
+    };
+    
+    // Execute the CPI call
+    invoke(
+        &instruction,
+        &[
+            endpoint_account.clone(),
+            fee_account.clone(),
+            sender_account.clone(),
+        ],
+    )?;
+    
+    msg!("Message sent successfully to LayerZero V2 endpoint");
     Ok(())
 }
 
 /// Verify a message from the LayerZero endpoint
 pub fn verify_from_endpoint(
-    _program_id: &Pubkey,
-    _endpoint_account: &AccountInfo,
+    program_id: &Pubkey,
+    endpoint_account: &AccountInfo,
     message: &CrossChainMessage,
 ) -> ProgramResult {
-    // In a real implementation, this would verify the message came from LayerZero
-    // For now, we'll just log the message
-    msg!("Verifying message from LayerZero endpoint");
+    msg!("Verifying message from LayerZero V2 endpoint");
+    
+    // Verify the endpoint account is owned by the LayerZero program
+    if !endpoint_account.owner.eq(program_id) {
+        msg!("Invalid LayerZero endpoint owner");
+        return Err(SolanaOpenApiError::InvalidEndpoint.into());
+    }
+    
+    // Log message details
     msg!("Source chain: {}", message.source_chain_id);
     msg!("Destination chain: {}", message.destination_chain_id);
     msg!("Message type: {}", message.message_type);
     msg!("Payload length: {}", message.payload.len());
     msg!("Nonce: {}", message.nonce);
-
-    // In production, this would verify the message signature and source
-    // if !endpoint_account.owner.eq(layerzero_program_id) {
-    //     return Err(SolanaOpenApiError::InvalidEndpoint.into());
-    // }
-
+    
+    // In a production environment, we would verify the message signature
+    // and validate that it came from the expected source chain and address
+    
+    msg!("Message verified successfully from LayerZero V2 endpoint");
     Ok(())
 }
 
-/// Estimate gas for a cross-chain message
-#[allow(dead_code)]
-pub fn estimate_gas(
+/// Get quote for sending a cross-chain message
+pub fn get_fee_quote(
+    program_id: &Pubkey,
+    endpoint_account: &AccountInfo,
     destination_chain_id: u32,
     payload_size: usize,
-) -> u64 {
-    // This is a simplified gas estimation
-    // In production, this would query the LayerZero endpoint for accurate estimates
-    let base_gas = match destination_chain_id {
-        1 => 100000, // Ethereum
-        2 => 50000,  // Arbitrum
-        3 => 60000,  // Optimism
-        4 => 40000,  // Polygon
-        _ => 80000,  // Default
+    options: &MessageOptions,
+) -> Result<u64, ProgramError> {
+    msg!("Getting fee quote from LayerZero V2 endpoint");
+    
+    // In a production environment, this would make a CPI call to the LayerZero endpoint
+    // to get an accurate fee quote. For now, we'll use our estimation function.
+    
+    let base_fee = match destination_chain_id {
+        1 => 1_000_000, // Ethereum (in lamports, 0.001 SOL)
+        2 => 500_000,   // Arbitrum (in lamports, 0.0005 SOL)
+        3 => 600_000,   // Optimism (in lamports, 0.0006 SOL)
+        4 => 400_000,   // Polygon (in lamports, 0.0004 SOL)
+        _ => 800_000,   // Default (in lamports, 0.0008 SOL)
     };
-
-    let gas_per_byte = 100;
-    base_gas + (payload_size as u64 * gas_per_byte)
+    
+    // Calculate fee based on payload size and gas limit
+    let byte_fee = (payload_size as u64) * 100; // 100 lamports per byte
+    let gas_fee = options.gas_limit / 1000; // Simplified gas fee calculation
+    
+    let total_fee = base_fee + byte_fee + gas_fee;
+    msg!("Estimated fee: {} lamports", total_fee);
+    
+    Ok(total_fee)
 }

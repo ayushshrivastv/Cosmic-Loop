@@ -1,6 +1,6 @@
 /**
  * @file instructions/send_message.rs
- * @description Instruction handler for sending cross-chain messages
+ * @description Instruction handler for sending cross-chain messages via LayerZero V2
  */
 
 use solana_program::{
@@ -14,8 +14,18 @@ use solana_program::{
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::error::SolanaOpenApiError;
-use crate::layerzero::{CrossChainMessage, send_to_endpoint};
+use crate::layerzero::{CrossChainMessage, MessageOptions, send_to_endpoint, get_fee_quote};
 use crate::state::{MessageRecord, ProgramConfig};
+
+/// Send message instruction data
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct SendMessageData {
+    pub destination_chain_id: u32,
+    pub destination_address: Vec<u8>,
+    pub message_type: u8,
+    pub payload: Vec<u8>,
+    pub gas_limit: u64,
+}
 
 /// Process a send message instruction
 pub fn process(
@@ -38,12 +48,12 @@ pub fn process(
         return Err(SolanaOpenApiError::Unauthorized.into());
     }
 
-    // Deserialize the message from instruction data
-    let message = CrossChainMessage::try_from_slice(instruction_data)
+    // Deserialize the instruction data
+    let send_data = SendMessageData::try_from_slice(instruction_data)
         .map_err(|_| SolanaOpenApiError::InvalidInstructionData)?;
 
     // Verify payload size
-    if message.payload.len() > 10000 {
+    if send_data.payload.len() > 10000 {
         return Err(SolanaOpenApiError::PayloadTooLarge.into());
     }
 
@@ -61,19 +71,38 @@ pub fn process(
         return Err(SolanaOpenApiError::InvalidEndpoint.into());
     }
 
-    // Generate message ID
-    let message_id = message.generate_id();
-
-    // Get current timestamp
+    // Get current timestamp and nonce
     let clock = Clock::from_account_info(clock_sysvar)?;
     let timestamp = clock.unix_timestamp as u64;
+    let nonce = timestamp; // Using timestamp as nonce for simplicity
+
+    // Create message options
+    let options = MessageOptions {
+        gas_limit: send_data.gas_limit,
+        refund_address: *sender_account.key,
+        executor_options: Vec::new(), // Default options
+        receiver_options: Vec::new(), // Default options
+    };
+
+    // Create the cross-chain message
+    let message = CrossChainMessage::new(
+        config.solana_chain_id,
+        send_data.destination_chain_id,
+        send_data.message_type,
+        send_data.payload.clone(),
+        nonce,
+        Some(options.clone()),
+    );
+
+    // Generate message ID
+    let message_id = message.generate_id();
 
     // Create message record
     let message_record = MessageRecord::new(
         message_id,
         config.solana_chain_id,
-        message.destination_chain_id,
-        message.message_type,
+        send_data.destination_chain_id,
+        send_data.message_type,
         *sender_account.key,
         timestamp,
     );
@@ -82,6 +111,17 @@ pub fn process(
     message_record.serialize(&mut *message_account.data.borrow_mut())
         .map_err(|_| ProgramError::AccountDataTooSmall)?;
 
+    // Get fee quote
+    let fee = get_fee_quote(
+        program_id,
+        layerzero_endpoint,
+        send_data.destination_chain_id,
+        send_data.payload.len(),
+        &options,
+    )?;
+
+    msg!("Estimated fee: {} lamports", fee);
+
     // Send message to LayerZero endpoint
     send_to_endpoint(
         program_id,
@@ -89,10 +129,12 @@ pub fn process(
         fee_account,
         sender_account,
         &message,
+        send_data.destination_address,
     )?;
 
-    msg!("Cross-chain message sent successfully");
+    msg!("Cross-chain message sent successfully via LayerZero V2");
     msg!("Message ID: {:?}", message_id);
+    msg!("Destination Chain: {}", send_data.destination_chain_id);
 
     Ok(())
 }
