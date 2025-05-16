@@ -295,6 +295,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Video Section */}
+      <section className="py-8 md:py-16 bg-black/30 backdrop-blur-sm">
+        <div className="flex flex-col items-center max-w-3xl mx-auto px-6 md:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="w-full"
+          >
+            <div className="w-full rounded-xl overflow-hidden shadow-2xl">
+              <video 
+                className="w-full" 
+                controls 
+                autoPlay 
+                loop 
+                muted
+                playsInline
+              >
+                <source src="/videos/Champ.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Feature Sections Container removed */}
 
       {/* CTA Section removed */}
