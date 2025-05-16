@@ -1,5 +1,5 @@
-export const APP_NAME = "The Project";
-export const APP_DESCRIPTION = "A modern Next.js frontend template with React, Tailwind CSS, and shadcn/ui components.";
+export const APP_NAME = "Solana OpenAPI";
+export const APP_DESCRIPTION = "Real-time blockchain data access powered by Solana Substreams and LayerZero V2 cross-chain integration.";
 
 // RPC endpoints - Replace with your actual endpoints when deploying
 export const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com";
