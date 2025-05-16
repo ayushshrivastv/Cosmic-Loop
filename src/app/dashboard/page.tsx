@@ -1,6 +1,7 @@
 "use client";
 
-import { AppleLayout } from '@/components/layouts/apple-layout';
+import * as React from 'react';
+import { useState } from 'react';
 import { ROUTES } from '@/lib/constants';
 import { EventStatistics } from '@/components/dashboard/event-statistics';
 import { RecipientList } from '@/components/dashboard/recipient-list';
@@ -9,8 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function DashboardPage() {
   return (
-    <AppleLayout>
-      {/* Content */}
       <div className="container mx-auto pt-32 pb-16 flex-1">
         <h1 className="text-3xl font-bold mb-8">Event Dashboard</h1>
 
@@ -65,6 +64,5 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </AppleLayout>
   );
 }

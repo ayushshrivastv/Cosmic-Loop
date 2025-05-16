@@ -77,16 +77,14 @@
   }
 }
 
-/* Tailwind layer directive with @apply rules */
-@layer base {
-  /* Apply border color to all elements */
-  * {
-    @apply border-border;
-  }
-  /* Apply background and text colors to body */
-  body {
-    @apply bg-background text-foreground;
-  }
+/* Base styles without using @apply */
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 /* Animation utilities */

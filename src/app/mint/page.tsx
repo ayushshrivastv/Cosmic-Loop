@@ -1,13 +1,13 @@
 "use client";
 
-import { AppleLayout } from '@/components/layouts/apple-layout';
+import { useState } from 'react';
 import { ROUTES } from '@/lib/constants';
 import { MintForm } from '@/components/mint/mint-form';
 import { TokenStatistics } from '@/components/mint/token-statistics';
 
 export default function MintPage() {
   return (
-    <AppleLayout>
+    <div>
       {/* Content */}
       <div className="container mx-auto pt-32 pb-16 flex-1">
         <h1 className="text-3xl font-bold mb-8">Create Event Token</h1>
@@ -50,6 +50,6 @@ export default function MintPage() {
         {/* Token Statistics Section */}
         <TokenStatistics />
       </div>
-    </AppleLayout>
+    </div>
   );
 }

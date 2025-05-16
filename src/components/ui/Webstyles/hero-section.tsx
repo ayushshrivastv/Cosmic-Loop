@@ -161,10 +161,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   return (
     // Main section container
-    <section 
-      className="relative w-full h-screen overflow-hidden hero-section-main-container" // Added a class for the new ::before
-      style={{ backgroundColor: '#000000', overflowX: 'hidden' }} // Pure black background
+    <section
+      className="relative w-full h-screen overflow-hidden hero-section-main-container"
       aria-label="Hero section with animated background and content"
+      style={{ backgroundColor: '#000000', overflowX: 'hidden' }}
     >
       {/* Embedded global styles for particles and background curves */}
       <style jsx global>{`
