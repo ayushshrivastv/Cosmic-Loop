@@ -86,6 +86,6 @@ ARFLAGS_aarch64_apple_darwin = None
 cargo:rerun-if-env-changed=ARFLAGS_aarch64-apple-darwin
 ARFLAGS_aarch64-apple-darwin = None
 cargo:rustc-link-lib=static=bz2
-cargo:rustc-link-search=native=/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/bzip2-sys-b8678f550fa24802/out/lib
-cargo:root=/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/bzip2-sys-b8678f550fa24802/out
-cargo:include=/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/bzip2-sys-b8678f550fa24802/out/include
+cargo:rustc-link-search=native=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/bzip2-sys-b8678f550fa24802/out/lib
+cargo:root=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/bzip2-sys-b8678f550fa24802/out
+cargo:include=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/bzip2-sys-b8678f550fa24802/out/include

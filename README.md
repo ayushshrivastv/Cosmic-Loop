@@ -1,4 +1,4 @@
-# Solana OpenAPI - AI Powered Blockchain Data Interface 
+# Solana OpenAPI - AI Powered Blockchain Data Interface
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Solana](https://img.shields.io/badge/Solana-Compatible-9945FF)](https://solana.com/)
@@ -9,7 +9,7 @@
 ## Overview
 This Substreams package indexes Solana blockchain data for NFTs, marketplace activities, and cross-chain bridging events. It's designed to work with the Solana OpenAPI project to provide real-time blockchain data through an AI powered interface.
 
-For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./architecture.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared) 
+For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./architecture.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared)
 
 P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead. Initially, I considered creating a mock data interface for the hackathon, but I’ve decided to connect to a real blockchain network instead. Writing the smart contract is taking some time.
 
@@ -45,7 +45,13 @@ Our platform leverages LayerZero V2 contracts to enable seamless cross-chain ope
 
 ### The Graph's Substreams
 
-**Substreams Integration**: Our project leverages The Graph's Substreams technology to process and index Solana blockchain data with unprecedented speed and efficiency. The Rust-based Substreams package in the `/substreams` directory processes data for: **NFT Events** (mints, transfers, burns, and metadata updates), **Marketplace Activities** (listings, sales, offers, and cancellations), **Cross-chain Bridging** (asset transfers between Solana and other blockchains), and **Wallet Activities** (comprehensive transaction histories and account analysis). The Substreams package is deployed to substreams.dev and can be accessed via our API endpoints. Our implementation demonstrates the power of Substreams' parallel processing capabilities, allowing for real-time data access even on Solana's high-throughput blockchain.
+**Substreams Integration**: In what could be described as a breakthrough for blockchain data accessibility, the project harnesses The Graph's Substreams technology—a sophisticated system that transforms how developers interact with Solana's vast data landscape.
+
+Behind the scenes, a meticulously crafted Rust-based package silently processes millions of on-chain events in real time. From the digital art economy's NFT transactions to the intricate web of marketplace activities, the system captures the pulse of Solana's ecosystem with remarkable precision. Perhaps most impressive is the platform's ability to track cross-chain asset movements, creating a comprehensive view of how value flows between Solana and dozens of other blockchain networks.
+
+Deployed on substreams.dev and accessible through elegantly designed API endpoints, the implementation showcases how parallel data processing can tame even Solana's notoriously high-throughput blockchain, delivering insights in moments rather than hours—a testament to how far blockchain infrastructure has evolved since the early days of clunky block explorers and delayed data feeds.
+
+Comprehensive documentation is available in the [docs](/substreams)
 
 ![Screenshot 2025-05-17 at 9 54 53 AM](https://github.com/user-attachments/assets/8ca9b285-8f59-4ee8-ab4e-d1392ef5a551)
 
@@ -83,43 +89,13 @@ Comprehensive documentation is available in the [docs](/docs) directory:
 - Gemini API key (get one from [Google AI Studio](https://ai.google.dev/))
 - Serper API key (optional, for web search capabilities)
 
-### Substreams Setup
-
-1. Install the Substreams CLI
-
-```bash
-cd substreams
-curl https://raw.githubusercontent.com/streamingfast/substreams/stable/install.sh | bash
-```
-
-2. Get an authentication token from substreams.dev
-
-3. Build the Substreams package
-
-```bash
-cd substreams
-substreams pack
-```
-
-4. Deploy the Substreams package to substreams.dev
-
-```bash
-substreams deploy your-package.spkg
-```
-
-5. Test your Substreams
-
-```bash
-substreams run substreams.yaml nft_events -e mainnet.sol.streamingfast.io:443
-```
-
-### Installation
+### Project Setup
 
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/cosmic-loop.git
-cd cosmic-loop
+git clone https://github.com/yourusername/Solana-OpenAPI.git
+cd Solana-OpenAPI
 ```
 
 2. Install dependencies
@@ -145,6 +121,8 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
 ```bash
 npm run dev
 ```
+
+> **Note**: For Substreams setup and deployment instructions, please refer to the [Substreams README](/substreams/README.md)
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser
 

@@ -12,7 +12,7 @@ cargo:rerun-if-env-changed=CARGO_CFG_TARGET_OS
 cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ENV
 cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ENDIAN
 OPT_LEVEL = Some(0)
-OUT_DIR = Some(/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/ring-31f7671c939298ef/out)
+OUT_DIR = Some(/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/ring-31f7671c939298ef/out)
 TARGET = Some(aarch64-apple-darwin)
 HOST = Some(aarch64-apple-darwin)
 cargo:rerun-if-env-changed=CC_aarch64-apple-darwin
@@ -64,7 +64,7 @@ exit status: 0
 exit status: 0
 cargo:rustc-link-lib=static=ring_core_0_17_14_
 OPT_LEVEL = Some(0)
-OUT_DIR = Some(/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/ring-31f7671c939298ef/out)
+OUT_DIR = Some(/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/ring-31f7671c939298ef/out)
 TARGET = Some(aarch64-apple-darwin)
 HOST = Some(aarch64-apple-darwin)
 cargo:rerun-if-env-changed=CC_aarch64-apple-darwin
@@ -92,7 +92,7 @@ cargo:rerun-if-env-changed=CFLAGS_aarch64-apple-darwin
 CFLAGS_aarch64-apple-darwin = None
 CARGO_ENCODED_RUSTFLAGS = Some()
 cargo:rustc-link-lib=static=ring_core_0_17_14__test
-cargo:rustc-link-search=native=/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/ring-31f7671c939298ef/out
+cargo:rustc-link-search=native=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/ring-31f7671c939298ef/out
 cargo:rerun-if-changed=crypto/perlasm/x86_64-xlate.pl
 cargo:rerun-if-changed=crypto/perlasm/x86gas.pl
 cargo:rerun-if-changed=crypto/perlasm/x86nasm.pl

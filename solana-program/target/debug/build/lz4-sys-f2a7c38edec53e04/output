@@ -1,4 +1,4 @@
-OUT_DIR = Some(/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out)
+OUT_DIR = Some(/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out)
 TARGET = Some(aarch64-apple-darwin)
 HOST = Some(aarch64-apple-darwin)
 cargo:rerun-if-env-changed=CC_aarch64-apple-darwin
@@ -46,6 +46,6 @@ ARFLAGS_aarch64_apple_darwin = None
 cargo:rerun-if-env-changed=ARFLAGS_aarch64-apple-darwin
 ARFLAGS_aarch64-apple-darwin = None
 cargo:rustc-link-lib=static=lz4
-cargo:rustc-link-search=native=/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out
-cargo:root=/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out
-cargo:include=/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out/include
+cargo:rustc-link-search=native=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out
+cargo:root=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out
+cargo:include=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/lz4-sys-f2a7c38edec53e04/out/include
