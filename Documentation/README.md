@@ -1,10 +1,10 @@
-# Cosmic Loop Documentation
+# Solana OpenAPI Documentation
 
-Welcome to the official documentation for Cosmic Loop, the omnichain NFT solution that seamlessly integrates Solana with LayerZero-supported networks. This documentation will guide you through the platform's features, architecture, and implementation details.
+Welcome to the official documentation for Solana OpenAPI, the omnichain NFT solution that seamlessly integrates Solana with LayerZero-supported networks. This documentation will guide you through the platform's features, architecture, and implementation details.
 
 ## Documentation Structure
 
-- [Overview](./overview.md) - Introduction to Cosmic Loop
+- [Overview](./overview.md) - Introduction to Solana OpenAPI
 - [Getting Started](./getting-started.md) - Quick start guide
 - [Architecture](./architecture/README.md) - System architecture and design
 - [Frontend](./frontend/README.md) - Frontend implementation details

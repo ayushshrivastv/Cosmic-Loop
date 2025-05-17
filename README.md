@@ -1,13 +1,21 @@
-# Solana OpenAPI - Realtime Blockchain Data Access
+# Solana OpenAPI - AI-Powered Blockchain Data Interface with Substreams
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.2-black)](https://nextjs.org/)
 [![Solana](https://img.shields.io/badge/Solana-Compatible-9945FF)](https://solana.com/)
-[![LayerZero](https://img.shields.io/badge/LayerZero-V2-2D374B)](https://layerzero.network/)
+[![The Graph](https://img.shields.io/badge/The%20Graph-Substreams-0C0A1C)](https://thegraph.com/docs/en/substreams/)
+[![Substreams](https://img.shields.io/badge/Substreams-Rust-DE5C43)](https://substreams.streamingfast.io/)
+[![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2)](https://ai.google.dev/)
 
 ## Overview
 
-Solana OpenAPI is an innovative blockchain data interface that provides real-time access to Solana's on-chain data through The Graph's Substreams technology. The platform enables developers, analysts, and users to query blockchain data using natural language, receiving structured responses about NFTs, marketplace activities, wallet histories, and cross-chain operations.
+Solana OpenAPI is an innovative AI-powered blockchain data interface that leverages The Graph's Substreams technology to provide real-time access to Solana's on-chain data. The platform enables developers, analysts, and users to query blockchain data using natural language, receiving structured responses about NFTs, marketplace activities, wallet histories, and cross-chain operations.
+
+Built for the 'Best Development of a Solana Substream (AI Agent)' track, this project demonstrates how Substreams can be integrated with Google's Gemini AI to create a powerful, intuitive interface for blockchain data exploration and analysis.
+
+**Substreams Integration**: Our project leverages The Graph's Substreams technology to process and index Solana blockchain data with unprecedented speed and efficiency. The Rust-based Substreams package in the `/substreams` directory processes data for: **NFT Events** (mints, transfers, burns, and metadata updates), **Marketplace Activities** (listings, sales, offers, and cancellations), **Cross-chain Bridging** (asset transfers between Solana and other blockchains), and **Wallet Activities** (comprehensive transaction histories and account analysis). The Substreams package is deployed to substreams.dev and can be accessed via our API endpoints. Our implementation demonstrates the power of Substreams' parallel processing capabilities, allowing for real-time data access even on Solana's high-throughput blockchain.
+
+**AI Agent Implementation**: Our AI agent leverages Google's Gemini model to create a natural language interface to blockchain data. The integration works as follows: (1) **Query Classification** - User queries are classified by type (NFT, marketplace, wallet, bridge, or general); (2) **Contextual Processing** - The AI assistant service retrieves relevant blockchain data based on query type; (3) **Enhanced Responses** - Gemini AI generates comprehensive, context-aware responses using the blockchain data; (4) **Web Search Integration** - For queries requiring off-chain information, the system can search the web via Serper.dev API; (5) **Streaming Updates** - Real-time response generation with typing indicators for better user experience.
 
 ## LayerZero V2 Integration
 
@@ -30,11 +38,13 @@ Our platform leverages LayerZero V2 contracts to enable seamless cross-chain ope
 
 - **Natural Language Queries**: AI-powered interface for querying blockchain data in plain English
 - **Substreams Integration**: Parallel processing of blockchain data with minimal latency
+- **Gemini AI Integration**: Context-aware responses using Google's advanced AI model
 - **Real-time Data Access**: Immediate access to on-chain events and transactions
 - **NFT Analytics**: Comprehensive data on NFT mints, transfers, and marketplace activities
 - **Cross-chain Monitoring**: Track bridge transactions and cross-chain asset movements
+- **Web Search Capabilities**: Access off-chain information to provide comprehensive answers
 - **Developer API**: Easy integration for applications requiring blockchain data
-- **Modern UI**: Responsive design with dark/light mode using Tailwind CSS
+- **Modern UI**: Responsive design with intuitive chat interface and typing indicators
 
 ## Documentation
 
@@ -51,9 +61,42 @@ Comprehensive documentation is available in the [docs](/docs) directory:
 
 - Node.js 18.x or later
 - npm or yarn
+- Rust toolchain (for Substreams development)
+- Substreams CLI (for deploying and testing Substreams)
 - PostgreSQL database
 - Redis server (optional for development)
 - Gemini API key (get one from [Google AI Studio](https://ai.google.dev/))
+- Serper API key (optional, for web search capabilities)
+
+### Substreams Setup
+
+1. Install the Substreams CLI
+
+```bash
+cd substreams
+curl https://raw.githubusercontent.com/streamingfast/substreams/stable/install.sh | bash
+```
+
+2. Get an authentication token from substreams.dev
+
+3. Build the Substreams package
+
+```bash
+cd substreams
+substreams pack
+```
+
+4. Deploy the Substreams package to substreams.dev
+
+```bash
+substreams deploy your-package.spkg
+```
+
+5. Test your Substreams
+
+```bash
+substreams run substreams.yaml nft_events -e mainnet.sol.streamingfast.io:443
+```
 
 ### Installation
 
@@ -120,6 +163,8 @@ When deploying to Vercel or other hosting platforms:
 
 ### Blockchain
 - Solana web3.js
+- The Graph Substreams for Solana
+- Rust-based Substreams package
 - Ethers.js for EVM chains
 - LayerZero v2 protocol
 - Light Protocol for compressed tokens
@@ -127,21 +172,96 @@ When deploying to Vercel or other hosting platforms:
 ## Project Structure
 
 ```
-├── src/                 # Frontend application
-│   ├── app/             # Next.js pages and routes
-│   ├── components/      # React components
-│   ├── hooks/           # Custom React hooks
-│   ├── lib/             # Utilities and services
-│   └── types/           # TypeScript type definitions
-├── backend/             # Backend services
-│   ├── config/          # Configuration files
-│   ├── services/        # Microservices
-│   ├── graphql/         # GraphQL API
-│   ├── database/        # Database models and migrations
-│   └── websockets/      # WebSocket implementation
-├── public/              # Static assets
-└── docs/                # Documentation
+├── src/                      # Frontend application
+│   ├── app/                  # Next.js pages and routes
+│   │   └── openapi/          # OpenAPI chat interface
+│   ├── components/           # React components
+│   │   └── shared/           # Shared components including chat-popup
+│   ├── hooks/                # Custom React hooks
+│   │   └── use-ai-assistant.ts # AI assistant hook
+│   ├── pages/                # API routes
+│   │   └── api/              # Backend API endpoints
+│   │       └── substreams/   # Substreams execution endpoints
+│   ├── services/             # Service layer
+│   │   ├── ai-assistant-service.ts    # AI assistant service
+│   │   ├── gemini-service.ts          # Gemini AI integration
+│   │   ├── prompt-engineering-service.ts # Enhanced prompts
+│   │   ├── substreams-service.ts       # Substreams data service
+│   │   ├── substreams-gemini-service.ts # Integration layer
+│   │   └── web-search-service.ts       # Web search capabilities
+│   └── types/                # TypeScript type definitions
+├── substreams/               # Rust-based Substreams package
+│   ├── src/                  # Rust source code
+│   │   ├── lib.rs            # Library entry point
+│   │   ├── nft.rs            # NFT event processing
+│   │   ├── marketplace.rs    # Marketplace event processing
+│   │   └── bridge.rs         # Cross-chain bridge processing
+│   ├── build/                # Compiled Substreams package
+│   └── substreams.yaml       # Substreams configuration
+├── public/                   # Static assets
+└── docs/                     # Documentation
 ```
+
+## API Endpoints
+
+### Substreams Execution
+
+```
+POST /api/substreams/execute
+```
+
+Executes specific modules in the Rust-based Substreams package and returns the results.
+
+**Request Body:**
+
+```json
+{
+  "module": "nft_events",
+  "params": {
+    "limit": 10
+  }
+}
+```
+
+**Available Modules:**
+
+- `nft_events`: Get recent NFT events
+- `nft_events_by_token`: Get NFT events for a specific token
+- `nft_events_by_wallet`: Get NFT events for a specific wallet
+- `bridge_events`: Get cross-chain bridge events
+- `marketplace_events`: Get marketplace events
+- `nft_collections`: Get NFT collection data
+- `account_transactions`: Get account transaction history
+
+### AI Assistant
+
+```
+POST /api/ai/ask
+```
+
+Sends a query to the AI assistant, which processes it using Gemini AI and relevant Substreams data.
+
+**Request Body:**
+
+```json
+{
+  "query": "Show me recent NFT sales on Solana",
+  "conversationId": "optional-conversation-id"
+}
+```
+
+## Using Substreams with the AI Agent
+
+The integration between Substreams and the AI agent works as follows:
+
+1. The user submits a natural language query through the chat interface
+2. The AI assistant service classifies the query type (NFT, marketplace, wallet, bridge, general)
+3. Based on the query type, the system fetches relevant blockchain data using Substreams
+4. The Substreams data is formatted and provided as context to the Gemini AI model
+5. The AI generates a comprehensive response that incorporates the blockchain data
+6. The response is streamed back to the user with real-time updates
+
+This architecture allows for efficient, real-time analysis of blockchain data while providing a natural language interface that makes the data accessible to users without technical blockchain knowledge.
 
 ## Contributing
 

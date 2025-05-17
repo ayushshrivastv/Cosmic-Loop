@@ -1,10 +1,10 @@
-# Cosmic Loop Overview
+# Solana OpenAPI Overview
 
 ## Introduction
 
-Cosmic Loop is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero-supported networks through V2 contracts, Cosmic Loop creates a unified experience across multiple blockchains.
+Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero-supported networks through V2 contracts, Solana OpenAPI creates a unified experience across multiple blockchains.
 
-![Cosmic Loop Architecture Overview](../public/images/documentation/architecture-overview.png)
+![Solana OpenAPI Architecture Overview](../public/images/documentation/architecture-overview.png)
 
 ## Key Features
 
@@ -48,7 +48,7 @@ Stay informed with WebSocket integration for live blockchain event notifications
 
 ### Event Attendance Verification
 
-Cosmic Loop provides a modern solution for verifying attendance at events:
+Solana OpenAPI provides a modern solution for verifying attendance at events:
 
 - **Conference badges**: Digital badges that can be bridged across chains
 - **VIP access**: Tiered access control through token ownership
@@ -107,7 +107,7 @@ Foster community engagement through digital ownership:
 
 ## Getting Started
 
-To start using Cosmic Loop, see the [Getting Started Guide](./getting-started.md) for installation instructions and initial setup.
+To start using Solana OpenAPI, see the [Getting Started Guide](./getting-started.md) for installation instructions and initial setup.
 
 ## Next Steps
 

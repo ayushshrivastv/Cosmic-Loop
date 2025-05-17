@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package marketplace.v1;
+
+message MarketplaceEvents {
+  repeated MarketplaceEvent events = 1;
+}
+
+message MarketplaceEvent {
+  string id = 1;
+  string transaction_hash = 2;
+  uint64 block_number = 3;
+  string block_hash = 4;
+  uint64 timestamp = 5;
+  string marketplace = 6; // magic_eden, tensor, etc.
+  string event_type = 7; // listing, sale, offer, cancel
+  string token_address = 8;
+  string token_id = 9;
+  string collection_address = 10;
+  string seller_address = 11;
+  string buyer_address = 12;
+  string currency_address = 13;
+  string price = 14; // string representation of the price
+  uint64 quantity = 15;
+  string marketplace_fee = 16;
+  string creator_fee = 17;
+}

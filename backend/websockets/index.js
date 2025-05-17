@@ -120,7 +120,7 @@ function handleConnection(ws, req, redisClient) {
   sendMessage(ws, {
     type: WS_EVENTS.SERVER_NOTIFICATION,
     data: {
-      message: 'Connected to Cosmic Loop WebSocket server',
+      message: 'Connected to Solana OpenAPI WebSocket server',
       clientId: id,
       authenticated: !!userId,
     },

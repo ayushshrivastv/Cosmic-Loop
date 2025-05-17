@@ -1,10 +1,10 @@
-# Cosmic Loop Architecture
+# Solana OpenAPI Architecture
 
-This section provides a comprehensive overview of the Cosmic Loop system architecture, explaining how the various components work together to deliver a seamless omnichain NFT experience.
+This section provides a comprehensive overview of the Solana OpenAPI system architecture, explaining how the various components work together to deliver a seamless omnichain NFT experience.
 
 ## Architecture Overview
 
-Cosmic Loop follows a modern, microservices-based architecture designed for scalability, resilience, and maintainability. The system is divided into several key components that work together to provide a comprehensive solution for cross-chain NFT management.
+Solana OpenAPI follows a modern, microservices-based architecture designed for scalability, resilience, and maintainability. The system is divided into several key components that work together to provide a comprehensive solution for cross-chain NFT management.
 
 ![System Architecture Diagram](../../public/images/documentation/system-architecture.png)
 
@@ -23,7 +23,7 @@ Cosmic Loop follows a modern, microservices-based architecture designed for scal
 
 ## Architecture Principles
 
-Cosmic Loop's architecture is built on the following principles:
+Solana OpenAPI's architecture is built on the following principles:
 
 1. **Separation of Concerns**: Each component has a well-defined responsibility
 2. **Microservices**: Independent services that can be developed and scaled separately
@@ -87,7 +87,7 @@ Cosmic Loop's architecture is built on the following principles:
 
 ## Deployment Architecture
 
-Cosmic Loop supports multiple deployment models:
+Solana OpenAPI supports multiple deployment models:
 
 1. **Monolithic**: All components deployed as a single application
 2. **Microservices**: Components deployed as separate services
