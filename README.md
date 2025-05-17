@@ -9,7 +9,7 @@
 ## Overview
 Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero supported networks through V2 contracts and The Graph's Substreams technology to process and index Solana blockchain data, Solana OpenAPI creates a unified experience across multiple blockchains.
 
-For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./ARCHITECTURE.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared) 
+For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./architecture.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared) 
 
 P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead. Initially, I considered creating a mock data interface for the hackathon, but I’ve decided to connect to a real blockchain network instead. Writing the smart contract is taking some time.
 
