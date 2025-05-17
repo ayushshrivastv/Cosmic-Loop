@@ -1,5 +1,5 @@
-export const APP_NAME = "Solana OpenAPI";
-export const APP_DESCRIPTION = "Real-time blockchain data access powered by Solana Substreams and LayerZero V2 cross-chain integration.";
+export const APP_NAME = "Scalable cToken Issuance via Solana Pay";
+export const APP_DESCRIPTION = "Demonstrating scalable compressed token (cToken) issuance and distribution on Solana using Solana Pay.";
 
 // RPC endpoints - Replace with your actual endpoints when deploying
 export const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com";
@@ -29,8 +29,5 @@ export const ROUTES = {
   DASHBOARD: "/dashboard",
   MINT: "/mint",
   CLAIM: "/claim",
-  BRIDGE: "/bridge",
   PROFILE: "/profile",
-  OPENAPI: "/openapi",
-  CROSS_CHAIN: "/cross-chain",
 };

@@ -19,20 +19,24 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
 import { DEFAULT_TOKEN_DECIMALS } from '@/lib/constants';
 import type { MintFormData } from '@/lib/types';
 import { createCompressedTokenMint, mintCompressedTokens, createConnection } from '@/lib/utils/solana';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { createClaimUrl, createSolanaPayUrl, createSolanaPayClaimUrl, generateQrCodeDataUrl } from '@/lib/utils/qrcode';
-import { SupportedChain, formatChainName } from '@/lib/utils/layer-zero';
-import { CHAIN_CONFIGS } from '@/lib/layer-zero-config';
 
-// Type definition for form values inferred from the Zod schema
+// Add this import for better toast management
+import { toast } from "sonner";
+
+/**
+ * Type definition for form values inferred from the Zod schema
+ */
 type FormValues = z.infer<typeof formSchema>;
 
-// Form validation schema
-// Defines the structure and validation rules for the form data
+/**
+ * Form validation schema
+ * Defines the structure and validation rules for the form data
+ */
 const formSchema = z.object({
   // Event Details
   eventName: z.string().min(3, { message: "Event name must be at least 3 characters" }),
@@ -48,10 +52,6 @@ const formSchema = z.object({
   tokenDescription: z.string().min(10, { message: "Token description must be at least 10 characters" }),
   tokenImage: z.string().url({ message: "Please enter a valid URL" }).optional(),
   tokenSupply: z.coerce.number().int().positive({ message: "Supply must be a positive number" }),
-
-  // Cross-chain settings
-  enableCrossChain: z.boolean().default(false),
-  supportedChains: z.array(z.string()).optional(),
 });
 
 /**
@@ -69,6 +69,8 @@ export function MintForm() {
   const [mintSuccess, setMintSuccess] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [claimUrl, setClaimUrl] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [transactionStatus, setTransactionStatus] = useState<string>("");
 
   useEffect(() => {
     setIsClient(true);
@@ -79,16 +81,6 @@ export function MintForm() {
   const connected = isClient ? wallet.connected : false;
   const signTransaction = isClient ? wallet.signTransaction : null;
   const sendTransaction = isClient ? wallet.sendTransaction : null;
-
-  // Available chains for cross-chain support
-  const availableChains = [
-    SupportedChain.Ethereum,
-    SupportedChain.Polygon,
-    SupportedChain.Arbitrum,
-    SupportedChain.Optimism,
-    SupportedChain.Avalanche,
-    SupportedChain.BinanceSmartChain,
-  ];
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -105,8 +97,6 @@ export function MintForm() {
       tokenDescription: "",
       tokenImage: "https://picsum.photos/300/300", // Placeholder image
       tokenSupply: 100,
-      enableCrossChain: false,
-      supportedChains: [],
     },
   });
 
@@ -116,18 +106,20 @@ export function MintForm() {
 
   /**
    * Form submission handler
-   * Executes a mock token creation process using the form data
+   * Executes the token creation process using the form data
    *
    * @param values - Form values collected from the user input
    */
   const onSubmit = async (values: FormValues) => {
     if (!connected || !publicKey) {
-      alert("Please connect your wallet first");
+      toast.error("Please connect your wallet first");
       return;
     }
 
     try {
       setIsSubmitting(true);
+      setTransactionStatus("Preparing token data...");
+      setErrorDetails(null);
 
       // Format data for token minting
       const mintData: MintFormData = {
@@ -138,60 +130,151 @@ export function MintForm() {
           location: values.eventLocation,
           organizerName: values.organizerName,
           maxAttendees: values.maxAttendees,
-          enableCrossChain: values.enableCrossChain,
-          supportedChains: values.supportedChains?.map(chain => chain as SupportedChain),
         },
         tokenMetadata: {
           name: values.tokenName,
           symbol: values.tokenSymbol,
           description: values.tokenDescription,
           image: values.tokenImage,
-          originChain: SupportedChain.Solana,
-          crossChainEnabled: values.enableCrossChain,
           attributes: [
             { trait_type: "Event", value: values.eventName },
             { trait_type: "Date", value: values.eventDate },
             { trait_type: "Organizer", value: values.organizerName },
-            { trait_type: "Cross-Chain Enabled", value: values.enableCrossChain ? "Yes" : "No" },
-            ...(values.enableCrossChain ? [{ trait_type: "Origin Chain", value: "Solana" }] : []),
           ],
         },
         supply: values.tokenSupply,
         decimals: DEFAULT_TOKEN_DECIMALS,
-        crossChainSettings: values.enableCrossChain ? {
-          enabled: true,
-          supportedChains: values.supportedChains?.map(chain => chain as SupportedChain) || [],
-        } : undefined,
       };
 
-      console.log("Creating mock token mint with data:", mintData);
+      // Validate token supply
+      if (values.tokenSupply <= 0 || values.tokenSupply > 1000000) {
+        toast.error("Token supply must be between 1 and 1,000,000");
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Simulate a delay to mimic the backend processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Validate token name and symbol
+      if (values.tokenName.length < 3 || values.tokenName.length > 32) {
+        toast.error("Token name must be between 3 and 32 characters");
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Generate a mock mint address (random PublicKey)
-      const mockMint = Keypair.generate().publicKey;
-      const mockCreateSignature = "mock_create_signature_" + Date.now().toString();
-      const mockMintSignature = "mock_mint_signature_" + Date.now().toString();
+      if (values.tokenSymbol.length < 2 || values.tokenSymbol.length > 10) {
+        toast.error("Token symbol must be between 2 and 10 characters");
+        setIsSubmitting(false);
+        return;
+      }
 
-      console.log("Mock token mint created with address:", mockMint.toBase58());
-      console.log("Mock creation signature:", mockCreateSignature);
-      console.log("Mock mint signature:", mockMintSignature);
+      console.log("Creating token mint with data:", mintData);
+
+      // Get config from environment variables or use defaults
+      const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://rpc-devnet.helius.xyz/?api-key=1d8740dc-e5f4-421c-b823-e1bad1889eff";
+      const appConfig = {
+        rpcEndpoint,
+        cluster: process.env.NEXT_PUBLIC_CLUSTER as "devnet" | "mainnet-beta" | "testnet" | "localnet" || "devnet"
+      };
+
+      // Check if wallet adapter signing is available
+      if (!wallet.signTransaction || !wallet.sendTransaction) {
+        throw new Error("Your wallet doesn't support the required signing methods.");
+      }
+
+      // We'll use the wallet adapter to sign transactions
+      // For Light Protocol operations that require a keypair, we'll need to adjust our approach
+
+      // We're using a server-side approach for token creation since Light Protocol requires Keypairs
+      // This keeps private keys secure on the server while still allowing wallet interaction
+      console.log("Initiating server-side token creation process...");
+
+      // Show loading message
+      setIsSubmitting(true);
+      setTransactionStatus("Initiating token creation process...");
+
+      // Variables to store token creation results
+      let mint: PublicKey;
+      let createSignature: string;
+      let mintSignature: string;
+
+      try {
+        // Call our server-side API endpoint
+        setTransactionStatus("Creating token mint on the blockchain...");
+
+        const response = await fetch('/api/token/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mintData,
+            destinationWallet: publicKey.toBase58(), // The user's wallet address
+          }),
+        });
+
+        // Parse the response
+        const result = await response.json();
+
+        // Check if the request was successful
+        if (!response.ok) {
+          console.error("Token creation failed:", result);
+
+          let errorMessage = result.details || result.error || 'Token creation failed';
+          setErrorDetails(errorMessage);
+
+          // Handle specific error cases
+          if (result.rootCause === 'insufficient_funds') {
+            toast.error("Token creation failed: The server doesn't have enough SOL. Please try again later or contact support.");
+          } else if (result.rootCause === 'blockhash_expired') {
+            toast.error("Transaction timeout. Please try again.");
+          } else if (result.step === 'create_mint' && result.details.includes('Invalid token metadata')) {
+            toast.error("Invalid token metadata. Please check the token name and symbol.");
+          } else {
+            toast.error(errorMessage);
+          }
+
+          setIsSubmitting(false);
+          return;
+        }
+
+        console.log("Server-side token creation successful:", result);
+
+        // Extract the relevant data from the response
+        mint = new PublicKey(result.mint);
+        createSignature = result.createSignature;
+        mintSignature = result.mintSignature;
+
+        setTransactionStatus("Token created successfully!");
+        console.log("Token mint created with address:", mint.toBase58());
+        console.log("Creation signature:", createSignature);
+        console.log("Mint signature:", mintSignature);
+      } catch (error) {
+        console.error("Error during server-side token creation:", error);
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        setErrorDetails(errorMessage);
+        toast.error(`Network error: ${errorMessage}`);
+
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("Tokens minted successfully, signature:", mintSignature);
 
       // 3. Generate both standard claim URL and Solana Pay URL
+      setTransactionStatus("Generating claim URLs and QR code...");
       const baseUrl = window.location.origin;
 
       // Standard claim URL for direct web access
       const standardClaimUrl = createClaimUrl(
         baseUrl,
         values.eventName, // Use event name as the eventId
-        mockMint // Pass the PublicKey directly, not as a string
+        mint // Pass the PublicKey directly, not as a string
       );
 
       // Solana Pay URL for wallet interaction
       const solanaPayUrl = createSolanaPayClaimUrl(
         publicKey, // The organizer's wallet as recipient
-        mockMint, // The token mint
+        mint, // The token mint
         values.eventName, // Event name as label
         `Claim your ${values.tokenName} token for ${values.eventName}` // Memo message
       );
@@ -207,11 +290,18 @@ export function MintForm() {
       setQrCodeUrl(qrCodeDataUrl);
 
       setMintSuccess(true);
+      toast.success("Token created successfully!");
+
     } catch (error) {
       console.error("Error minting token:", error);
-      alert(`Error minting token: ${error instanceof Error ? error.message : String(error)}`);
+
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setErrorDetails(errorMessage);
+      toast.error(`Error minting token: ${errorMessage}`);
+
     } finally {
       setIsSubmitting(false);
+      setTransactionStatus("");
     }
   };
 
@@ -309,10 +399,9 @@ export function MintForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 animate-fade-in">
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="event">Event Details</TabsTrigger>
             <TabsTrigger value="token">Token Configuration</TabsTrigger>
-            <TabsTrigger value="crosschain">Cross-Chain Settings</TabsTrigger>
           </TabsList>
 
           {/* Event Details Tab */}
@@ -503,149 +592,9 @@ export function MintForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="enableCrossChain"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Enable Cross-Chain Functionality
-                    </FormLabel>
-                    <FormDescription>
-                      Allow attendees to bridge their tokens to other blockchains using LayerZero
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-
             <div className="flex justify-between mt-6">
               <Button type="button" variant="outline" onClick={() => setActiveTab("event")}>
                 Back to Event Details
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setActiveTab("crosschain")}
-                className="bg-white text-black hover:bg-slate-100 transition-all"
-              >
-                Next: Cross-Chain Settings
-              </Button>
-            </div>
-          </TabsContent>
-
-          {/* Cross-Chain Settings Tab */}
-          <TabsContent value="crosschain" className="space-y-4">
-            <div className="bg-muted rounded-lg p-4 mb-4">
-              <h3 className="font-medium text-lg mb-2">Cross-Chain Settings</h3>
-              <p className="text-muted-foreground text-sm">
-                Configure which blockchains your event token can be bridged to. Attendees will be able to transfer their tokens
-                to these chains after claiming them on Solana.
-              </p>
-            </div>
-
-            {form.watch('enableCrossChain') ? (
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="supportedChains"
-                  render={() => (
-                    <FormItem>
-                      <div className="mb-4">
-                        <FormLabel className="text-base">Supported Blockchains</FormLabel>
-                        <FormDescription>
-                          Select which blockchains attendees can bridge their tokens to
-                        </FormDescription>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {availableChains.map((chain) => (
-                          <FormField
-                            key={chain}
-                            control={form.control}
-                            name="supportedChains"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  className="flex flex-row items-start space-x-3 space-y-0 border rounded-md p-3"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(chain)}
-                                      onCheckedChange={(checked) => {
-                                        const currentValue = field.value || [];
-                                        return checked
-                                          ? field.onChange([...currentValue, chain])
-                                          : field.onChange(currentValue.filter((value) => value !== chain));
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <div className="flex items-center space-x-2">
-                                    <img
-                                      src={CHAIN_CONFIGS[chain].logo}
-                                      alt={CHAIN_CONFIGS[chain].name}
-                                      className="w-6 h-6"
-                                    />
-                                    <FormLabel className="font-normal">
-                                      {CHAIN_CONFIGS[chain].name}
-                                    </FormLabel>
-                                  </div>
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 my-6 text-blue-800">
-                  <h4 className="font-medium flex items-center text-blue-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                    Bridge Fees Information
-                  </h4>
-                  <p className="mt-1 text-sm">
-                    When attendees bridge their tokens to other chains, they will need to pay a small network fee to cover the
-                    LayerZero messaging costs. These fees vary by destination chain.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="bg-zinc-100 dark:bg-zinc-800 p-6 rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-medium mb-2">Cross-Chain Functionality Disabled</h3>
-                <p className="text-muted-foreground text-center max-w-md mb-4">
-                  To configure cross-chain settings, please enable cross-chain functionality in the Token Configuration tab.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    form.setValue('enableCrossChain', true);
-                    setActiveTab("token");
-                  }}
-                >
-                  Enable Cross-Chain Functionality
-                </Button>
-              </div>
-            )}
-
-            <div className="flex justify-between mt-8">
-              <Button type="button" variant="outline" onClick={() => setActiveTab("token")}>
-                Back to Token Configuration
               </Button>
               <Button
                 type="submit"
@@ -659,7 +608,7 @@ export function MintForm() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Creating Token...
+                      {transactionStatus || "Creating Token..."}
                     </span>
                   </>
                 ) : (
@@ -672,6 +621,17 @@ export function MintForm() {
                 )}
               </Button>
             </div>
+
+            {errorDetails && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm">
+                <p className="font-medium mb-1">Error Details:</p>
+                <p>{errorDetails}</p>
+                <p className="mt-2 text-xs">
+                  <strong>Troubleshooting:</strong> Try reducing token supply, check network connection,
+                  or ensure admin wallet has sufficient SOL.
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </form>

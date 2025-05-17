@@ -1,275 +1,211 @@
-# Solana OpenAPI - AI Powered Blockchain Data Interface
+# Scalable cToken (Solana Pay)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Solana](https://img.shields.io/badge/Solana-Compatible-9945FF)](https://solana.com/)
-[![LayerZero](https://img.shields.io/badge/LayerZero-V2-2D374B)](https://layerzero.network/)
-[![The Graph](https://img.shields.io/badge/The%20Graph-Substreams-0C0A1C)](https://thegraph.com/docs/en/substreams/)
-[![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2)](https://ai.google.dev/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.2.0-black)](https://nextjs.org/)
+[![Solana Pay](https://img.shields.io/badge/Solana-Pay-9945FF)](https://solanapay.com/)
+[![Light Protocol](https://img.shields.io/badge/Light_Protocol-ZK_Compression-6A5ACD)](https://lightprotocol.com/)
 
-## Overview
-This Substreams package indexes Solana blockchain data for NFTs, marketplace activities, and cross-chain bridging events. It's designed to work with the Solana OpenAPI project to provide real-time blockchain data through an AI powered interface.
+This project enables event organisers to mint digital POP tokens that can be claimed by attendees through a simple scan of a QR code. These tokens are not just symbolic; they represent verifiable, compressed assets living entirely on-chain, making them ideal for airdrops, community rewards, or credentialing at scale. 
 
-For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./architecture.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared)
+For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./ARCHITECTURE.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared) 
 
 P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead. Initially, I considered creating a mock data interface for the hackathon, but I’ve decided to connect to a real blockchain network instead. Writing the smart contract is taking some time.
 
-I came across this project on Superteam on March 10th, and this is my first ever submission on superteam—and also my first Solana project!
-
-Web Page Link
-**[Solana OpenAPI](https://openapi-lilac.vercel.app)**
-
-![Screenshot 2025-05-17 at 9 52 16 AM](https://github.com/user-attachments/assets/3d38bdad-17fe-48c7-8b5d-57cd0492fbb9)
-
-## LayerZero V2 Integration
-
-Our platform leverages LayerZero V2 contracts to enable seamless cross-chain operations with enhanced security and efficiency. These contracts facilitate trustless message passing between Solana and other blockchains, allowing for interoperable NFT minting, token bridging, and multi-chain data synchronization. The V2 protocol's improved security model with decentralized verification, optimized gas efficiency, and enhanced message delivery guarantees robust cross-chain functionality while maintaining Solana's high performance standards.
-
-![Screenshot 2025-05-17 at 9 56 24 AM](https://github.com/user-attachments/assets/21513163-affd-4f80-bd63-6758f9c61f64)
-
-![Screenshot 2025-05-17 at 9 56 36 AM](https://github.com/user-attachments/assets/11a7e319-260e-4bd7-bde7-dcff1cfe4c92)
-
-![Screenshot 2025-05-17 at 9 56 10 AM](https://github.com/user-attachments/assets/c54b3fab-9f69-4f30-9ee0-9602c2020e7c)
+I came across this project on Superteam on March 10th, and this is my first-ever submission—and also my first Solana project!
 
 
-### Benefits of LayerZero V2 Integration
+### Web Page Link
+**[Scalable cToken Page](https://scalable-c-token-ayushshrivastvs-projects.vercel.app/)**
 
-| Feature | Traditional Cross-Chain | With LayerZero V2 |
-|---------|------------------------|-------------------|
-| Security | Relies on centralized bridges | Decentralized verification with DVNs |
-| Speed | Minutes to hours | Seconds to minutes |
-| Cost | High gas fees | Optimized for efficiency |
-| Reliability | Subject to bridge failures | Enhanced message delivery guarantees |
-| Interoperability | Limited to specific chains | Connects to 30+ blockchains |
-| Developer Experience | Complex integration | Simplified API and SDK |
-| User Experience | Multiple transaction approvals | Seamless single-transaction flows |
+![Screenshot 2025-05-11 at 3 10 50 AM](https://github.com/user-attachments/assets/f3607a9c-9026-46d0-8559-f83740a2eab7)
 
-### The Graph's Substreams
+## Overview
 
-**Substreams Integration**: In what could be described as a breakthrough for blockchain data accessibility, the project harnesses The Graph's Substreams technology—a sophisticated system that transforms how developers interact with Solana's vast data landscape.
+Scalable cToken Distribution with Solana Pay and ZK Compression on Solana
 
-Behind the scenes, a meticulously crafted Rust-based package silently processes millions of on-chain events in real time. From the digital art economy's NFT transactions to the intricate web of marketplace activities, the system captures the pulse of Solana's ecosystem with remarkable precision. Perhaps most impressive is the platform's ability to track cross-chain asset movements, creating a comprehensive view of how value flows between Solana and dozens of other blockchain networks.
+A high throughput solution for creating and distributing compressed proof-of-participation tokens at scale on Solana blockchain using Solana Pay and Light Protocol's compression technology.
 
-Deployed on substreams.dev and accessible through elegantly designed API endpoints, the implementation showcases how parallel data processing can tame even Solana's notoriously high-throughput blockchain, delivering insights in moments rather than hours—a testament to how far blockchain infrastructure has evolved since the early days of clunky block explorers and delayed data feeds.
+Check out [Presentation](./PRESENTATION.md) for a quick overview of the project's functionality.
 
-Comprehensive documentation is available in the [docs](/substreams)
+## Zero-Knowledge Compression Technology
 
-![Screenshot 2025-05-17 at 9 54 53 AM](https://github.com/user-attachments/assets/8ca9b285-8f59-4ee8-ab4e-d1392ef5a551)
+Scalable cToken leverages Light Protocol's zero-knowledge compression technology to revolutionize token distribution on Solana. This cutting-edge approach combines the security of blockchain with the efficiency of advanced cryptographic techniques, enabling a new paradigm for digital asset management.
 
-### Key Features
+At its core, our implementation uses zero-knowledge proofs to compress token data while preserving its integrity and verifiability. This allows us to dramatically reduce on-chain storage requirements and transaction costs without sacrificing security or functionality. The system can process hundreds of tokens in a single transaction, making it ideal for large-scale events and airdrops.
 
-- **Natural Language Queries**: AI-powered interface for querying blockchain data in plain English
-- **Substreams Integration**: Parallel processing of blockchain data with minimal latency
-- **Gemini AI Integration**: Context-aware responses using Google's advanced AI model
-- **Real-time Data Access**: Immediate access to on-chain events and transactions
-- **NFT Analytics**: Comprehensive data on NFT mints, transfers, and marketplace activities
-- **Cross-chain Monitoring**: Track bridge transactions and cross-chain asset movements
-- **Web Search Capabilities**: Access off-chain information to provide comprehensive answers
-- **Developer API**: Easy integration for applications requiring blockchain data
-- **Modern UI**: Responsive design with intuitive chat interface and typing indicators
+Beyond efficiency, this technology enhances privacy by allowing selective disclosure of information. Event organizers can verify attendance without exposing sensitive participant data, while attendees can prove their participation without revealing personal details. The entire system is built on cryptographic guarantees that mathematically prevent forgery or unauthorized modifications.
 
-## Documentation
+### Performance Comparison: Traditional vs. Compressed Tokens
 
-Comprehensive documentation is available in the [docs](/docs) directory:
+| Metric | Traditional Tokens | Compressed Tokens | Improvement |
+|--------|-------------------|-------------------|-------------|
+| Cost per mint | ~0.005 SOL | ~0.000005 SOL | 1000× cheaper |
+| Tokens per transaction | 1-5 | Up to 1,000 | 200-1000× more efficient |
+| Processing speed | ~10 tokens/minute | ~5,000 tokens/minute | 500× faster |
+| Storage requirements | Full on-chain data | Compressed merkle proofs | 100× less storage |
+| Security level | Standard on-chain | Cryptographically equivalent | Equally secure |
+| Privacy features | Limited | Selective disclosure | Enhanced privacy |
 
-- [Overview](/docs/overview.md) - Introduction and key concepts
-- [Getting Started](/docs/getting-started.md) - Installation and setup
-- [Architecture](/docs/architecture/README.md) - System design and components
-- [API Reference](/docs/api-reference/README.md) - API documentation
+This powerful combination of scalability, privacy, and security makes Scalable cToken an ideal solution for any organization looking to distribute verifiable digital assets at scale without prohibitive costs or technical complexity.
 
-## Quick Start
+## Solana Pay and Smart Contract Workflow
 
-### Prerequisites
+This Scalable cToken uses Solana Pay to make QR code interactions super easy. Attendees can claim tokens without any hassle. The organizers set up a smart contract on Solana to mint tokens. This contract uses Light Protocol’s infrastructure to create cTokens. When an attendee scans the Solana Pay QR code, it sends a transaction to the smart contract. The smart contract checks if the claim is valid and then sends a unique, compressed proof-of-participation token straight to the attendee’s wallet. This way, the tokens are distributed securely and efficiently.
 
-- Node.js 18.x or later
-- npm or yarn
-- Rust toolchain (for Substreams development)
-- Substreams CLI (for deploying and testing Substreams)
-- PostgreSQL database
-- Redis server (optional for development)
-- Gemini API key (get one from [Google AI Studio](https://ai.google.dev/))
-- Serper API key (optional, for web search capabilities)
 
-### Project Setup
 
-1. Clone the repository
+## Functionality
+
+Organisers can log in with their Solana wallet, create a new event, and instantly mint compressed tokens tied to event metadata such as name, time, and location. Upon creation, the system generates a Solana Pay-compatible QR code, which attendees can scan to securely claim their tokens via their own wallet. Each token is issued using Light Protocol's compression infrastructure, drastically reducing storage costs while maintaining full L1 composability.
+
+The user interface is built to be intuitive across devices and accommodates both the event creator and attendee journeys—from minting to claiming—with minimal friction.
+
+![442056085-235a9be9-e4fa-46f9-989e-1b1ce8cda931](https://github.com/user-attachments/assets/f7a7ba25-3150-4b68-a109-b3f85af91110)
+
+![442056067-8b7532fd-1a86-4471-810d-b7e9b3484217](https://github.com/user-attachments/assets/e2d11e13-a8b1-4c6c-a7ad-2a3d65d02f86)
+
+![Screenshot 2025-05-12 at 4 23 55 AM](https://github.com/user-attachments/assets/f9c81e73-129b-4750-9d6d-9a44a9d8d104)
+
+### Seamless Connection of Wallet to Collect Event Tokens.
+
+<img src="https://github.com/user-attachments/assets/397b8b3b-b404-4b81-8b32-a6f6885f04cb" alt="Screenshot 2025-05-12 at 7 16 48 AM" width="300"/>
+
+
+## QR Codes & Airdrops
+
+### Solana Pay QR Codes
+The application leverages Solana Pay's QR code technology to create a seamless claiming experience:
+
+- **Dynamic Generation**: Each event automatically generates a unique QR code that encodes all necessary transaction data
+- **Instant Recognition**: Compatible with any standard QR scanner or smartphone camera
+- **Transaction Embedding**: QR codes contain pre-formatted transaction instructions for token claiming
+- **Wallet Connectivity**: Scanning initiates an immediate connection to the user's preferred Solana wallet
+- **Security Features**: Each QR code includes validation parameters to prevent unauthorized claims
+
+### Airdrop Capabilities
+The platform offers efficient airdrop functionality for event organizers:
+
+- **Bulk Distribution**: Send tokens to multiple recipients simultaneously with minimal gas costs
+- **Targeted Campaigns**: Create audience segments based on event participation or other criteria
+- **Scheduled Releases**: Set up timed airdrops to coincide with event milestones
+- **Claim Verification**: Monitor real-time claiming statistics through an intuitive dashboard
+- **Flexible Allocation**: Distribute different quantities of tokens to different participant tiers
+
+This combination of QR-based claiming and airdrop functionality makes the platform ideal for both in-person events and remote participation scenarios.
+
+### Smart Contracts & Solana Pay Integration
+Distribute tokens to large audiences with just a few clicks. Our airdrop system allows event organizers to send tokens to hundreds or thousands of attendees simultaneously. The platform leverages custom Solana smart contracts that interact seamlessly with Light Protocol's compression technology, reducing transaction costs by 1000x. Solana Pay integration enables frictionless claiming through scannable QR codes that embed transaction instructions, wallet connections, and verification parameters—all while maintaining sub-second finality and military-grade security.
+
+**[Try the live demo here](https://scalable-c-token-ayushshrivastvs-projects.vercel.app/)**
+
+## Setup & Installation
+
+To run this project locally, ensure you have Node.js 16 or later and a compatible Solana wallet (Phantom, Backpack, or Solflare). Clone the repository and install dependencies using:
 
 ```bash
-git clone https://github.com/yourusername/Solana-OpenAPI.git
-cd Solana-OpenAPI
-```
-
-2. Install dependencies
-
-```bash
+git clone https://github.com/ayushshrivastv/Scalable-cToken.git
+cd Scalable-cToken
 npm install
+# or if you prefer using bun
+bun install
 ```
 
-3. Set up environment variables
+### Automated Setup (Recommended)
+
+The project now includes an automated setup script that will:
+1. Create the necessary `.env` file with the correct environment variables
+2. Generate a new admin wallet keypair for token operations
+3. Request an airdrop of SOL to the admin wallet (on devnet)
+
+Simply run:
 
 ```bash
-cp .env.example .env.local
+npm run setup
+# or
+bun run setup
 ```
 
-4. Add your Gemini API key to the `.env.local` file
-
-```
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
-```
-
-5. Start the development server
+Then start the development server:
 
 ```bash
 npm run dev
+# or
+bun run dev
 ```
 
-> **Note**: For Substreams setup and deployment instructions, please refer to the [Substreams README](/substreams/README.md)
+The development server will also automatically run the setup script if needed.
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+### Manual Setup (Alternative)
 
-### Deployment
-
-When deploying to Vercel or other hosting platforms:
-
-1. **Never commit your API keys to the repository**
-2. Set the `NEXT_PUBLIC_GEMINI_API_KEY` as an environment variable in your hosting platform's dashboard
-3. For Vercel specifically:
-   - Go to your project settings
-   - Navigate to the "Environment Variables" section
-   - Add `NEXT_PUBLIC_GEMINI_API_KEY` with your Gemini API key
-   - Deploy your project
-
-## Technology Stack
-
-### Frontend
-- Next.js 15.3.2 with App Router
-- React 18.3.1
-- Tailwind CSS and shadcn/ui
-- TypeScript
-- Wallet adapters for Solana and EVM chains
-
-### Backend
-- Node.js with Express
-- GraphQL API with Apollo Server
-- PostgreSQL database with Knex.js
-- Redis for caching and pub/sub
-- WebSockets for real-time updates
-
-### Blockchain
-- Solana web3.js
-- The Graph Substreams for Solana
-- Rust-based Substreams package
-- Ethers.js for EVM chains
-- LayerZero v2 protocol
-- Light Protocol for compressed tokens
-
-## Project Structure
+If you prefer to set up manually, create a `.env` file in the root directory with the following environment variables:
 
 ```
-├── src/                      # Frontend application
-│   ├── app/                  # Next.js pages and routes
-│   │   └── openapi/          # OpenAPI chat interface
-│   ├── components/           # React components
-│   │   └── shared/           # Shared components including chat-popup
-│   ├── hooks/                # Custom React hooks
-│   │   └── use-ai-assistant.ts # AI assistant hook
-│   ├── pages/                # API routes
-│   │   └── api/              # Backend API endpoints
-│   │       └── substreams/   # Substreams execution endpoints
-│   ├── services/             # Service layer
-│   │   ├── ai-assistant-service.ts    # AI assistant service
-│   │   ├── gemini-service.ts          # Gemini AI integration
-│   │   ├── prompt-engineering-service.ts # Enhanced prompts
-│   │   ├── substreams-service.ts       # Substreams data service
-│   │   ├── substreams-gemini-service.ts # Integration layer
-│   │   └── web-search-service.ts       # Web search capabilities
-│   └── types/                # TypeScript type definitions
-├── substreams/               # Rust-based Substreams package
-│   ├── src/                  # Rust source code
-│   │   ├── lib.rs            # Library entry point
-│   │   ├── nft.rs            # NFT event processing
-│   │   ├── marketplace.rs    # Marketplace event processing
-│   │   └── bridge.rs         # Cross-chain bridge processing
-│   ├── build/                # Compiled Substreams package
-│   └── substreams.yaml       # Substreams configuration
-├── public/                   # Static assets
-└── docs/                     # Documentation
+NEXT_PUBLIC_CLUSTER=devnet
+NEXT_PUBLIC_RPC_ENDPOINT=https://api.devnet.solana.com
+ADMIN_PRIVATE_KEY=your_admin_private_key_here
 ```
 
-## API Endpoints
-
-### Substreams Execution
-
-```
-POST /api/substreams/execute
-```
-
-Executes specific modules in the Rust-based Substreams package and returns the results.
-
-**Request Body:**
-
-```json
-{
-  "module": "nft_events",
-  "params": {
-    "limit": 10
-  }
-}
+You can generate an admin private key using the Solana CLI:
+```bash
+solana-keygen new --no-passphrase -o admin-keypair.json
+# Then convert to base64 format for the .env file
+cat admin-keypair.json | base64
 ```
 
-**Available Modules:**
+The application will be available at [http://localhost:3000](http://localhost:3000). Connect your wallet to begin creating or claiming tokens.
 
-- `nft_events`: Get recent NFT events
-- `nft_events_by_token`: Get NFT events for a specific token
-- `nft_events_by_wallet`: Get NFT events for a specific wallet
-- `bridge_events`: Get cross-chain bridge events
-- `marketplace_events`: Get marketplace events
-- `nft_collections`: Get NFT collection data
-- `account_transactions`: Get account transaction history
+## Using the Application
 
-### AI Assistant
+To create tokens, connect your wallet and navigate to the "Create Event" section. Fill out the event information, confirm the transaction, and a QR code will be generated for distribution. Attendees can scan this QR code using any QR reader or camera app, which will launch Solana Pay and guide them through the token claim process in a few simple steps.
 
+The process is secure, affordable, and designed for high-volume usage at real-world events.
+
+## Technical Stack
+
+This application is built with Next.js 15, React 18, and TypeScript, using Tailwind CSS and shadcn/ui for the frontend. Blockchain functionality is powered by Solana, with Light Protocol handling compression. Wallet interactions are handled via the Solana Wallet Adapter framework.
+
+The architecture allows easy extensibility and is suitable for further enhancements such as event analytics, email confirmations, or token gating.
+
+
+For more in-depth technical details, refer to the [src/README.md](./src/README.md) file.
+
+## Development Scripts
+
+```bash
+npm run dev         # Run development server
+npm run lint        # Check for code issues
+npm run format      # Auto-format code
+npm run build       # Build application for production
+npm run start       # Start production server
 ```
-POST /api/ai/ask
-```
+## User Experience Showcase
 
-Sends a query to the AI assistant, which processes it using Gemini AI and relevant Substreams data.
+### Organizer Journey
+For event organizers, the process is simple: connect your Solana wallet, create an event with custom details, and generate QR codes for distribution. The system handles token creation using Light Protocol's compression technology.
 
-**Request Body:**
+1. Connect wallet and access the intuitive dashboard
+2. Create an event with custom branding and metadata
+3. Generate a unique QR code for distribution
+4. Monitor real-time claim statistics
 
-```json
-{
-  "query": "Show me recent NFT sales on Solana",
-  "conversationId": "optional-conversation-id"
-}
-```
+### Attendee Journey
+Attendees just scan the QR code with their phone, approve the claim in their Solana wallet, and instantly receive their token – all with minimal fees.
 
-## Using Substreams with the AI Agent
+1. Scan event QR code with any Phone
+2. Connect Solana wallet with a single tap
+3. Claim compressed token in seconds
+4. Instantly verify token in wallet
 
-The integration between Substreams and the AI agent works as follows:
+## Deployment
 
-1. The user submits a natural language query through the chat interface
-2. The AI assistant service classifies the query type (NFT, marketplace, wallet, bridge, general)
-3. Based on the query type, the system fetches relevant blockchain data using Substreams
-4. The Substreams data is formatted and provided as context to the Gemini AI model
-5. The AI generates a comprehensive response that incorporates the blockchain data
-6. The response is streamed back to the user with real-time updates
+The application is deployed on Vercel. To deploy your own version:
 
-This architecture allows for efficient, real-time analysis of blockchain data while providing a natural language interface that makes the data accessible to users without technical blockchain knowledge.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Push your code to GitHub.
+2. Import the repository into [Vercel](https://vercel.com/).
+3. Add the required environment variables:
+   - `NEXT_PUBLIC_CLUSTER` (e.g., `devnet`)
+   - `NEXT_PUBLIC_RPC_ENDPOINT` (e.g., `https://api.devnet.solana.com`)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-If you have any questions or need help, please open an issue on GitHub or contact the maintainers.
+This project is licensed under the MIT License and is open for extension, experimentation, and contribution.

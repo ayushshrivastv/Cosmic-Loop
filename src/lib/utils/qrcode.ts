@@ -1,13 +1,19 @@
 /**
  * @file qrcode.ts
  * @description Utilities for generating QR codes and Solana Pay URLs for token claiming
- * This file contains enhanced functions for creating URLs and QR codes with validation
- * and better error handling.
+ * This file contains functions for creating URLs and QR codes that enable users to claim
+ * their proof-of-participation tokens through Solana Pay integration.
  */
 
 import { PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
 import QRCode from 'qrcode';
-import { toast } from 'sonner';
+
+// Since we may not have uuid installed, create a simple function to generate a unique reference
+function generateUUID() {
+  // This is a simple implementation that's good enough for our Solana Pay references
+  const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+}
 
 /**
  * Interface defining the parameters needed to create a claim URL
@@ -24,36 +30,13 @@ interface ClaimUrlParams {
 }
 
 /**
- * Generate a secure and unique reference ID for QR codes
- * This implements a more reliable method than UUID v4
- * @returns A unique reference string
- */
-export function generateSecureReference(): string {
-  // Generate random values for better uniqueness
-  const timestamp = Date.now().toString(36);
-  const randomPart = Math.random().toString(36).substring(2);
-  const uniqueId = `${timestamp}-${randomPart}`;
-
-  return uniqueId;
-}
-
-/**
- * Validate a Solana public key string
- * @param publicKeyString - String to validate as a Solana public key
- * @returns Boolean indicating if string is a valid Solana public key
- */
-export function isValidSolanaPublicKey(publicKeyString: string): boolean {
-  try {
-    new PublicKey(publicKeyString);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-/**
  * Generate a Solana Pay URL for claiming tokens
- * Enhanced with validation and error handling
+ *
+ * Creates a URL following the Solana Pay protocol specification that can be used
+ * to initiate a token transfer when scanned with a compatible wallet.
+ *
+ * @see https://docs.solanapay.com/spec
+ * @format solana:<recipient>?spl-token=<token-mint>&amount=<amount>&reference=<reference>
  *
  * @param recipient - PublicKey of the wallet receiving the payment/transfer
  * @param tokenMint - PublicKey of the token mint address
@@ -61,303 +44,187 @@ export function isValidSolanaPublicKey(publicKeyString: string): boolean {
  * @param reference - Unique identifier for tracking the transaction
  * @param label - Optional label to display in the wallet (e.g., event name)
  * @param message - Optional message to display in the wallet
- * @returns Solana Pay URL as a string or null if parameters are invalid
+ * @returns Solana Pay URL as a string
  */
 export const createSolanaPayUrl = (
-  recipient: PublicKey | string,
-  tokenMint: PublicKey | string,
+  recipient: PublicKey,
+  tokenMint: PublicKey,
   amount: number,
   reference: string,
   label?: string,
   message?: string
-): string | null => {
-  try {
-    // Convert string inputs to PublicKey objects if needed
-    const recipientPubKey = typeof recipient === 'string' ? new PublicKey(recipient) : recipient;
-    const tokenMintPubKey = typeof tokenMint === 'string' ? new PublicKey(tokenMint) : tokenMint;
+): string => {
+  // Base URL with recipient
+  let url = `solana:${recipient.toBase58()}`;
 
-    // Validate inputs
-    if (!recipientPubKey || !tokenMintPubKey) {
-      console.error('Invalid recipient or token mint address');
-      return null;
-    }
+  // Add SPL token parameter for the token mint
+  url += `?spl-token=${tokenMint.toBase58()}`;
 
-    // Base URL with recipient
-    let url = `solana:${recipientPubKey.toBase58()}`;
-
-    // Add SPL token parameter for the token mint
-    url += `?spl-token=${tokenMintPubKey.toBase58()}`;
-
-    // Add amount if provided (in base units)
-    if (amount > 0) {
-      url += `&amount=${amount}`;
-    }
-
-    // Add reference for tracking the payment
-    if (reference) {
-      url += `&reference=${reference}`;
-    }
-
-    // Add optional label
-    if (label) {
-      url += `&label=${encodeURIComponent(label)}`;
-    }
-
-    // Add optional message
-    if (message) {
-      url += `&message=${encodeURIComponent(message)}`;
-    }
-
-    return url;
-  } catch (error) {
-    console.error('Error creating Solana Pay URL:', error);
-    return null;
+  // Add amount if provided (in base units)
+  if (amount > 0) {
+    url += `&amount=${amount}`;
   }
+
+  // Add reference for tracking the payment
+  if (reference) {
+    url += `&reference=${reference}`;
+  }
+
+  // Add optional label
+  if (label) {
+    url += `&label=${encodeURIComponent(label)}`;
+  }
+
+  // Add optional message
+  if (message) {
+    url += `&message=${encodeURIComponent(message)}`;
+  }
+
+  return url;
 };
 
 /**
  * Create a URL for claiming a token through the application's claim page
- * Enhanced with validation and better error handling
+ *
+ * This creates a direct link to the claim page with the necessary parameters
+ * for the user to claim their token. This URL can be shared directly or
+ * embedded in a QR code.
  *
  * @param baseUrl - Base URL of the application (e.g., https://example.com)
  * @param eventId - Identifier or name of the event
  * @param tokenMint - PublicKey of the token mint to claim
- * @returns Full URL to the claim page with parameters or null if validation fails
+ * @returns Full URL to the claim page with parameters
+ *
+ * @example
+ * // Returns "https://example.com/claim?event=DevConference2025&mint=7nB3aDJ...5aB"
+ * createClaimUrl("https://example.com", "DevConference2025", new PublicKey("7nB3aDJ...5aB"))
  */
 export const createClaimUrl = (
   baseUrl: string,
   eventId: string,
-  tokenMint: PublicKey | string,
-): string | null => {
-  try {
-    // Validate base URL
-    if (!baseUrl || typeof baseUrl !== 'string' || !baseUrl.startsWith('http')) {
-      console.error('Invalid base URL');
-      return null;
-    }
-
-    // Validate event ID
-    if (!eventId || typeof eventId !== 'string') {
-      console.error('Invalid event ID');
-      return null;
-    }
-
-    // Validate token mint
-    const mintAddress = typeof tokenMint === 'string' ?
-      tokenMint :
-      tokenMint.toBase58();
-
-    if (!isValidSolanaPublicKey(mintAddress)) {
-      console.error('Invalid token mint address');
-      return null;
-    }
-
-    return `${baseUrl}/claim?event=${encodeURIComponent(eventId)}&mint=${mintAddress}`;
-  } catch (error) {
-    console.error('Error creating claim URL:', error);
-    return null;
-  }
+  tokenMint: PublicKey,
+): string => {
+  return `${baseUrl}/claim?event=${encodeURIComponent(eventId)}&mint=${tokenMint.toBase58()}`;
 };
 
 /**
  * Create a URL for claiming a token using a parameters object
- * Enhanced with validation and better error handling
+ *
+ * Alternative to createClaimUrl that accepts a single object with all parameters.
+ * This is useful when you have all parameters in a structured object already.
  *
  * @param params - Object containing all parameters needed for the claim URL
- * @returns Full URL to the claim page with parameters or null if validation fails
+ * @returns Full URL to the claim page with parameters
+ *
+ * @example
+ * // Returns "https://example.com/claim?event=DevConference2025&mint=7nB3aDJ...5aB"
+ * createClaimUrlWithParams({
+ *   baseUrl: "https://example.com",
+ *   eventName: "DevConference2025",
+ *   mintAddress: "7nB3aDJ...5aB",
+ *   organizerPubkey: "EPjFW...PCh"
+ * })
  */
-export const createClaimUrlWithParams = (params: ClaimUrlParams): string | null => {
-  try {
-    // Validate all required parameters
-    if (!params.baseUrl || !params.eventName || !params.mintAddress) {
-      console.error('Missing required parameters for claim URL');
-      return null;
-    }
-
-    // Validate mint address
-    if (!isValidSolanaPublicKey(params.mintAddress)) {
-      console.error('Invalid mint address in claim URL parameters');
-      return null;
-    }
-
-    return `${params.baseUrl}/claim?event=${encodeURIComponent(params.eventName)}&mint=${params.mintAddress}`;
-  } catch (error) {
-    console.error('Error creating claim URL with params:', error);
-    return null;
-  }
+export const createClaimUrlWithParams = (params: ClaimUrlParams): string => {
+  return `${params.baseUrl}/claim?event=${encodeURIComponent(params.eventName)}&mint=${params.mintAddress}`;
 };
 
 /**
  * Generate a Solana Pay transfer request URL specifically for claiming a token
- * Enhanced with validation, secure reference generation, and better error handling
+ *
+ * Simplifies the process of creating a Solana Pay URL for token claiming by
+ * automatically generating a UUID reference and setting sensible defaults.
+ * This URL can be converted to a QR code for easy scanning.
  *
  * @param recipient - PublicKey of the wallet that owns the tokens (event organizer)
  * @param tokenMint - PublicKey of the token mint to claim
  * @param label - Label to show in the wallet UI (typically the event name)
  * @param memo - Optional additional information to include in the transaction
- * @returns Complete Solana Pay URL as a string or null if parameters are invalid
+ * @returns Complete Solana Pay URL as a string
+ *
+ * @example
+ * // Returns a Solana Pay URL like "solana:EPjFW...PCh?spl-token=7nB3aDJ...5aB&amount=1&reference=..."
+ * createSolanaPayClaimUrl(
+ *   new PublicKey("EPjFW...PCh"),
+ *   new PublicKey("7nB3aDJ...5aB"),
+ *   "DevConference2025",
+ *   "Thanks for attending our conference!"
+ * )
  */
 export const createSolanaPayClaimUrl = (
-  recipient: PublicKey | string,
-  tokenMint: PublicKey | string,
+  recipient: PublicKey,
+  tokenMint: PublicKey,
   label: string,
   memo?: string
-): string | null => {
-  try {
-    // Convert string inputs to PublicKey objects if needed
-    const recipientPubKey = typeof recipient === 'string' ? new PublicKey(recipient) : recipient;
-    const tokenMintPubKey = typeof tokenMint === 'string' ? new PublicKey(tokenMint) : tokenMint;
+): string => {
+  // Create unique reference for this transaction
+  // This helps wallets track and identify the specific transaction
+  const reference = generateUUID();
 
-    // Validate inputs
-    if (!recipientPubKey || !tokenMintPubKey) {
-      console.error('Invalid recipient or token mint address');
-      return null;
-    }
-
-    // Create unique reference for this transaction
-    // Using a more reliable method than UUID v4
-    const reference = generateSecureReference();
-
-    // Create the complete Solana Pay URL with all necessary parameters
-    return createSolanaPayUrl(
-      recipientPubKey,
-      tokenMintPubKey,
-      1, // Amount - typically 1 for an NFT/token claim
-      reference,
-      label, // Event name as label
-      memo || "Claim your proof-of-participation token"
-    );
-  } catch (error) {
-    console.error('Error creating Solana Pay claim URL:', error);
-    return null;
-  }
+  // Create the complete Solana Pay URL with all necessary parameters
+  return createSolanaPayUrl(
+    recipient,
+    tokenMint,
+    1, // Amount - typically 1 for an NFT/token claim
+    reference,
+    label, // Event name as label
+    memo || "Claim your proof-of-participation token"
+  );
 };
 
 /**
- * Interface for QR code generation options
- */
-export interface QrCodeOptions {
-  size?: number;
-  includeMargin?: boolean;
-  color?: {
-    dark?: string;
-    light?: string;
-  };
-  errorCorrectionLevel?: 'L' | 'M' | 'Q' | 'H';
-}
-
-/**
- * Result interface for QR code generation
- */
-export interface QrCodeResult {
-  dataUrl: string | null;
-  success: boolean;
-  message?: string;
-  error?: Error;
-}
-
-/**
  * Generate a QR code as a data URL from any URL string
- * Enhanced with improved error handling and validation
+ *
+ * Creates a QR code image as a data URL (Base64 encoded) that can be directly
+ * used in HTML img tags or downloaded as an image file.
  *
  * @param url - The URL to encode in the QR code (Solana Pay URL or any URL)
- * @param options - QR code generation options
- * @returns Promise resolving to a QrCodeResult object
+ * @param size - Size of the QR code in pixels (default: 256)
+ * @param includeMargin - Whether to include a margin around the QR code (default: true)
+ * @returns Promise resolving to a data URL string (format: data:image/png;base64,...)
+ *
+ * @example
+ * // Generate a QR code and set it as an image source
+ * const dataUrl = await generateQrCodeDataUrl("https://example.com");
+ * document.getElementById("qr-code").src = dataUrl;
  */
 export function generateQrCodeDataUrl(
   url: string,
-  options: QrCodeOptions = {}
-): Promise<QrCodeResult> {
-  return new Promise((resolve) => {
-    // Validate URL
-    if (!url || typeof url !== 'string') {
-      const result: QrCodeResult = {
-        dataUrl: null,
-        success: false,
-        message: 'Invalid URL provided for QR code generation'
-      };
-      console.error(result.message);
-      return resolve(result);
-    }
-
-    // Default options
-    const size = options.size || 256;
-    const includeMargin = options.includeMargin !== undefined ? options.includeMargin : true;
-    const darkColor = options.color?.dark || '#000000';
-    const lightColor = options.color?.light || '#ffffff';
-    const errorCorrectionLevel = options.errorCorrectionLevel || 'H';
-
+  size: number = 256,
+  includeMargin: boolean = true
+): Promise<string> {
+  return new Promise((resolve, reject) => {
     try {
       QRCode.toDataURL(
         url,
         {
           width: size,
           margin: includeMargin ? 4 : 0,
-          errorCorrectionLevel: errorCorrectionLevel,
+          errorCorrectionLevel: 'H', // High error correction level for better readability
           type: 'image/png',
           color: {
-            dark: darkColor,
-            light: lightColor,
+            dark: '#000000', // Black QR code modules
+            light: '#ffffff', // White background
           },
         },
         (err, dataUrl) => {
           if (err) {
             console.error('Error generating QR code data URL:', err);
-            const result: QrCodeResult = {
-              dataUrl: null,
-              success: false,
-              message: 'Failed to generate QR code',
-              error: err
-            };
-            return resolve(result);
+            reject(err);
+            return;
           }
-
-          const result: QrCodeResult = {
-            dataUrl,
-            success: true,
-            message: 'QR code generated successfully'
-          };
-          return resolve(result);
+          resolve(dataUrl);
         }
       );
     } catch (error) {
       console.error('Exception during QR code generation:', error);
-      const result: QrCodeResult = {
-        dataUrl: null,
-        success: false,
-        message: 'Exception during QR code generation',
-        error: error instanceof Error ? error : new Error(String(error))
-      };
-      return resolve(result);
+      reject(error);
     }
   });
 }
 
 /**
- * Generate a QR code with validation and feedback
- * @param url - URL to encode in the QR code
- * @param options - QR code generation options
- * @returns Promise resolving to a QR code data URL or null
- */
-export async function generateQrCodeWithValidation(
-  url: string,
-  options: QrCodeOptions = {}
-): Promise<string | null> {
-  const result = await generateQrCodeDataUrl(url, options);
-
-  if (!result.success) {
-    toast.error('QR Code Generation Failed', {
-      description: result.message || 'Could not generate QR code',
-      duration: 5000,
-    });
-    return null;
-  }
-
-  return result.dataUrl;
-}
-
-/**
  * Shorthand alias for generateQrCodeDataUrl
- * This is exported for backward compatibility
+ * This is exported for backward compatibility and convenience
  */
-export const createQRCode = generateQrCodeWithValidation;
+export const createQRCode = generateQrCodeDataUrl;

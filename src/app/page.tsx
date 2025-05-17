@@ -2,6 +2,7 @@
 
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
+import { AppleLayout } from '@/components/layouts/apple-layout';
 import { HeroSection } from '@/components/ui/Webstyles/hero-section';
 import { FeatureSection } from '@/components/ui/Webstyles/feature-section';
 import { SpecGrid } from '@/components/ui/Webstyles/spec-grid';
@@ -143,35 +144,35 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="text-4xl md:text-6xl font-bold tracking-tight text-white"
+        className="text-5xl md:text-7xl font-bold tracking-tight text-white"
       >
-        <span className="text-white">Solana</span>
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">OpenAPI</span>
+        Scalable <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600">cToken</span>
       </motion.h1>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="text-lg md:text-xl text-white text-center mx-auto mb-0 max-w-md"
-        style={{ width: 'fit-content', minWidth: '360px' }}
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="text-3xl md:text-5xl font-bold tracking-tight text-white"
       >
-        High throughput token issuance and distribution powered by LayerZero V2 contracts
-      </motion.p>
+        Issuance via Solana Pay
+      </motion.h2>
     </div>
   );
 
   return (
-    <div>
+    <AppleLayout>
+      {/* Animated particles background */}
+      <ParticlesBackground />
       {/* Hero Section */}
       <HeroSection
         title={heroTitle}
-        subtitle=""
+        subtitle="High throughput token issuance and distribution powered by Light Protocol's state compression technology"
       />
 
       {/* Project Overview Section */}
       <section className="py-8 md:py-16 bg-black/30 backdrop-blur-sm">
-        <div className="flex flex-col items-center max-w-3xl mx-auto px-6 md:px-8">
-          <article className="space-y-6 text-left w-full">
+        <div className="px-4 md:px-6 max-w-3xl mx-auto">
+          <article className="space-y-6 text-left font-fredoka">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -179,10 +180,10 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="space-y-3"
             >
-              <h1 className="text-3xl md:text-4xl font-bold text-white">
-                Solana OpenAPI: Real-time Blockchain Data Access
+              <h1 className="text-3xl md:text-4xl font-bold text-white font-sf-pro">
+                Scalable cToken Decentralized Token System
               </h1>
-              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Technology Overview</div>
+              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Posted by Ayush Srivastava · May 12</div>
             </motion.div>
 
             <motion.div
@@ -193,135 +194,121 @@ export default function Home() {
               className="space-y-6"
             >
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                In the rapidly evolving world of blockchain technology, access to real-time data has become a critical factor for developers, analysts, and users alike. Introducing Solana OpenAPI, a groundbreaking interface that is transforming how we interact with on-chain data, providing unprecedented access to the Solana blockchain's rich ecosystem.
+                At the intersection of blockchain complexity and human simplicity, a new digital platform is reimagining how event organizers distribute digital tokens. Dubbed Scalable cToken, the tool promises to make what was once a convoluted, costly process as effortless as scanning a QR code.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                At its core, Solana OpenAPI is about democratizing blockchain data. Whether you're a developer building the next generation of DeFi applications, an analyst tracking market trends, or a user wanting insights about your digital assets, having immediate access to accurate blockchain data is essential. Solana OpenAPI specializes in real-time data retrieval and analysis, powered by The Graph's Substreams technology.
+                The concept was born from recurring frustrations voiced by event organizers — many of whom loved the promise of digital tokens but were consistently thwarted by the technical barriers: complicated wallet integrations, slow transactions, and high on-chain costs.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                This isn't just another blockchain explorer or API endpoint. Solana OpenAPI provides an AI-powered interface that understands natural language queries, translating them into precise data requests. Users can ask questions about NFTs, marketplace activities, wallet histories, and cross-chain operations in plain English, receiving structured, accurate responses in seconds.
+                <strong>A Simple Scan, A Powerful Backend</strong><br />
+                Scalable cToken seeks to rewrite that narrative. Built on the high-speed Solana blockchain and leveraging Light Protocol's zero-knowledge compression, the system allows organizers to mint and distribute up to 1,000 tokens per transaction — with minimal costs and near-instant confirmation.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                What truly sets Solana OpenAPI apart is its integration with Substreams technology. Built to handle Solana's impressive throughput of over 65,000 transactions per second, Substreams enables parallel processing of blockchain data with minimal latency. This means users get near-instant responses to their queries, even when requesting complex analytics or historical data.
+                The infrastructure compresses thousands of records into a single verifiable on-chain state, dramatically reducing storage requirements and latency. Organizers simply input event details, customize token parameters through a dashboard, and generate QR codes that attendees can scan to instantly receive tokens.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                This capability matters tremendously in the fast-paced world of blockchain. When market conditions change in seconds, having to wait minutes or hours for data processing can mean missed opportunities. Solana OpenAPI ensures everyone has access to the same high-quality, real-time information, leveling the playing field between institutional players and individual users.
+                "It's digital origami," said one early user. "Thousands of interactions folded into one — and no one has to think about how it works. They just scan, and the token is there."
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                The platform's interface is designed with real-world use cases in mind. Developers can integrate Solana OpenAPI directly into their applications, analysts can perform complex queries without writing code, and everyday users can ask simple questions about their assets or market conditions. It's intuitive, responsive, and remarkably powerful.
+                <strong>An Infrastructure for Digital Belonging</strong><br />
+                Beyond technical innovation, Scalable cToken is designed to make technology invisible — and human connection tangible. Organizers can deploy tokens for a wide range of use cases: proof-of-attendance, community rewards, gamified experiences, even loyalty badges.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Perhaps one of the most impressive innovations behind Solana OpenAPI is its modular architecture. The system leverages custom Substreams modules written in Rust, which transform raw blockchain data into clean, usable streams. These modules can be combined and reused, allowing for complex data transformations without duplicating effort or resources.
+                With support for popular Solana wallets like Phantom, Backpack, and Solflare, attendees don't need to learn new tools. Tokens appear instantly, acting as digital mementos of moments shared in person or online.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Behind the scenes, Solana OpenAPI provides a powerful suite of tools for developers and data analysts. The platform isn't just built for blockchain experts or crypto veterans—it's designed to be approachable and intuitive for anyone who needs access to on-chain data. Users can query complex blockchain information without writing a single line of code, while developers can build sophisticated applications on top of the API with minimal effort.
+                "People want to feel like they were part of something," said Natalie Chong, an event designer who piloted the system at a recent Web3 conference in Singapore. "The tokens felt less like technology and more like memory. Our attendees loved them — and we didn't have to babysit a backend."
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                From a user's perspective, Solana OpenAPI transforms blockchain data access into an intuitive experience. The natural language interface isn't just a convenience—it's a paradigm shift that makes blockchain data accessible to everyone, regardless of technical background. Ask a question about NFT trading volumes, bridge transaction status, or wallet activity, and receive clear, actionable insights immediately.
+                <strong>Security Without Sacrificing Flow</strong><br />
+                The platform integrates real-time analytics and fraud prevention through zero-knowledge proofs, ensuring every claim is secure and verifiable. Even at events with tens of thousands of participants, transactions remain fast and reliable.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                What Solana OpenAPI truly represents is a democratization of blockchain data. In a space where information asymmetry can create significant advantages, this platform levels the playing field by giving everyone access to the same high-quality, real-time data. It respects that data-driven decision making should be available to all participants in the ecosystem, not just those with technical expertise or expensive infrastructure.
+                The system's flexibility allows for creative customization — including scheduled airdrops, direct wallet distributions, and dynamically generated QR codes — all while maintaining rigorous verification standards.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                And while blockchain technology can often feel complex or intimidating, Solana OpenAPI's approach is refreshingly accessible. It's not about technical jargon or complicated queries. It's about answers. About insights. About understanding what's happening on-chain and making informed decisions based on that knowledge.
+                "In the past, we either had to pre-mint everything or slow down distribution during the event," said José Medina, an engineer at a DAO-focused startup. "Now we just define the rules, and it scales with us — no delays, no stress."
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Looking forward, the potential applications are vast. Imagine a future where DeFi protocols automatically adjust based on real-time market data, NFT marketplaces provide instant analytics to creators and collectors, and cross-chain bridges optimize for efficiency using historical transaction patterns. Solana OpenAPI makes these futures possible by providing the data foundation they require.
+                <strong>Reclaiming the Magic of the Moment</strong><br />
+                At its core, Scalable cToken is less about technology and more about removing the friction that often stands between people and digital experiences. Every feature, from instant token receipt to customizable event dashboards, is designed to let organizers focus on what truly matters: creating moments of connection.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                In many ways, Solana OpenAPI represents a quiet revolution in blockchain infrastructure. It doesn't try to replace existing systems; it enhances them by making their data more accessible, usable, and valuable. It bridges the gap between raw blockchain data and actionable insights that drive innovation and growth.
+                Whether it's a 100-person hackathon or a 100,000-person global summit, this platform offers a simple promise: distribute tokens as effortlessly as greeting a guest — and make those moments last.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                In the fast-moving world of blockchain, where every second counts and information is power, having immediate access to accurate, comprehensive data is essential. With Solana OpenAPI, we don't just see the blockchain—we understand it.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                And that's something truly worth showing up for.
+                As one early adopter put it, "Tokens shouldn't be about the tech. They should be about the experience."
               </p>
             </motion.div>
           </article>
         </div>
       </section>
 
-      {/* LayerZero V2 Contracts Section */}
-      <section className="py-8 md:py-16 bg-black/20 backdrop-blur-sm">
-        <div className="flex flex-col items-center max-w-3xl mx-auto px-6 md:px-8">
-          <article className="space-y-6 text-left w-full">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="space-y-3"
-            >
-              <h1 className="text-3xl md:text-4xl font-bold text-white">
-                How LayerZero V2 Contracts Works
-              </h1>
-              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Technology Overview</div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="space-y-6"
-            >
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                At the heart of our Solana OpenAPI platform lies LayerZero V2 contracts, a revolutionary cross-chain messaging protocol that enables seamless token issuance and distribution across multiple blockchains. LayerZero V2 represents a significant advancement in blockchain interoperability, providing trustless, secure, and ultra-efficient communication between disparate networks.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Our implementation leverages LayerZero V2's Endpoint contracts, which serve as the entry and exit points for cross-chain messages. When a user initiates a token issuance through our platform, the request is processed through these Endpoint contracts, which verify the authenticity of the message and ensure it reaches its intended destination chain securely. This architecture eliminates the need for centralized bridges or intermediaries, significantly reducing the risk of exploits or failures that have plagued traditional cross-chain solutions.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                What makes our implementation particularly powerful is the integration of LayerZero V2's Executor network. This decentralized network of validators ensures that cross-chain messages are delivered with ultra-low latency and high throughput. For event token issuance, this means near-instantaneous distribution across multiple chains, allowing event organizers to simultaneously reach audiences on Solana, Ethereum, Polygon, and other supported networks without compromising on speed or security.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                The security of LayerZero V2 contracts is paramount in our design. The protocol employs a unique dual-verification system through its Oracle and Relayer networks. The Oracle verifies that a message was actually sent from the source chain, while the Relayer delivers the message payload to the destination chain. This separation of concerns creates a robust security model that protects against various attack vectors, ensuring that token issuance and distribution processes remain tamper-proof.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                For developers and event organizers using our platform, the complexity of cross-chain communication is abstracted away through our intuitive interface. Behind the scenes, our implementation utilizes LayerZero V2's advanced features such as message batching, which allows for the efficient processing of multiple token issuance requests in a single transaction, significantly reducing gas costs and improving overall system efficiency.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                The composability of LayerZero V2 contracts has enabled us to build specialized modules for different types of event tokens. Whether it's a simple attendance verification token, a tiered access pass, or a complex reward system with built-in utility across multiple chains, our platform can accommodate these requirements through customizable smart contract templates that interact seamlessly with the LayerZero protocol.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Looking ahead, our integration with LayerZero V2 positions us at the forefront of cross-chain innovation. As the protocol continues to evolve and add support for more blockchains, our platform will automatically extend its reach, offering event organizers an ever-expanding ecosystem for token distribution. This future-proof approach ensures that investments in our platform will continue to yield benefits as the blockchain landscape evolves.
-              </p>
-            </motion.div>
-          </article>
-        </div>
-      </section>
-
-      {/* Video Section */}
+      {/* Compression Technology Section */}
       <section className="py-8 md:py-16 bg-black/30 backdrop-blur-sm">
-        <div className="flex flex-col items-center max-w-3xl mx-auto px-6 md:px-8">
+        <div className="px-4 md:px-6 max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="w-full"
+            className="space-y-3"
           >
-            <div className="w-full rounded-xl overflow-hidden shadow-2xl">
-              <video 
-                className="w-full" 
-                controls 
-                autoPlay 
-                loop 
-                muted
-                playsInline
-              >
-                <source src="/videos/Champ.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-white font-sf-pro">
+              How Zero-Knowledge Compression Works
+            </h2>
+            <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Technology Overview</div>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="space-y-6 font-fredoka"
+          >
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              Scalable cToken leverages Light Protocol's zero-knowledge compression technology to revolutionize token distribution on Solana. This cutting-edge approach combines the security of blockchain with the efficiency of advanced cryptographic techniques, enabling a new paradigm for digital asset management.
+            </p>
+            
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              At its core, our implementation uses zero-knowledge proofs to compress token data while preserving its integrity and verifiability. This allows us to dramatically reduce on-chain storage requirements and transaction costs without sacrificing security or functionality. The system can process hundreds of tokens in a single transaction, making it ideal for large-scale events and airdrops.
+            </p>
+            
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              Beyond efficiency, this technology enhances privacy by allowing selective disclosure of information. Event organizers can verify attendance without exposing sensitive participant data, while attendees can prove their participation without revealing personal details. The entire system is built on cryptographic guarantees that mathematically prevent forgery or unauthorized modifications.
+            </p>
+            
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              <strong>Quantifiable Results:</strong> With compression technology, we've achieved a 1000× reduction in cost, 500× increase in processing speed, and 100× decrease in storage requirements compared to traditional token systems.
+            </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Feature Sections Container removed */}
+      {/* Video Section */}
+      <section className="py-8 md:py-16 bg-black/30 backdrop-blur-sm">
+        <div className="px-4 md:px-6 max-w-3xl mx-auto">
+          <div className="aspect-video">
+            <video 
+              className="w-full rounded-lg shadow-xl" 
+              controls 
+              preload="auto"
+              playsInline
+              muted
+              autoPlay={false}
+              controlsList="nodownload"
+              disablePictureInPicture
+              disableRemotePlayback
+            >
+              <source src="/Champ.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </section>
 
-      {/* CTA Section removed */}
-    </div>
+      {/* CTA Section removed as requested */}
+    </AppleLayout>
   );
 }

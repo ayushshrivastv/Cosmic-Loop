@@ -15,23 +15,27 @@ const navItems = [
   { label: 'Dashboard', href: ROUTES.DASHBOARD },
   { label: 'Create Event', href: ROUTES.MINT },
   { label: 'Claim Token', href: ROUTES.CLAIM },
-  { label: 'Cross Chain', href: ROUTES.CROSS_CHAIN },
-  { label: 'OpenAPI', href: ROUTES.OPENAPI, external: false },
 ];
 
-export const AppleLayout = ({ children }: AppleLayoutProps): React.JSX.Element => {
+export const AppleLayout: React.FC<AppleLayoutProps> = ({ children }: AppleLayoutProps) => {
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* Top right wallet button */}
-      <div className="fixed top-4 right-4 z-50">
-        <SmartWalletButton />
-      </div>
-      
+    <div className="min-h-screen bg-black text-foreground flex">
+      {/* Sidebar Navigation */}
       <SidebarNav navItems={navItems} />
-      <main className="flex-grow md:pl-[180px] pt-16 md:pt-6 px-4 md:px-8 max-w-screen-xl mx-auto"> {/* Match OpenAI's content layout */}
-        {children}
-      </main>
-      <SimplifiedFooter className="md:pl-[180px]" /> {/* Add left padding to the footer on desktop only */}
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col ml-52"> {/* ml-52 matches the new width of the sidebar */}
+        {/* Top wallet button bar */}
+        <div className="sticky top-0 z-40 w-full h-24 flex items-center justify-end px-8 bg-black">
+          <SmartWalletButton />
+        </div>
+        
+        <main className="flex-grow px-8 pt-0 pb-6">
+          {children}
+        </main>
+        
+        <SimplifiedFooter />
+      </div>
     </div>
   );
 };

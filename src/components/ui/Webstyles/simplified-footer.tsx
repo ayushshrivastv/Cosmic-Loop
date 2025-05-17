@@ -15,54 +15,48 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className={`bg-black text-zinc-400 py-10 ${className}`}>
-      <div className="container max-w-5xl mx-auto text-center">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-16 mb-6">
-          {/* Logo only - no description */}
-          <div className="p-4 flex flex-col items-center md:items-start">
-            <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold tracking-tight flex items-center">
-                <span className="text-white">Solana</span>
-                <span className="text-white ml-1">OpenAPI</span>
+    <footer className={`bg-black text-zinc-400 py-12 ${className}`}>
+      <div className="container mx-auto px-4 text-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-items-center">
+          {/* Logo and brief description */}
+          <div className="space-y-4 flex flex-col items-center">
+            <Link href="/" className="flex items-center justify-center">
+              <span className="text-xl font-bold tracking-tight flex items-center text-white">
+                Scalable cToken
               </span>
             </Link>
           </div>
           
           {/* Resources links */}
-          <div className="p-4 flex flex-col items-center md:items-center">
-            <h3 className="text-white font-medium mb-4 text-lg">Resources</h3>
-            <ul className="space-y-2 text-center md:text-center">
+          <div className="flex flex-col items-center">
+            <h3 className="text-white font-medium mb-4">Resources</h3>
+            <ul className="space-y-2 text-center">
               <li>
                 <Link href="https://solana.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
                   Solana
                 </Link>
               </li>
               <li>
-                <Link href="https://layerzero.network" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
-                  LayerZero
+                <Link href="https://lightprotocol.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
+                  Light Protocol
                 </Link>
               </li>
               <li>
-                <Link href="https://layerzerolabs.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
-                  LayerZero Labs
+                <Link href="https://solanapay.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
+                  Solana Pay
                 </Link>
               </li>
               <li>
-                <Link href="https://github.com/ayushshrivastv/Cosmic-Loop/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
+                <Link href="https://github.com/ayushshrivastv/Scalable-cToken/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
                   MIT License
-                </Link>
-              </li>
-              <li>
-                <Link href="https://github.com/ayushshrivastv/Cosmic-Loop" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
-                  GitHub Repository
                 </Link>
               </li>
             </ul>
           </div>
           
           {/* Connect section */}
-          <div className="p-4 flex flex-col items-center md:items-center">
-            <h3 className="text-white font-medium mb-4 text-lg">Connect</h3>
+          <div className="flex flex-col items-center">
+            <h3 className="text-white font-medium mb-4">Connect</h3>
             <div className="flex space-x-4 justify-center">
               <Link 
                 href="https://x.com/ayushsrivastv" 
@@ -89,7 +83,7 @@ export const SimplifiedFooter: React.FC<FooterProps> = ({ className = '' }) => {
         </div>
         
         {/* Copyright */}
-        <div className="border-t border-zinc-800 mt-6 pt-6 text-center text-xs">
+        <div className="border-t border-zinc-800 mt-10 pt-6 text-center text-xs">
           <p>&copy; {currentYear} Ayush Srivastava</p>
         </div>
       </div>

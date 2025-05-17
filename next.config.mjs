@@ -7,14 +7,6 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     mdxRs: true,
-    turbo: {
-      rules: {
-        // Configure Tailwind CSS processing
-        '*.css': [
-          { loader: 'postcss', options: { postcssOptions: { config: './postcss.config.mjs' } } },
-        ],
-      },
-    },
   },
 };
 

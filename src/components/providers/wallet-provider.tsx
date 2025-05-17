@@ -6,12 +6,6 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
-  BackpackWalletAdapter,
-  CoinbaseWalletAdapter,
-  SlopeWalletAdapter,
-  TorusWalletAdapter,
-  BraveWalletAdapter,
-  CloverWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { type Cluster, DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
@@ -55,12 +49,6 @@ export const SolanaWalletProvider: FC<SolanaWalletProviderProps> = ({
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
-    new BackpackWalletAdapter(),
-    new CoinbaseWalletAdapter(),
-    new SlopeWalletAdapter(),
-    new TorusWalletAdapter(),
-    new BraveWalletAdapter(),
-    new CloverWalletAdapter(),
   ], []);
 
   // State to determine if the component has been mounted client-side

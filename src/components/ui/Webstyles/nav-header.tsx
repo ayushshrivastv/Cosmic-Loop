@@ -9,7 +9,6 @@ import { SmartWalletButton } from '@/components/wallet/smart-wallet-button';
 interface NavItem {
   label: string;
   href: string;
-  external?: boolean;
 }
 
 interface NavHeaderProps {
@@ -20,12 +19,12 @@ interface NavHeaderProps {
 export const NavHeader: React.FC<NavHeaderProps> = ({
   navItems,
   logo
-}: NavHeaderProps) => {
+}) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isWalletButtonMounted, setIsWalletButtonMounted] = useState(false);
-  const walletButtonDelay = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const walletButtonDelay = useRef<NodeJS.Timeout | null>(null);
 
   // Client-side only initialization and cleanup
   useEffect(() => {
@@ -66,34 +65,22 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
           <div className="flex-shrink-0">
             {logo || (
               <Link href="/" className="text-white font-bold text-xl">
-                <span className="text-white">Solana</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">OpenAPI</span>
+                <span className="text-white">Scalable</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">cToken</span>
               </Link>
             )}
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item: NavItem) => (
-              item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-zinc-300 hover:text-white transition-colors font-medium"
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link 
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm text-zinc-300 hover:text-white transition-colors font-medium"
-                >
-                  {item.label}
-                </Link>
-              )
+            {navItems.map((item) => (
+              <Link 
+                key={item.href}
+                href={item.href}
+                className="text-sm text-zinc-300 hover:text-white transition-colors font-medium"
+              >
+                {item.label}
+              </Link>
             ))}
           </nav>
 
@@ -129,28 +116,15 @@ export const NavHeader: React.FC<NavHeaderProps> = ({
           >
             <div className="container mx-auto px-4 py-6 space-y-4">
               <nav className="flex flex-col space-y-4">
-                {navItems.map((item: NavItem) => (
-                  item.external ? (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-zinc-300 hover:text-white transition-colors py-2"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item.label}
-                    </a>
-                  ) : (
-                    <Link 
-                      key={item.href}
-                      href={item.href}
-                      className="text-zinc-300 hover:text-white transition-colors py-2"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  )
+                {navItems.map((item) => (
+                  <Link 
+                    key={item.href}
+                    href={item.href}
+                    className="text-zinc-300 hover:text-white transition-colors py-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
                 ))}
               </nav>
               <div className="pt-4 border-t border-white/10">

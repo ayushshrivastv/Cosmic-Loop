@@ -40,68 +40,100 @@ interface AnalyticsData {
   }[];
 }
 
-import { eventService, analyticsService, EventAnalytics } from '@/lib/services';
-
-// Function for getting analytics data from the API
+// Function for getting analytics data - would be replaced with actual blockchain API calls
 async function getAnalyticsData(publicKey: any, timeframe: 'week' | 'month' = 'week'): Promise<AnalyticsData | null> {
   if (!publicKey) return null;
+  
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // In a real implementation, this would fetch actual data from the blockchain
+  // For now, we'll return zeros to indicate no real data yet
+  return {
+    totalEvents: 0,
+    totalTokensCreated: 0,
+    totalTokensClaimed: 0,
+    conversionRate: 0,
+    claimsByHour: Array(24).fill(0).map((_, hour) => ({ hour, count: 0 })),
+    claimsByDay: Array(timeframe === 'week' ? 7 : 30).fill(0).map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      return {
+        date: date.toISOString().split('T')[0],
+        count: 0
+      };
+    }),
+    deviceBreakdown: [
+      { type: 'Mobile', count: 0, percentage: 0 },
+      { type: 'Desktop', count: 0, percentage: 0 },
+      { type: 'Tablet', count: 0, percentage: 0 }
+    ],
+    topEvents: [
+      { name: 'Scalable cToken Demo', tokensIssued: 0, tokensClaimed: 0, conversionRate: 0 }
+    ],
+    recentActivity: []
+  };
+}
 
-  try {
-    // Convert the wallet adapter timeframe to event service timeframe
-    const period = timeframe === 'week' ? 'week' : 'month';
-
-    // Get analytics data from the event service
-    const walletAddress = publicKey.toBase58();
-    const eventAnalytics = await eventService.getEventAnalytics(period);
-
-    // Map event analytics data to our component's format
-    return {
-      totalEvents: eventAnalytics.totalEvents,
-      totalTokensCreated: eventAnalytics.totalTokensCreated,
-      totalTokensClaimed: eventAnalytics.totalTokensClaimed,
-      conversionRate: eventAnalytics.conversionRate,
-      claimsByHour: eventAnalytics.claimsByHour,
-      claimsByDay: eventAnalytics.claimsByDay,
-      deviceBreakdown: eventAnalytics.deviceBreakdown,
-      topEvents: eventAnalytics.topEvents,
-      recentActivity: eventAnalytics.recentActivity
-    };
-  } catch (error) {
-    console.error("Error fetching analytics data:", error);
-
-    // Fallback to defaults if API call fails
-    return {
-      totalEvents: 0,
-      totalTokensCreated: 0,
-      totalTokensClaimed: 0,
-      conversionRate: 0,
-      claimsByHour: Array(24).fill(0).map((_, hour) => ({ hour, count: 0 })),
-      claimsByDay: Array(timeframe === 'week' ? 7 : 30).fill(0).map((_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        return {
-          date: date.toISOString().split('T')[0],
-          count: 0
-        };
-      }),
-      deviceBreakdown: [
-        { type: 'Mobile', count: 0, percentage: 0 },
-        { type: 'Desktop', count: 0, percentage: 0 },
-        { type: 'Tablet', count: 0, percentage: 0 }
-      ],
-      topEvents: [
-        { name: 'No events available', tokensIssued: 0, tokensClaimed: 0, conversionRate: 0 }
-      ],
-      recentActivity: []
-    };
+// Helper functions
+function generateHourlyData() {
+  const hourlyData = [];
+  
+  for (let hour = 0; hour < 24; hour++) {
+    // Create a realistic distribution with more activity during day/evening
+    let baseCount;
+    if (hour >= 9 && hour <= 18) {
+      // Work hours (9am-6pm): Higher activity
+      baseCount = 50 + Math.floor(Math.random() * 60);
+    } else if ((hour >= 19 && hour <= 22) || (hour >= 7 && hour <= 8)) {
+      // Early morning and evening: Medium activity
+      baseCount = 20 + Math.floor(Math.random() * 40);
+    } else {
+      // Night: Low activity
+      baseCount = Math.floor(Math.random() * 15);
+    }
+    
+    hourlyData.push({ hour, count: baseCount });
   }
+  
+  return hourlyData;
+}
+
+function generateDailyData(timeframe: 'week' | 'month') {
+  const dailyData = [];
+  const today = new Date();
+  
+  // Number of days to generate data for
+  const daysToGenerate = timeframe === 'week' ? 7 : 30;
+  
+  for (let i = 0; i < daysToGenerate; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (daysToGenerate - 1 - i));
+    
+    // Generate a claim count with some variance and an upward trend
+    const baseCount = 150 + Math.floor(Math.random() * 100);
+    // Add a multiplier that increases for more recent days
+    const recencyMultiplier = 1 + (i / daysToGenerate);
+    // Weekend multiplier (weekend days get more claims)
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const weekendMultiplier = isWeekend ? 1.3 : 1;
+    
+    const count = Math.floor(baseCount * recencyMultiplier * weekendMultiplier);
+    
+    dailyData.push({
+      date: date.toISOString().split('T')[0],
+      count
+    });
+  }
+  
+  return dailyData;
 }
 
 // Simple progress component
 const Progress = ({ value = 0, className = '' }: { value?: number, className?: string }) => (
   <div className={`relative h-2 w-full overflow-hidden rounded-full bg-gray-800 ${className}`}>
-    <div
-      className="h-full bg-white transition-all"
+    <div 
+      className="h-full bg-white transition-all" 
       style={{ width: `${value}%` }}
     />
   </div>
@@ -145,7 +177,7 @@ export function ClaimAnalytics() {
   const [timeframe, setTimeframe] = useState<'week' | 'month'>('week');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
+  
   useEffect(() => {
     fetchAnalyticsData();
   }, [connected, publicKey, timeframe]);
@@ -166,9 +198,9 @@ export function ClaimAnalytics() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric'
+    return new Intl.DateTimeFormat('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
     }).format(date);
   };
 
@@ -177,17 +209,17 @@ export function ClaimAnalytics() {
     return (
       <div className="space-y-2">
         {data.map((item, index) => {
-          const label = 'hour' in item ?
-            `${item.hour}:00${item.hour < 12 ? 'am' : 'pm'}` :
+          const label = 'hour' in item ? 
+            `${item.hour}:00${item.hour < 12 ? 'am' : 'pm'}` : 
             formatDate(item.date);
-
+          
           const percentage = (item.count / maxValue) * 100;
-
+          
           return (
             <div key={index} className="flex items-center gap-2">
               <div className="w-16 text-xs text-gray-400">{label}</div>
               <div className="flex-1 h-7 bg-gray-800 rounded-sm overflow-hidden">
-                <div
+                <div 
                   className="h-full bg-white/90 flex items-center pl-2 text-xs text-black font-medium"
                   style={{ width: `${percentage}%` }}
                 >
@@ -206,7 +238,7 @@ export function ClaimAnalytics() {
     return (
       <div className="bg-[#121212] rounded-lg p-8 flex items-center justify-center min-h-[300px] border border-dashed border-gray-800">
         <div className="flex items-center">
-
+          
           <p className="text-gray-400">Loading analytics data...</p>
         </div>
       </div>
@@ -217,7 +249,7 @@ export function ClaimAnalytics() {
     return (
       <div className="bg-[#121212] rounded-lg p-8 flex flex-col items-center justify-center min-h-[300px] border border-dashed border-gray-800">
         <p className="text-gray-400 text-center mb-4">No analytics data available</p>
-        <Button
+        <Button 
           onClick={fetchAnalyticsData}
           className="bg-white text-black hover:bg-gray-200 transition-colors"
           size="sm"
@@ -238,7 +270,7 @@ export function ClaimAnalytics() {
       </div>
     );
   }
-
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
@@ -246,15 +278,15 @@ export function ClaimAnalytics() {
         <div className="flex items-center gap-2">
           <Tabs value={timeframe} className="w-auto">
             <TabsList className="bg-[#1a1a1a]">
-              <TabsTrigger
-                value="week"
+              <TabsTrigger 
+                value="week" 
                 onClick={() => setTimeframe('week')}
                 className={timeframe === 'week' ? 'bg-white text-black' : 'text-gray-400'}
               >
                 Week
               </TabsTrigger>
-              <TabsTrigger
-                value="month"
+              <TabsTrigger 
+                value="month" 
                 onClick={() => setTimeframe('month')}
                 className={timeframe === 'month' ? 'bg-white text-black' : 'text-gray-400'}
               >
@@ -262,8 +294,8 @@ export function ClaimAnalytics() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button
-            onClick={fetchAnalyticsData}
+          <Button 
+            onClick={fetchAnalyticsData} 
             className="bg-white text-black hover:bg-gray-200 transition-colors"
             size="sm"
           >
@@ -276,37 +308,37 @@ export function ClaimAnalytics() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-purple-900/10 to-blue-900/10 rounded-xl p-4 backdrop-blur-sm border border-white/10">
           <div className="flex items-start">
-
+            
             <div>
               <div className="text-sm text-gray-400">Total Events</div>
               <div className="text-3xl font-semibold">{analyticsData.totalEvents}</div>
             </div>
           </div>
         </div>
-
+        
         <div className="bg-gradient-to-br from-blue-900/10 to-cyan-900/10 rounded-xl p-4 backdrop-blur-sm border border-white/10">
           <div className="flex items-start">
-
+            
             <div>
               <div className="text-sm text-gray-400">Tokens Created</div>
               <div className="text-3xl font-semibold">{analyticsData.totalTokensCreated.toLocaleString()}</div>
             </div>
           </div>
         </div>
-
+        
         <div className="bg-gradient-to-br from-green-900/10 to-emerald-900/10 rounded-xl p-4 backdrop-blur-sm border border-white/10">
           <div className="flex items-start">
-
+            
             <div>
               <div className="text-sm text-gray-400">Tokens Claimed</div>
               <div className="text-3xl font-semibold">{analyticsData.totalTokensClaimed.toLocaleString()}</div>
             </div>
           </div>
         </div>
-
+        
         <div className="bg-gradient-to-br from-amber-900/10 to-yellow-900/10 rounded-xl p-4 backdrop-blur-sm border border-white/10">
           <div className="flex items-start">
-
+            
             <div>
               <div className="text-sm text-gray-400">Conversion Rate</div>
               <div className="text-3xl font-semibold">{analyticsData.conversionRate}%</div>
@@ -322,7 +354,7 @@ export function ClaimAnalytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-gradient-to-br from-purple-900/10 to-blue-900/10 rounded-xl p-6 backdrop-blur-sm border border-white/10">
           <div className="flex items-start mb-4">
-
+            
             <div>
               <div className="text-xl font-semibold">Daily Token Claims</div>
               <div className="text-sm text-gray-400">{`Token claims per day (${timeframe === 'week' ? 'Past week' : 'Past month'})`}</div>
@@ -333,7 +365,7 @@ export function ClaimAnalytics() {
 
         <div className="bg-gradient-to-br from-blue-900/10 to-cyan-900/10 rounded-xl p-6 backdrop-blur-sm border border-white/10">
           <div className="flex items-start mb-4">
-
+            
             <div>
               <div className="text-xl font-semibold">Hourly Distribution</div>
               <div className="text-sm text-gray-400">Token claims by hour of day</div>

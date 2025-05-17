@@ -1,3 +1,0 @@
-cargo:rustc-link-lib=static=ring-core
-cargo:rustc-link-lib=static=ring-test
-cargo:rustc-link-search=native=/Users/ayushsrivastava/Solana-OpenAPI/solana-program/target/debug/build/ring-f66505b1875242c4/out

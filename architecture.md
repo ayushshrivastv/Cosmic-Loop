@@ -1,67 +1,62 @@
-# Solana OpenAPI - Architecture Documentation
+# Scalable cToken: Compressed Token Distribution Architecture
 
 ## Overview
 
-Solana OpenAPI is an innovative blockchain data interface that provides real-time access to Solana's on-chain data through The Graph's Substreams technology, enhanced with cross-chain capabilities via LayerZero V2 contracts. The platform enables developers, analysts, and users to query blockchain data using natural language, receiving structured responses about NFTs, marketplace activities, wallet histories, and cross-chain operations.
+Scalable cToken is a high-throughput solution for creating and distributing compressed proof-of-participation tokens at scale on the Solana blockchain. The system leverages Solana Pay for seamless QR code interactions and Light Protocol's ZK compression technology to achieve significant cost reductions and scalability improvements.
+
+This document outlines the technical architecture, user workflows, and implementation details of the system.
 
 ## System Architecture
 
 ```
 ┌─────────────────────────────────────┐      ┌─────────────────────────────────┐
 │                                     │      │                                 │
-│   Frontend (Next.js + React)        │      │  Blockchain Integration         │
+│   Frontend (Next.js + React)        │      │  Solana On-Chain Programs       │
 │   ┌────────────────────────────┐    │      │  ┌─────────────────────────┐    │
 │   │                            │    │      │  │                         │    │
-│   │   OpenAPI Interface        │    │      │  │  Substreams Package     │    │
-│   │   - Natural Language Query │    │      │  │  - Process Solana Data  │    │
-│   │   - Structured Responses   │────┼──────┼─▶│  - Index Transactions   │    │
-│   │   - Real-time Updates      │    │      │  │  - Track NFT Activity   │    │
-│   │   - Cross-chain Data View  │    │      │  │  - Monitor Marketplaces │    │
+│   │   Event Creator Interface  │    │      │  │  cToken Program         │    │
+│   │   - Create Events          │    │      │  │  - initialize_event     │    │
+│   │   - Mint cTokens           │────┼──────┼─▶│  - mint_batch_tokens    │    │
+│   │   - Generate QR Codes      │    │      │  │  - claim_token          │    │
+│   │   - Monitor Claims         │    │      │  │  - verify_token         │    │
 │   │                            │    │      │  │                         │    │
 │   └────────────────────────────┘    │      │  └─────────────┬───────────┘    │
 │                                     │      │                │                │
 │   ┌────────────────────────────┐    │      │  ┌─────────────▼───────────┐    │
 │   │                            │    │      │  │                         │    │
-│   │   AI Assistant             │    │      │  │  LayerZero V2           │    │
-│   │   - Query Classification   │    │      │  │  - Cross-chain Messaging│    │
-│   │   - Web Search Integration │────┼──────┼─▶│  - DVN Security Network │    │
-│   │   - Response Generation    │    │      │  │  - Omnichain Execution  │    │
-│   │   - Gemini AI Integration  │    │      │  │                         │    │
+│   │   Attendee Interface       │    │      │  │  Light Protocol         │    │
+│   │   - Scan QR Codes          │    │      │  │  - compressed_token     │    │
+│   │   - Claim cTokens          │────┼──────┼─▶│  - stateless.js         │    │
+│   │   - View Claimed Tokens    │    │      │  │  - state compression    │    │
+│   │                            │    │      │  │                         │    │
 │   └────────────────────────────┘    │      │  └─────────────┬───────────┘    │
 │                                     │      │                │                │
 │   ┌────────────────────────────┐    │      │  ┌─────────────▼───────────┐    │
 │   │                            │    │      │  │                         │    │
-│   │   Data Visualization       │    │      │  │  Multi-chain Support    │    │
-│   │   - Interactive Charts     │────┼──────┼─▶│  - Ethereum            │    │
-│   │   - Transaction Timelines  │    │      │  │  - Arbitrum             │    │
-│   │   - NFT Gallery View       │    │      │  │  - Optimism             │    │
-│   │                            │    │      │  │  - 30+ Other Chains     │    │
+│   │   Solana Pay Integration   │    │      │  │  Solana SPL Tokens      │    │
+│   │   - QR Code Generation     │────┼──────┼─▶│  - Token Program        │    │
+│   │   - Transaction Embedding  │    │      │  │  - Associated Token     │    │
+│   │   - Payment Processing     │    │      │  │    Account Program      │    │
+│   │                            │    │      │  │                         │    │
 │   └────────────────────────────┘    │      │  └─────────────────────────┘    │
 │                                     │      │                                 │
-└─────────────────────────────────────┘      └─────────────────────────────────┘
-
-┌─────────────────────────────────────┐      ┌─────────────────────────────────┐
-│                                     │      │                                 │
-│   Backend Services                  │      │   Security & Verification       │
-│   ┌────────────────────────────┐    │      │   ┌─────────────────────────┐   │
-│   │                            │    │      │   │                         │   │
-│   │   API Gateway              │    │      │   │   Decentralized         │   │
-│   │   - Request Routing        │    │      │   │   Verification Network  │   │
-│   │   - Rate Limiting          │    │      │   │   (DVN)                │   │
-│   │   - Authentication         │    │      │   │                         │   │
-│   │                            │    │      │   │   - Message Verification│   │
-│   └────────────────────────────┘    │      │   │   - Fraud Prevention    │   │
-│                                     │      │   │   - Security Guarantees │   │
-│   ┌────────────────────────────┐    │      │   │                         │   │
-│   │                            │    │      │   └─────────────────────────┘   │
-│   │   Web Search Service       │    │      │                                 │
-│   │   - Serper.dev Integration │    │      │   ┌─────────────────────────┐   │
-│   │   - Real-time Web Data     │    │      │   │                         │   │
-│   │   - Knowledge Enhancement  │    │      │   │   Endpoint Security     │   │
-│   │                            │    │      │   │   - API Key Management  │   │
-│   └────────────────────────────┘    │      │   │   - Rate Limiting       │   │
-│                                     │      │   │   - Request Validation  │   │
+└─────────────────────────────────────┘      │                                 │
+                                             └─────────────────────────────────┘
+┌─────────────────────────────────────┐
+│                                     │      ┌─────────────────────────────────┐
+│   Wallet Integration                │      │                                 │
+│   ┌────────────────────────────┐    │      │   ZK Compression               │
+│   │                            │    │      │   ┌─────────────────────────┐   │
+│   │   Solana Wallet Adapter    │    │      │   │                         │   │
+│   │   - Connect Wallet         │    │      │   │     Merkle Tree         │   │
+│   │   - Sign Transactions      │    │      │   │         │               │   │
+│   │   - View Balances          │    │      │   │     ┌───┴────┐           │   │
+│   │                            │    │      │   │     │        │           │   │
+│   └────────────────────────────┘    │      │   │  Event    Token         │   │
+│                                     │      │   │  State    Trees         │   │
 └─────────────────────────────────────┘      │   │                         │   │
+                                             │   │   Compressed cTokens    │   │
+                                             │   │                         │   │
                                              │   └─────────────────────────┘   │
                                              │                                 │
                                              └─────────────────────────────────┘
@@ -69,355 +64,298 @@ Solana OpenAPI is an innovative blockchain data interface that provides real-tim
 
 ## Component Flow
 
-### Query Processing Flow
+### Event Creation Process
 
-1. **User Query Submission**
-   - User submits natural language query through the OpenAPI interface
-   - Query is preprocessed and normalized
+1. **Organizer** logs into the application with a Solana wallet
+2. Organizer fills out event details (name, time, location, token supply) and submits creation form
+3. Client-side code sends transaction to initialize the event on-chain
+4. On-chain `initialize_event` function:
+   - Initializes event data
+   - Sets up token metadata structure
+   - Initializes compressed token state using Light Protocol
+   - Creates event authority account
+5. Event details are stored and displayed on dashboard
 
-2. **Query Classification**
-   - AI Assistant classifies query type (blockchain data, web search, or hybrid)
-   - Determines required data sources and processing paths
+### Token Minting Process
 
-3. **Data Retrieval**
-   - For blockchain queries: Substreams package processes Solana data
-   - For cross-chain data: LayerZero V2 contracts retrieve data from other chains
-   - For general knowledge: Web Search Service fetches relevant information
+1. **Organizer** selects an event and specifies token parameters
+2. Client-side code sends transaction to mint tokens on-chain
+3. On-chain `mint_batch_tokens` function:
+   - Creates compressed cTokens using Light Protocol
+   - Associates tokens with event metadata
+   - Allocates tokens for distribution via QR codes
+4. Event status is updated to show available tokens
 
-4. **Response Generation**
-   - Gemini AI generates structured, human-readable responses
-   - Combines blockchain data with web knowledge when appropriate
-   - Formats results with appropriate visualizations
+### QR Code Generation Process
 
-### Cross-Chain Operation Flow
+1. **Organizer** requests to generate QR codes for an event
+2. Client-side code generates Solana Pay QR codes that encode:
+   - Event ID
+   - Token claim instructions
+   - Verification parameters
+3. QR codes are rendered for display or download
+4. Organizer can distribute QR codes via print or digital means
 
-1. **Message Initiation**
-   - Source chain initiates cross-chain message via LayerZero endpoint
-   - Message contains payload, destination information, and execution parameters
+### Token Claim Process
 
-2. **Security Verification**
-   - Decentralized Verification Network (DVN) validates the message
-   - Multiple validators confirm transaction authenticity
-   - Security guarantees prevent fraudulent messages
+1. **Attendee** scans a Solana Pay QR code with their mobile device
+2. Their Solana wallet application launches and displays the transaction details
+3. Attendee confirms the transaction to claim the token
+4. On-chain `claim_token` function:
+   - Verifies the claim eligibility
+   - Transfers a compressed cToken to the attendee's wallet
+   - Records the claim in the event records
+   - Updates token distribution statistics
+5. Attendee receives confirmation of claimed token in their wallet
 
-3. **Cross-Chain Delivery**
-   - Message is delivered to destination chain via LayerZero protocol
-   - Gas efficiency optimizations reduce transaction costs
-   - Guaranteed delivery mechanisms ensure reliability
+## User Experience Workflows
 
-4. **Execution and Confirmation**
-   - Destination chain executes the intended operation
-   - Confirmation is sent back to source chain
-   - Transaction status is updated in the OpenAPI interface
+### Event Organizer Journey
 
-## LayerZero V2 Integration Details
+1. **Onboarding & Authentication**
+   - Organizer visits the platform and connects their Solana wallet (Phantom, Backpack, or Solflare)
+   - The system recognizes the wallet address and loads any existing events created by this organizer
+   - First-time users are presented with a brief tutorial on creating and managing events
 
-### Core Components
+2. **Event Creation**
+   - Organizer navigates to the "Create Event" section from the dashboard
+   - Completes a multi-step form with event details:
+     - Basic Information: Name, date, location, description
+     - Token Configuration: Name, symbol, supply, metadata attributes
+     - Branding: Upload event logo and customize token appearance
+   - Reviews all information before submitting
+   - System provides real-time feedback on transaction status and confirmation
 
-1. **Endpoints**
-   - Smart contracts deployed on each blockchain
-   - Entry point for cross-chain messages
-   - Handle message serialization and deserialization
+3. **Token Distribution Management**
+   - After successful event creation, organizer is redirected to the event management dashboard
+   - Dashboard displays key metrics: tokens minted, tokens claimed, unique participants
+   - Organizer can generate QR codes in various formats:
+     - Individual codes for one-time claims
+     - Batch codes for specific attendee groups
+     - Master codes for event staff to distribute
+   - Export options for QR codes: PDF sheets, individual image files, or embedded in emails
 
-2. **Decentralized Verification Network (DVN)**
-   - Network of validators that verify cross-chain messages
-   - Provides security guarantees through decentralization
-   - Prevents fraudulent message delivery
+4. **Monitoring & Analytics**
+   - Real-time claim tracking shows which tokens have been claimed and when
+   - Geographic distribution of claims (if location data is available)
+   - Time-based analytics showing claim patterns throughout the event
+   - Export functionality for post-event reporting
 
-3. **Executor Network**
-   - Delivers messages to destination chains
-   - Optimizes for gas efficiency
-   - Ensures reliable message delivery
+### Attendee Journey
 
-4. **Application Contracts**
-   - Custom contracts that utilize LayerZero for cross-chain functionality
-   - Implement specific business logic for the Solana OpenAPI platform
-   - Handle NFT bridging, token transfers, and data synchronization
+1. **Token Discovery**
+   - Attendee encounters a QR code at an event (physical signage, digital display, or event materials)
+   - QR code includes brief instructions and the event branding for context
 
-### Technical Implementation
+2. **Scanning & Wallet Connection**
+   - Attendee scans the QR code using their phone's camera or a QR scanner app
+   - If they have a Solana wallet installed, it automatically launches
+   - First-time users are guided to install a compatible wallet with simple instructions
 
-```solidity
-// Example LayerZero V2 Application Contract Interface
-interface ISolanaOpenAPIApp {
-    // Send a cross-chain message
-    function sendMessage(
-        uint32 dstEid,        // Destination chain endpoint ID
-        bytes calldata message,  // Message payload
-        bytes calldata options   // Delivery options
-    ) external payable returns (bytes32 messageId);
-    
-    // Receive a cross-chain message
-    function lzReceive(
-        Origin calldata origin,  // Source information
-        bytes32 guid,           // Unique message ID
-        bytes calldata message,  // Message payload
-        address executor,       // Message executor
-        bytes calldata extraData // Additional data
-    ) external;
-    
-    // Verify message delivery status
-    function getMessageStatus(bytes32 messageId) external view returns (MessageStatus);
-}
-```
+3. **Token Claiming**
+   - Wallet displays the claim transaction details including:
+     - Event name and organizer information
+     - Token description and attributes
+     - Network fee estimate (minimal due to compression)
+   - Attendee approves the transaction with a single tap
+   - System provides immediate feedback on successful claim
+
+4. **Post-Claim Experience**
+   - Confirmation screen shows the claimed token with animation
+   - Options to view the token in their wallet or return to the event page
+   - Social sharing functionality to showcase their participation
+   - Optional: Links to related events or additional resources
+
+## Light Protocol ZK Compression Integration
+
+The Scalable cToken system leverages Solana's State Compression through Light Protocol to efficiently store and distribute tokens:
+
+1. **Storage Efficiency**: Instead of creating separate token mint accounts for each participant, all token data is stored as compressed state, significantly reducing on-chain storage costs by approximately 1000x.
+
+2. **Scalability**: The system can handle thousands of token distributions with minimal on-chain storage cost, making it ideal for large-scale events with many attendees.
+
+3. **Throughput Optimization**: Light Protocol enables minting up to 1,000 tokens per transaction, compared to just 1 with traditional NFTs.
+
+4. **Cost Reduction**: Using Light Protocol's compressed token standard drastically reduces the cost of minting and distributing tokens, making it economically viable for events of any size.
+
+5. **Technical Implementation**: The system uses Light Protocol's stateless.js and compressed-token libraries to handle the ZK proofs and state compression operations.
 
 ## Data Structure
 
-### Cross-Chain Message Format
+### On-Chain Accounts
+
+1. **Event Account**
+   - Authority (Pubkey)
+   - Event Name (String)
+   - Event Description (String)
+   - Event Time (i64)
+   - Event Location (String)
+   - Total Supply (u64)
+   - Tokens Claimed (u64)
+   - Active Status (bool)
+   - Merkle Root (32 bytes)
+
+2. **Claim Account**
+   - Attendee (Pubkey)
+   - Event ID (Pubkey)
+   - Token ID (u64)
+   - Timestamp (i64)
+   - Status (enum: Claimed, Pending, Failed)
+
+### Compressed Token Structure
 
 ```
-┌───────────────────────────────────────────────────────────┐
-│                     Message Packet                        │
-├───────────┬───────────┬────────────┬────────────┬────────┤
-│ Source    │ Dest.     │ Nonce      │ Message    │ Gas    │
-│ Chain ID  │ Chain ID  │            │ Payload    │ Params │
-├───────────┴───────────┴────────────┴────────────┴────────┤
-│                     Verification Data                     │
-├───────────┬───────────┬────────────┬────────────┬────────┤
-│ DVN       │ Validator │ Signatures │ Timestamp  │ Proof  │
-│ ID        │ Set       │            │            │ Data   │
-└───────────┴───────────┴────────────┴────────────┴────────┘
+CompressedToken {
+    event_id: Pubkey,       // References the event account
+    serial_number: u64,     // Unique token identifier within the event
+    recipient: Pubkey,      // Wallet address of the token recipient
+    metadata: {
+        name: String,       // Token name (usually event name + token number)
+        symbol: String,     // Token symbol
+        uri: String,        // Link to metadata JSON
+        attributes: [       // Additional token attributes
+            {
+                trait_type: String,
+                value: String
+            }
+        ]
+    }
+}
 ```
-
-### Supported Data Types
-
-1. **NFT Data**
-   - Metadata, ownership history, bridging status
-   - Cross-chain provenance tracking
-
-2. **Token Transfers**
-   - Cross-chain transaction details
-   - Fee information and execution status
-
-3. **Market Activity**
-   - Multi-chain marketplace listings and sales
-   - Price history and volume analytics
-
-4. **Wallet History**
-   - Unified view of cross-chain wallet activity
-   - Transaction timeline across multiple chains
 
 ## Security Features
 
-1. **Decentralized Verification**
-   - Multiple independent validators confirm message authenticity
-   - Prevents single points of failure in the verification process
+1. **Authority Validation**: Only the event creator can mint tokens and generate valid QR codes for their events.
 
-2. **Configurable Security**
-   - Adjustable security parameters based on transaction value
-   - Higher-value transactions can require more validators
+2. **Dual-Signature Verification**: Token claims require valid signatures from both the event authority and the claiming wallet.
 
-3. **Message Delivery Guarantees**
-   - Reliable delivery mechanisms with retry logic
-   - Transaction finality confirmation across chains
+3. **On-Chain Verification**: All token claims are verified on-chain to prevent duplicate or fraudulent claims.
 
-4. **Fraud Prevention**
-   - Built-in mechanisms to detect and prevent malicious activity
-   - Economic incentives for honest validator behavior
+4. **Time-Bound Claims**: Events can specify claim periods to limit when tokens can be claimed.
+
+5. **Merkle Proof Validation**: Light Protocol uses Merkle proofs to verify token authenticity without exposing the entire token dataset.
 
 ## Frontend-Blockchain Communication
 
-### API Endpoints
+### Solana Pay Integration Module
 
-1. **Query Interface**
-   - `/api/query` - Submit natural language queries
-   - `/api/history` - Retrieve query history
+The application integrates with Solana Pay to create a seamless user experience:
 
-2. **Cross-Chain Operations**
-   - `/api/bridge` - Initiate cross-chain transfers
-   - `/api/status` - Check cross-chain transaction status
+1. **QR Code Generation**:
+   ```typescript
+   // Create a Solana Pay transaction request
+   const transactionRequest = new TransactionRequestURL({
+     link: new URL(`https://${baseUrl}/api/claim`),
+     label: eventName,
+     message: `Claim your proof-of-participation token for ${eventName}`,
+     params: {
+       eventId: eventAccount.toString(),
+       recipient: 'recipient_wallet', // To be filled by wallet app
+     }
+   });
 
-3. **Data Visualization**
-   - `/api/analytics` - Get cross-chain analytics data
-   - `/api/nft/gallery` - View NFTs across multiple chains
+   // Generate QR code from URL
+   const qrCode = transactionRequest.toString();
+   ```
+
+2. **Transaction Construction**:
+   ```typescript
+   // When user scans the QR code, construct the token claim transaction
+   const transaction = new Transaction()
+     .add(
+       createClaimTokenInstruction({
+         eventAccount: new PublicKey(eventId),
+         recipientAccount: new PublicKey(recipient),
+         systemProgram: SystemProgram.programId,
+       })
+     );
+   ```
+
+3. **Light Protocol Integration**:
+   ```typescript
+   import {
+     LightProtocolCompression,
+     createMintCompressedTokenInstruction
+   } from '@lightprotocol/stateless.js';
+
+   // Create a compressed token instruction
+   const mintIx = createMintCompressedTokenInstruction({
+     payer: organizer.publicKey,
+     eventAccount: eventPublicKey,
+     merkleTree: merkleTreePublicKey,
+     metadata: eventMetadata,
+     mintAuthority: organizer.publicKey,
+     recipient: attendee.publicKey,
+   });
+   ```
 
 ## Future Extensions
 
-1. **Enhanced Cross-Chain Analytics**
-   - Advanced metrics for cross-chain activity
-   - Predictive analytics for market trends
+1. **Token Gating**: Enable event organizers to create token-gated experiences where only attendees with valid cTokens can access specific content or areas.
 
-2. **Multi-Chain Smart Contract Deployment**
-   - One-click deployment across multiple chains
-   - Synchronized contract state management
+2. **Multi-Event Series**: Allow organizers to create series of connected events with progressive token collection and rewards for attending multiple events.
 
-3. **Cross-Chain Governance**
-   - Unified governance mechanisms across chains
-   - Coordinated protocol upgrades
+3. **Attendance Verification**: Add additional verification layers such as location-based verification or time-window restrictions.
 
-4. **Expanded Chain Support**
-   - Integration with additional blockchain networks
-   - Support for emerging L2 solutions
+4. **Token Utility Expansion**: Implement mechanisms for token holders to redeem benefits, discounts, or access to exclusive content.
 
-## Performance Metrics
+5. **Analytics Dashboard**: Develop comprehensive analytics for organizers to track attendee engagement and token distribution metrics.
 
-| Metric | Traditional Bridge | LayerZero V2 |
-|--------|-------------------|--------------||
-| Message Delivery Time | 30-60 minutes | 2-5 minutes |
-| Transaction Cost | High (multiple validations) | Optimized (30-50% reduction) |
-| Security Level | Centralized validators | Decentralized network |
-| Chains Supported | Limited set | 30+ blockchains |
-| Failure Recovery | Manual intervention | Automatic retry mechanism |
-| Throughput | Limited by slowest chain | Parallelized processing |
-The frontend is built with Next.js 15 using the App Router architecture and React 18. It provides a modern, responsive user interface for interacting with the Solana OpenAPI ecosystem.
+6. **Cross-Chain Compatibility**: Expand the system to allow token claims across multiple blockchain networks.
 
-#### Key Frontend Components:
+## Planned Backend Enhancements
 
-- **Natural Language Interface**: AI-powered input for querying blockchain data
-- **Data Visualization**: Interactive charts and graphs for blockchain analytics
-- **Real-time Updates**: WebSocket connections for live blockchain events
-- **Search History**: Tracks and manages previous queries
-- **Response Formatting**: Presents blockchain data in a readable format
+The current implementation focuses on delivering a functional and user-friendly cPOP interface. In the coming days, I plan to enhance the backend with the following improvements:
 
-#### Frontend Technology Stack:
+### Security Enhancements
 
-- Next.js 15.3.2 with App Router
-- React 18.3.1
-- TypeScript
-- Tailwind CSS for styling
-- shadcn/ui component library
-- react-hook-form with zod validation
-- Wallet adapters for blockchain interaction
+1. **Advanced Access Control**
+   - Role-based permissions for event management teams
+   - Multi-signature requirements for high-value token operations
+   - Rate limiting to prevent abuse of the token claiming system
 
-### 2. Backend Services
+2. **Enhanced Transaction Security**
+   - Implement additional verification layers for token claims
+   - Fraud detection system to identify suspicious claiming patterns
+   - Revocation mechanisms for compromised QR codes
 
-The backend uses a microservices architecture to provide scalable, maintainable services that handle various aspects of the application.
+3. **Data Protection**
+   - End-to-end encryption for sensitive event data
+   - Privacy-preserving analytics that maintain user anonymity
+   - Compliance with data protection regulations
 
-#### Key Backend Services:
+### Testing and Quality Assurance
 
-- **GraphQL API**: Central API gateway for frontend-backend communication
-- **NFT Service**: Manages NFT creation, metadata, and transfers
-- **Bridge Service**: Handles cross-chain NFT transfers via LayerZero
-- **Event Service**: Manages event creation and participation
-- **Auth Service**: Handles user authentication and authorization
-- **Chain Listeners**: Monitors blockchain events across multiple chains
+1. **Comprehensive Test Suite**
+   - Unit tests for all smart contract functions
+   - Integration tests for the entire token lifecycle
+   - Load testing to verify performance at scale (10,000+ simultaneous users)
 
-#### Backend Technology Stack:
+2. **Security Audits**
+   - Third-party security audit of smart contracts
+   - Penetration testing of the web application
+   - Formal verification of critical contract functions
 
-- Node.js with Express
-- GraphQL with Apollo Server
-- PostgreSQL database with Knex.js ORM
-- Redis for caching and pub/sub messaging
-- WebSockets for real-time communication
-- JWT for authentication
-- Zod for validation
+3. **Performance Optimization**
+   - Benchmarking and optimization of token minting operations
+   - Caching strategies for frequently accessed data
+   - Gas optimization for all on-chain operations
 
-### 3. Blockchain Integration
+### Feature Expansion
 
-Solana OpenAPI integrates with Solana blockchain to provide a seamless data access experience.
+1. **Advanced Token Functionality**
+   - Tiered token systems for different attendee categories
+   - Time-locked tokens that activate at specific event milestones
+   - Token upgradeability for returning attendees
 
-#### Key Blockchain Components:
+2. **Integration Ecosystem**
+   - API endpoints for third-party event management platforms
+   - Webhook support for real-time notifications
+   - SDK for developers to build on top of the cToken infrastructure
 
-- **Solana Integration**: Uses web3.js and wallet adapters for Solana interaction
-- **EVM Integration**: Uses ethers.js and wagmi for EVM chain interaction
-- **LayerZero Protocol**: Enables cross-chain messaging and NFT transfers
-- **Light Protocol**: Provides compressed token functionality on Solana
+3. **Community Governance**
+   - Decentralized governance for protocol upgrades
+   - Community-driven feature prioritization
+   - Open-source contribution framework
 
-### 4. Database System
-
-The system uses PostgreSQL for persistent data storage, with a schema designed to track NFTs and operations across multiple chains.
-
-#### Key Database Tables:
-
-- `nft_collections`: Stores collection metadata
-- `nfts`: Stores individual NFT data
-- `bridge_operations`: Tracks cross-chain transfer operations
-- `verification_proofs`: Stores cryptographic verification proofs
-- `events`: Stores event data for NFT distribution
-- `event_participants`: Tracks participation in events
-- `chain_listeners`: Configuration for blockchain event monitoring
-
-### 5. Caching and Messaging
-
-Redis is used for caching frequently accessed data and for pub/sub messaging between services.
-
-#### Key Caching and Messaging Components:
-
-- **Data Caching**: Reduces database load for frequently accessed data
-- **Pub/Sub Messaging**: Enables communication between microservices
-- **WebSocket Notifications**: Provides real-time updates to clients
-
-## Data Flow
-
-### NFT Creation Flow
-
-1. User connects wallet on frontend
-2. User submits NFT creation form
-3. Frontend sends request to GraphQL API
-4. NFT Service processes request
-5. Light Protocol SDK creates compressed token on Solana
-6. Database records NFT metadata
-7. WebSocket notifies client of successful creation
-
-### NFT Bridging Flow
-
-1. User selects NFT to bridge
-2. User selects destination chain
-3. Frontend sends bridge request to GraphQL API
-4. Bridge Service initiates LayerZero message
-5. Source chain locks or burns NFT
-6. LayerZero delivers message to destination chain
-7. Destination chain mints or unlocks NFT
-8. Database updates NFT status
-9. WebSocket notifies client of successful bridge
-
-### Event Token Distribution Flow
-
-1. Event creator generates QR codes for tokens
-2. Attendee scans QR code
-3. Frontend sends claim request to GraphQL API
-4. NFT Service verifies claim eligibility
-5. Light Protocol SDK transfers token to attendee
-6. Database updates token ownership
-7. WebSocket notifies client of successful claim
-
-## Scalability Considerations
-
-Solana OpenAPI is designed for high scalability, capable of handling thousands of concurrent queries:
-
-- **Microservices Architecture**: Allows independent scaling of services
-- **Compressed Tokens**: Reduces on-chain storage by up to 1000x
-- **Serverless Functions**: Handles computation-intensive tasks
-- **Redis Caching**: Reduces database load
-- **Database Indexing**: Optimizes query performance
-- **Rate Limiting**: Prevents API abuse
-
-## Security Considerations
-
-Security is a top priority for Solana OpenAPI:
-
-- **JWT Authentication**: Secure user authentication
-- **Input Validation**: Zod validation for all inputs
-- **Rate Limiting**: Prevents brute force attacks
-- **CORS Configuration**: Restricts API access
-- **No Private Key Storage**: Keys remain in user wallets
-- **Cryptographic Verification**: Ensures cross-chain transfer integrity
-
-## Deployment Architecture
-
-The system can be deployed in various configurations:
-
-- **Frontend**: Deployed on Vercel or Netlify
-- **Backend**: Can be deployed as:
-  - Monolithic application
-  - Microservices on Kubernetes
-  - Serverless functions on AWS Lambda or Netlify Functions
-- **Database**: Hosted PostgreSQL (AWS RDS, Digital Ocean, etc.)
-- **Redis**: Managed Redis service (Redis Labs, AWS ElastiCache, etc.)
-
-## Development Workflow
-
-1. Local development with hot reloading
-2. Testing with Jest and React Testing Library
-3. CI/CD pipeline with GitHub Actions
-4. Staging environment for testing
-5. Production deployment with blue/green strategy
-
-## Future Enhancements
-
-Planned enhancements for the Solana OpenAPI platform:
-
-1. Support for additional blockchains
-2. Enhanced analytics dashboard
-3. Mobile application
-4. Advanced token utilities (staking, voting, etc.)
-5. Integration with existing NFT marketplaces
+These enhancements will further strengthen the platform's security, reliability, and scalability while maintaining the intuitive user experience that makes the current implementation accessible to both event organizers and attendees.

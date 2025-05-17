@@ -1,7 +1,7 @@
 "use client";
 
-import React, { FC, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
-import { WalletAdapterNetwork, WalletError, WalletNotConnectedError } from '@solana/wallet-adapter-base';
+import React, { FC, ReactNode, useMemo, useState, useEffect } from 'react';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
   ConnectionProvider,
   WalletProvider,
@@ -11,13 +11,15 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
+  BackpackWalletAdapter,
+  BraveWalletAdapter,
+  CoinbaseWalletAdapter,
+  CloverWalletAdapter,
   TorusWalletAdapter,
-  // BackpackWalletAdapter and GlowWalletAdapter are not available in the current version
-  // Using only the available adapters
+  LedgerWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
 import { toast } from 'sonner';
-// Using local implementation of useLocalStorage instead of importing
 
 interface WalletAdapterProviderProps {
   children: ReactNode;
@@ -25,16 +27,8 @@ interface WalletAdapterProviderProps {
   endpoint?: string;
 }
 
-// Wallet preference storage key
-const WALLET_PREFERENCE_KEY = 'cosmic-loop-wallet-preference';
-
 /**
  * Component that safely wraps Solana's wallet adapter functionality with proper client-side detection
- * This enhanced version includes:
- * - Support for multiple wallet types (Phantom, Backpack, Solflare, etc.)
- * - Auto-reconnection logic with retry mechanism
- * - Proper error handling with user feedback via toast notifications
- * - Remembering the last used wallet for better UX
  */
 export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
   children,
@@ -47,23 +41,14 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
   // Track if we've properly waited to initialize wallet
   const [walletInitialized, setWalletInitialized] = useState(false);
 
-  // Remember user's wallet preference
-  const [walletPreference, setWalletPreference] = useLocalStorage<string | null>(
-    WALLET_PREFERENCE_KEY,
-    null
-  );
-
-  // Track connection attempts to prevent infinite loops
-  const [connectionAttempts, setConnectionAttempts] = useState(0);
-
   useEffect(() => {
     setMounted(true);
 
     // Delay wallet initialization to ensure DOM is stable
     const timeoutId = setTimeout(() => {
       setWalletInitialized(true);
-      console.debug('[Wallet] Initialization complete');
-    }, 1000);
+      console.log('Wallet adapter initialization complete');
+    }, 1500); // Increased timeout to ensure DOM is fully loaded
 
     return () => {
       clearTimeout(timeoutId);
@@ -87,60 +72,42 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
   const rpcEndpoint = useMemo(() => {
     if (endpoint) return endpoint;
 
-    return cluster === 'mainnet-beta'
+    const finalEndpoint = cluster === 'mainnet-beta'
       ? MAINNET_RPC_ENDPOINT
       : DEVNET_RPC_ENDPOINT;
+
+    console.log(`Using RPC endpoint: ${finalEndpoint} (${cluster})`);
+    return finalEndpoint;
   }, [cluster, endpoint]);
 
-  // Configure supported wallets with all major Solana wallets
-  const wallets = useMemo(() => [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter(),
-    // BackpackWalletAdapter and GlowWalletAdapter removed as they're not available in the current version
-    new TorusWalletAdapter()
-  ], []);
-
-  // Handle wallet errors with detailed feedback
-  const onError = useCallback((error: WalletError) => {
-    console.error('[Wallet] Error:', error);
-
-    let message = 'An error occurred with your wallet';
-
-    // Provide specific error messages based on error type
-    if (error instanceof WalletNotConnectedError) {
-      message = 'Please connect your wallet to continue';
-    } else if (error.name === 'WalletDisconnectedError') {
-      message = 'Your wallet was disconnected. Please reconnect';
-      // Attempt to reconnect automatically after a short delay
-      setTimeout(() => {
-        if (connectionAttempts < 3) {
-          setConnectionAttempts(prev => prev + 1);
-          console.debug('[Wallet] Attempting to reconnect, attempt:', connectionAttempts + 1);
-        }
-      }, 2000);
-    } else if (error.name === 'WalletWindowClosedError') {
-      message = 'You closed the wallet connection window';
-    } else if (error.name.includes('WalletTimeoutError')) {
-      message = 'Wallet connection timed out. Please try again';
-    } else if (error.message) {
-      message = error.message;
+  // Configure supported wallets with improved options
+  const wallets = useMemo(() => {
+    try {
+      console.log('Configuring wallets for network:', network);
+      return [
+        new PhantomWalletAdapter(),
+        new SolflareWalletAdapter(),
+        new BackpackWalletAdapter(),
+        new BraveWalletAdapter(),
+        new CoinbaseWalletAdapter(),
+        new CloverWalletAdapter(),
+        new TorusWalletAdapter(),
+        new LedgerWalletAdapter(),
+      ];
+    } catch (error) {
+      console.error('Error initializing wallet adapters:', error);
+      // Return minimum set of wallets if there's an error
+      return [
+        new PhantomWalletAdapter(),
+        new SolflareWalletAdapter(),
+      ];
     }
+  }, [network]);
 
-    toast.error(message, {
-      description: 'Please try again or use a different wallet',
-      duration: 5000,
-    });
-  }, [connectionAttempts]);
-
-  // Save wallet preference when connected
-  const onWalletConnected = (walletName: string) => {
-    setWalletPreference(walletName);
-    setConnectionAttempts(0); // Reset connection attempts on successful connection
-    console.debug('[Wallet] Connected to:', walletName);
-
-    toast.success('Wallet connected', {
-      description: `Successfully connected to ${walletName}`,
-    });
+  // Wallet connection error handler
+  const onError = (error: Error) => {
+    console.error('Wallet connection error:', error);
+    toast.error(`Wallet connection error: ${error.message}`);
   };
 
   // Render fallback during SSR
@@ -154,57 +121,14 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
         wallets={wallets}
         autoConnect={walletInitialized}
         onError={onError}
+        localStorageKey="walletAdapter"
       >
-        <WalletEventListener onWalletConnected={onWalletConnected} preferredWallet={walletPreference} />
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          {children}
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );
-};
-
-// Helper component to listen for wallet events
-type WalletEventListenerProps = {
-  onWalletConnected: (walletName: string) => void;
-  preferredWallet: string | null;
-};
-
-const WalletEventListener: FC<WalletEventListenerProps> = ({
-  onWalletConnected,
-  preferredWallet
-}) => {
-  const { wallet, connected, connecting, disconnect, select, wallets } = useWallet();
-
-  // Track connection state
-  useEffect(() => {
-    if (connected && wallet) {
-      onWalletConnected(wallet.adapter.name);
-    }
-  }, [connected, wallet, onWalletConnected]);
-
-  // Try to select preferred wallet on mount
-  useEffect(() => {
-    if (preferredWallet && !connected && !connecting) {
-      const matchingWallet = wallets.find(w => w.adapter.name === preferredWallet);
-      if (matchingWallet) {
-        try {
-          console.debug('[Wallet] Auto-selecting preferred wallet:', preferredWallet);
-          select(matchingWallet.adapter.name);
-        } catch (error) {
-          console.error('[Wallet] Error selecting preferred wallet:', error);
-        }
-      }
-    }
-  }, [preferredWallet, wallets, connected, connecting, select]);
-
-  // Return null as this is just a listener component
-  return null;
-};
-
-/**
- * Hook for accessing and persisting the user's preferred wallet
- */
-export const useWalletPreference = () => {
-  return useLocalStorage<string | null>(WALLET_PREFERENCE_KEY, null);
 };
 
 /**
@@ -230,36 +154,3 @@ export const SafeWalletComponentWrapper: FC<{ children: ReactNode }> = ({ childr
 
   return <>{children}</>;
 };
-
-// Create a custom hook for easier access to local storage
-export function useLocalStorage<T>(
-  key: string,
-  initialValue: T
-): [T, (value: T) => void] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = (value: T) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
-    } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
-    }
-  };
-
-  return [storedValue, setValue];
-}

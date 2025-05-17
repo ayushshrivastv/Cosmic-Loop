@@ -1,9 +1,0 @@
-/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/deps/libsolana_loader_v3_interface-488348abd0ac8e8d.rmeta: /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/lib.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/instruction.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/state.rs
-
-/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/deps/libsolana_loader_v3_interface-488348abd0ac8e8d.rlib: /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/lib.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/instruction.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/state.rs
-
-/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/deps/solana_loader_v3_interface-488348abd0ac8e8d.d: /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/lib.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/instruction.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/state.rs
-
-/Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/lib.rs:
-/Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/instruction.rs:
-/Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-loader-v3-interface-3.0.0/src/state.rs:

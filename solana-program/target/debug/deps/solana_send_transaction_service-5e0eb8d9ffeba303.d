@@ -1,7 +1,0 @@
-/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/deps/libsolana_send_transaction_service-5e0eb8d9ffeba303.rmeta: /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/lib.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/send_transaction_service.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/tpu_info.rs
-
-/Users/ayushsrivastava/Downloads/Clone-SolanaOpenAPI/SolanaOpenAPI/solana-program/target/debug/deps/solana_send_transaction_service-5e0eb8d9ffeba303.d: /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/lib.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/send_transaction_service.rs /Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/tpu_info.rs
-
-/Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/lib.rs:
-/Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/send_transaction_service.rs:
-/Users/ayushsrivastava/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-send-transaction-service-1.16.15/src/tpu_info.rs:
