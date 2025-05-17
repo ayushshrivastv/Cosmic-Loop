@@ -1,11 +1,9 @@
 # Solana OpenAPI - AI-Powered Blockchain Data Interface with Substreams
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-15.3.2-black)](https://nextjs.org/)
 [![Solana](https://img.shields.io/badge/Solana-Compatible-9945FF)](https://solana.com/)
 [![LayerZero](https://img.shields.io/badge/LayerZero-V2-2D374B)](https://layerzero.network/)
 [![The Graph](https://img.shields.io/badge/The%20Graph-Substreams-0C0A1C)](https://thegraph.com/docs/en/substreams/)
-[![Substreams](https://img.shields.io/badge/Substreams-Rust-DE5C43)](https://substreams.streamingfast.io/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2)](https://ai.google.dev/)
 
 ## Overview
@@ -13,8 +11,6 @@
 Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero-supported networks through V2 contracts, Solana OpenAPI creates a unified experience across multiple blockchains.
 
 **Substreams Integration**: Our project leverages The Graph's Substreams technology to process and index Solana blockchain data with unprecedented speed and efficiency. The Rust-based Substreams package in the `/substreams` directory processes data for: **NFT Events** (mints, transfers, burns, and metadata updates), **Marketplace Activities** (listings, sales, offers, and cancellations), **Cross-chain Bridging** (asset transfers between Solana and other blockchains), and **Wallet Activities** (comprehensive transaction histories and account analysis). The Substreams package is deployed to substreams.dev and can be accessed via our API endpoints. Our implementation demonstrates the power of Substreams' parallel processing capabilities, allowing for real-time data access even on Solana's high-throughput blockchain.
-
-**AI Agent Implementation**: Our AI agent leverages Google's Gemini model to create a natural language interface to blockchain data. The integration works as follows: (1) **Query Classification** - User queries are classified by type (NFT, marketplace, wallet, bridge, or general); (2) **Contextual Processing** - The AI assistant service retrieves relevant blockchain data based on query type; (3) **Enhanced Responses** - Gemini AI generates comprehensive, context-aware responses using the blockchain data; (4) **Web Search Integration** - For queries requiring off-chain information, the system can search the web via Serper.dev API; (5) **Streaming Updates** - Real-time response generation with typing indicators for better user experience.
 
 ## LayerZero V2 Integration
 
