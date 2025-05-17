@@ -1,6 +1,6 @@
 # Backend Architecture
 
-The Cosmic Loop backend is designed as a scalable, microservices-based architecture that handles the complex requirements of cross-chain NFT operations. This document provides a comprehensive overview of the backend components and how they interact.
+The Solana OpenAPI backend is designed as a scalable, microservices-based architecture that handles the complex requirements of cross-chain NFT operations. This document provides a comprehensive overview of the backend components and how they interact.
 
 ## Architecture Overview
 

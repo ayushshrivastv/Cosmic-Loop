@@ -1,12 +1,12 @@
-# Cosmic Loop Backend Architecture
+# Solana OpenAPI Backend Architecture
 
-This document outlines the backend architecture for the Cosmic Loop omnichain NFT solution that seamlessly integrates Solana with LayerZero-supported networks using V2 contracts.
+This document outlines the backend architecture for the Solana OpenAPI omnichain NFT solution that seamlessly integrates Solana with LayerZero-supported networks using V2 contracts.
 
 ## Architecture Overview
 
 ![Backend Architecture](https://mermaid.ink/img/pako:eNqVVMtu2zAQ_BXC5zrIS7ZbNIZ76KFFijRIDMOHFVlKBPRYkpQdw9C_d0nKduoHkPYgibvDmZ0ZUecgdY0QwXOjcm5xsGUdm6xsW7QWv-sGrSm4lRgRV6XYYPCgFyexlGWzmTBdClU3sXg5CVNToJxP4G8sjNJmK3FZ6qo2EYmUKJV96M95a2gAcXgSYD_eU5M1jd7CnXRLzGYFn7fwU6J_pPbxdtbpVD9l0Wbx5NMRWltU9w0JsYrIGt7RNTnKXGIJHynGC09kzWPcauJc1xRbbbHNdSnKOiNYMpNlCjNWgdKz5F2iJGuoGFXHQlLhxlGYx-3adKrq1ipTGHHXkfCEzCpxuBM5_gOZSTfdnJQkuUqvWa4TmqRJOsmvL88vJkmS_1kVdL3Ck4gXdLudEojjXSyHLqZTk8HcaC6NDXG52J2-aPZTLXfcfDqbJmmSMBYYjaI5jZD2WaYf_0GxQTpWg-sDKZF73ueVVONHKHZoXa3l1o3mj-G8E1a67HaA8xNMNvNu6Pu-Fw2Pw-FwRCZxDJFTshY6Qkg8hJmOoalKiGIXwdZ6jX44K9Bg52_Dg9DQ02Fh-OVGWgofImfXVWnGmwvzxlm8bU3zW2rLfg2jDtMj2xPlYdiE0PsDP7O9bQ?type=png)
 
-The Cosmic Loop backend is a microservices architecture designed for scalability, security, and real-time functionality. It consists of the following components:
+The Solana OpenAPI backend is a microservices architecture designed for scalability, security, and real-time functionality. It consists of the following components:
 
 1. **GraphQL API Layer**: A unified API interface for frontend interaction
 2. **Microservices**: Independent services for specific domains

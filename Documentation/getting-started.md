@@ -1,6 +1,6 @@
-# Getting Started with Cosmic Loop
+# Getting Started with Solana OpenAPI
 
-This guide will help you set up and run Cosmic Loop on your local development environment, and prepare it for production deployment.
+This guide will help you set up and run Solana OpenAPI on your local development environment, and prepare it for production deployment.
 
 ## Prerequisites
 
@@ -139,7 +139,7 @@ npm start
 
 2. Verify the frontend is running:
    - Visit [http://localhost:3000](http://localhost:3000)
-   - You should see the Cosmic Loop homepage
+   - You should see the Solana OpenAPI homepage
 
 ### Wallet Connection
 
@@ -175,7 +175,7 @@ The backend can be configured through environment variables and configuration fi
 
 ## Next Steps
 
-Now that you have Cosmic Loop up and running, you can:
+Now that you have Solana OpenAPI up and running, you can:
 
 1. [Create your first event](./guides/event-setup.md)
 2. [Set up NFT distribution](./guides/nft-distribution.md)

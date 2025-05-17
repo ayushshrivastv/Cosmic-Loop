@@ -1,6 +1,6 @@
-# Cosmic Loop AI Assistant
+# Solana OpenAPI AI Assistant
 
-Cosmic Loop AI Assistant is an intelligent chatbot powered by The Graph Substreams on Solana that provides real-time, data-driven insights about NFTs, cross-chain bridging, and blockchain activities.
+Solana OpenAPI AI Assistant is an intelligent chatbot powered by The Graph Substreams on Solana that provides real-time, data-driven insights about NFTs, cross-chain bridging, and blockchain activities.
 
 ## Features
 
@@ -25,7 +25,7 @@ The AI Assistant is built on a combination of:
 
 4. **Backend API** - GraphQL API endpoints for querying the AI Assistant
 
-5. **Frontend UI** - Enhanced chat interface in the Cosmic Loop application
+5. **Frontend UI** - Enhanced chat interface in the Solana OpenAPI application
 
 ## Implementation Details
 

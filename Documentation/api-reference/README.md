@@ -1,10 +1,10 @@
 # API Reference
 
-This section provides comprehensive documentation for the Cosmic Loop API, including GraphQL schemas, REST endpoints, and WebSocket events.
+This section provides comprehensive documentation for the Solana OpenAPI API, including GraphQL schemas, REST endpoints, and WebSocket events.
 
 ## API Overview
 
-Cosmic Loop offers multiple API interfaces to accommodate different integration needs:
+Solana OpenAPI offers multiple API interfaces to accommodate different integration needs:
 
 1. **GraphQL API** - Primary API for frontend and third-party integrations
 2. **REST API** - Alternative API for specific microservices
@@ -12,7 +12,7 @@ Cosmic Loop offers multiple API interfaces to accommodate different integration 
 
 ## GraphQL API
 
-The GraphQL API is the recommended way to interact with Cosmic Loop, offering flexible queries, mutations, and subscriptions.
+The GraphQL API is the recommended way to interact with Solana OpenAPI, offering flexible queries, mutations, and subscriptions.
 
 ### Base URL
 
@@ -399,7 +399,7 @@ REST errors use standard HTTP status codes with JSON error responses:
 
 ## API Versioning
 
-The Cosmic Loop API uses versioning to ensure backward compatibility:
+The Solana OpenAPI API uses versioning to ensure backward compatibility:
 
 - **GraphQL API**: Versioned through schema changes with deprecation notices
 - **REST API**: Versioned through URL path (e.g., `/v1/nfts`)

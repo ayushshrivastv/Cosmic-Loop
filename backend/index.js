@@ -1,6 +1,6 @@
 /**
  * @file index.js
- * @description Main entry point for the Cosmic Loop backend
+ * @description Main entry point for the Solana OpenAPI backend
  */
 
 const express = require('express');

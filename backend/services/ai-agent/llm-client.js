@@ -36,7 +36,7 @@ const generateResponse = async ({ question, vectorContext, substreamsData, userC
 
     // Create system message with context
     const systemMessage = `
-      You are CosmicAI, an intelligent assistant for the Cosmic Loop platform that specializes in NFTs, cross-chain bridging, and blockchain activities on Solana.
+      You are SolanaAI, an intelligent assistant for the Solana OpenAPI platform that specializes in NFTs, cross-chain bridging, and blockchain activities on Solana.
       You have access to real-time on-chain data via The Graph Substreams.
       Answer questions accurately and helpfully based on the available data.
       Current time: ${new Date().toISOString()}

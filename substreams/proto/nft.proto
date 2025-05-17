@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package nft.v1;
+
+message NFTEvents {
+  repeated NFTEvent events = 1;
+}
+
+message NFTEvent {
+  string id = 1;
+  string transaction_hash = 2;
+  uint64 block_number = 3;
+  string block_hash = 4;
+  uint64 timestamp = 5;
+  string event_type = 6; // mint, transfer, burn, metadata_update
+  string token_address = 7;
+  string token_id = 8;
+  string collection_address = 9;
+  string from_address = 10;
+  string to_address = 11;
+  NFTMetadata metadata = 12;
+}
+
+message NFTMetadata {
+  string name = 1;
+  string symbol = 2;
+  string uri = 3;
+  string description = 4;
+  string image = 5;
+  repeated Attribute attributes = 6;
+}
+
+message Attribute {
+  string trait_type = 1;
+  string value = 2;
+}
