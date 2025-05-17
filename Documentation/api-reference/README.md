@@ -17,7 +17,7 @@ The GraphQL API is the recommended way to interact with Solana OpenAPI, offering
 ### Base URL
 
 ```
-https://api.cosmic-loop.com/graphql
+https://api.solana-openapi.com/graphql
 ```
 
 For local development:
@@ -149,7 +149,7 @@ While GraphQL is the preferred API, some microservices also expose REST endpoint
 ### Base URL
 
 ```
-https://api.cosmic-loop.com
+https://api.solana-openapi.com
 ```
 
 For local development:
@@ -220,7 +220,7 @@ The WebSocket API provides real-time updates for blockchain events, bridge opera
 ### Connection URL
 
 ```
-wss://api.cosmic-loop.com/websocket
+wss://api.solana-openapi.com/websocket
 ```
 
 For local development:
@@ -234,7 +234,7 @@ ws://localhost:4000/websocket
 Include the JWT token in the connection handshake:
 
 ```javascript
-const socket = new WebSocket('wss://api.cosmic-loop.com/websocket', {
+const socket = new WebSocket('wss://api.solana-openapi.com/websocket', {
   headers: {
     Authorization: `Bearer ${jwtToken}`
   }
@@ -273,7 +273,7 @@ const socket = new WebSocket('wss://api.cosmic-loop.com/websocket', {
 
 ```javascript
 // Connect to WebSocket
-const socket = new WebSocket('wss://api.cosmic-loop.com/websocket', {
+const socket = new WebSocket('wss://api.solana-openapi.com/websocket', {
   headers: {
     Authorization: `Bearer ${jwtToken}`
   }
