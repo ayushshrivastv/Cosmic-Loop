@@ -141,7 +141,14 @@ User query: ${query}
 Blockchain data:
 ${blockchainData}
 
-Analyze the blockchain data and respond to the user's query.
+IMPORTANT INSTRUCTIONS:
+1. First, address the user's query directly using your general knowledge about Solana, blockchain, and crypto.
+2. Then, analyze the blockchain data and provide insights relevant to the query.
+3. If the user is asking about general information (like Solana founders, history, etc.), make sure to provide that information first before analyzing the blockchain data.
+4. Remember that you have general knowledge about Solana:
+   - Solana was founded by Anatoly Yakovenko in 2017
+   - It uses Proof of Stake with Proof of History
+   - It's known for high throughput and low transaction costs
 
 Format your response using Markdown:
 - Use **bold** for emphasis and important data points

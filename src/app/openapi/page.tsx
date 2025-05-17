@@ -8,6 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Send, User, Code, Info, ArrowRightLeft } from 'lucide-react';
 import React, { useState, useRef, useEffect, ReactNode } from 'react';
 import { useAIAssistant } from '@/hooks/use-ai-assistant';
+import { substreamsService } from '@/services/substreams-service';
+import { substreamsGeminiService } from '@/services/substreams-gemini-service';
+import { AIQueryType } from '@/services/ai-assistant-service';
+import { promptEngineeringService } from '@/services/prompt-engineering-service';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -144,10 +148,8 @@ export default function OpenAPIPage() {
     }
   };
 
-  // Disabled send message functionality
+  // Enabled send message functionality with substreams integration
   const handleSendMessage = async () => {
-    // Early return to prevent any message sending
-    return;
     if (!inputValue.trim() || isLoading) return;
 
     // Add user message to chat
@@ -187,30 +189,98 @@ export default function OpenAPIPage() {
       // Create a new conversation
       const newConversation = await startNewConversation();
 
-      // Send the message with streaming updates
-      await sendMessage(
-        currentInputValue, 
-        newConversation.id, 
-        (partialResponse: any) => {
-          // Update the assistant message with each partial response
-          setMessages((prev: Message[]) => {
-            // Find the assistant message by ID and update it
-            return prev.map(msg => {
-              if (msg.id === assistantMessageId) {
-                return {
-                  ...msg,
-                  text: partialResponse.text || 'Processing...',
-                  timestamp: new Date()
-                };
-              }
-              return msg;
-            });
+      // First, try to process the message with enhanced prompt engineering
+      let useEnhancedPrompts = false;
+      let enhancedResponse: string | null = null;
+      
+      try {
+        // Set a flag to indicate we're using enhanced prompts
+        useEnhancedPrompts = true;
+        
+        // Update the assistant message to show we're processing
+        setMessages((prev: Message[]) => {
+          return prev.map(msg => {
+            if (msg.id === assistantMessageId) {
+              return {
+                ...msg,
+                text: 'Thinking...',
+                timestamp: new Date()
+              };
+            }
+            return msg;
           });
-
-          // Scroll to bottom with each update
-          scrollToBottom();
+        });
+        
+        // Detect the query type using the prompt engineering service
+        const queryType = promptEngineeringService.detectQueryType(currentInputValue);
+        
+        // Fetch blockchain data if it's a blockchain-related query
+        let blockchainData = null;
+        if (queryType !== 'general') {
+          // Process the query with substreams data
+          const substreamsResponse = await substreamsGeminiService.processBlockchainQuery(
+            currentInputValue,
+            queryType as AIQueryType
+          );
+          
+          blockchainData = substreamsResponse.data || substreamsResponse.relatedEvents;
         }
-      );
+        
+        // Generate enhanced response using prompt engineering
+        enhancedResponse = await promptEngineeringService.generateResponse(
+          currentInputValue,
+          queryType,
+          blockchainData
+        );
+        
+        // Update the assistant message with the enhanced response
+        setMessages((prev: Message[]) => {
+          return prev.map(msg => {
+            if (msg.id === assistantMessageId) {
+              return {
+                ...msg,
+                text: enhancedResponse || 'I processed your query but couldn\'t generate a response.',
+                timestamp: new Date()
+              };
+            }
+            return msg;
+          });
+        });
+        
+        // Scroll to bottom with the update
+        scrollToBottom();
+      } catch (enhancedError) {
+        console.error('Error processing with enhanced prompts:', enhancedError);
+        useEnhancedPrompts = false; // Fall back to regular AI processing
+      }
+      
+      // If we didn't use enhanced prompts or it failed, use the regular AI assistant
+      if (!useEnhancedPrompts) {
+        // Send the message with streaming updates
+        await sendMessage(
+          currentInputValue, 
+          newConversation.id, 
+          (partialResponse: any) => {
+            // Update the assistant message with each partial response
+            setMessages((prev: Message[]) => {
+              // Find the assistant message by ID and update it
+              return prev.map(msg => {
+                if (msg.id === assistantMessageId) {
+                  return {
+                    ...msg,
+                    text: partialResponse.text || 'Processing...',
+                    timestamp: new Date()
+                  };
+                }
+                return msg;
+              });
+            });
+
+            // Scroll to bottom with each update
+            scrollToBottom();
+          }
+        );
+      }
     } catch (error) {
       console.error('Error sending message:', error);
 
@@ -233,15 +303,17 @@ export default function OpenAPIPage() {
     }
   };
 
-  // Disabled key down handler
+  // Enable key down handler for Enter key
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Do nothing - functionality disabled
-    return;
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   return (
     <div className="overflow-hidden">
-      <div className="flex flex-col min-h-[80vh] bg-background px-4">
+      <div className="flex flex-col min-h-[75vh] bg-background px-4">
         {/* Empty space when messages exist to maintain spacing */}
         {messages.length > 0 && (
           <div className="w-full max-w-2xl mx-auto pt-12"></div>
@@ -249,7 +321,7 @@ export default function OpenAPIPage() {
 
         {messages.length === 0 ? (
           /* Layout for when no messages exist */
-          <div className="w-full max-w-2xl mx-auto flex-grow flex flex-col justify-center">
+          <div className="w-full max-w-2xl mx-auto flex-grow flex flex-col justify-center" style={{ paddingBottom: '8vh' }}>
             {/* Heading inside the container */}
             <h1 className="text-4xl font-medium text-center mb-8">What can I help with?</h1>
 
@@ -258,10 +330,10 @@ export default function OpenAPIPage() {
               <div className="relative">
                 <input
                   className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-600 bg-transparent"
-                  placeholder="Coming Soon.."
+                  placeholder="Ask about Solana, NFTs, or blockchain data..."
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  disabled={true}
+                  onKeyDown={handleKeyDown}
                 />
 
                 <div className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -289,8 +361,8 @@ export default function OpenAPIPage() {
                 ref={chatContainerRef}
                 className="w-full mb-4 p-4 bg-black rounded-t-2xl chat-container"
                 style={{
-                  maxHeight: '400px',
-                  minHeight: '400px',
+                  maxHeight: '380px',
+                  minHeight: '380px',
                   overflowY: 'auto',
                   scrollbarWidth: 'thin',
                   scrollbarColor: '#4B5563 #1F2937',
@@ -395,10 +467,10 @@ export default function OpenAPIPage() {
                 <div className="relative">
                   <input
                     className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-600 bg-transparent"
-                    placeholder="Coming Soon.."
+                    placeholder="Ask about Solana, NFTs, or blockchain data..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    disabled={true}
+                    onKeyDown={handleKeyDown}
                   />
 
                   <div className="absolute right-2 top-1/2 -translate-y-1/2">
