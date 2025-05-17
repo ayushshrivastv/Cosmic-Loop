@@ -7,7 +7,9 @@
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2)](https://ai.google.dev/)
 
 ## Overview
-This Substreams package indexes Solana blockchain data for NFTs, marketplace activities, and cross-chain bridging events. It's designed to work with the Solana OpenAPI project to provide real-time blockchain data through an AI powered interface.
+Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero-supported networks through V2 contracts and The Graph Substreams, Solana OpenAPI creates a unified experience across multiple blockchains.
+
+This Substreams package indexes Solana blockchain data for NFTs, marketplace activities, and cross-chain bridging events. It's designed to work with the Solana OpenAPI project to provide real time blockchain data through an AI powered interface.
 
 For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./architecture.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared)
 
