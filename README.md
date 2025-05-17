@@ -11,9 +11,9 @@ Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize
 
 For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./ARCHITECTURE.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared) 
 
-P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead.
+P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead. Initially, I considered creating a mock data interface for the hackathon, but I’ve decided to connect to a real blockchain network instead. Writing the smart contract is taking some time.
 
-I came across this project on Superteam on March 10th, and this is my first ever submission—and also my first Solana project!
+I came across this project on Superteam on March 10th, and this is my first ever submission on superteam—and also my first Solana project!
 
 Web Page Link
 **[Solana OpenAPI](https://openapi-lilac.vercel.app)**
