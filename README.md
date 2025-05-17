@@ -1,4 +1,4 @@
-# Solana OpenAPI - AI-Powered Blockchain Data Interface with Substreams
+# Solana OpenAPI - AI Powered Blockchain Data Interface 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Solana](https://img.shields.io/badge/Solana-Compatible-9945FF)](https://solana.com/)
@@ -7,14 +7,29 @@
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2)](https://ai.google.dev/)
 
 ## Overview
+Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero supported networks through V2 contracts and The Graph's Substreams technology to process and index Solana blockchain data, Solana OpenAPI creates a unified experience across multiple blockchains.
 
-Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero-supported networks through V2 contracts, Solana OpenAPI creates a unified experience across multiple blockchains.
+For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./ARCHITECTURE.md) document or [YouTube](https://youtu.be/V40mvlS0EkA?feature=shared) 
 
-**Substreams Integration**: Our project leverages The Graph's Substreams technology to process and index Solana blockchain data with unprecedented speed and efficiency. The Rust-based Substreams package in the `/substreams` directory processes data for: **NFT Events** (mints, transfers, burns, and metadata updates), **Marketplace Activities** (listings, sales, offers, and cancellations), **Cross-chain Bridging** (asset transfers between Solana and other blockchains), and **Wallet Activities** (comprehensive transaction histories and account analysis). The Substreams package is deployed to substreams.dev and can be accessed via our API endpoints. Our implementation demonstrates the power of Substreams' parallel processing capabilities, allowing for real-time data access even on Solana's high-throughput blockchain.
+P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead.
+
+I came across this project on Superteam on March 10th, and this is my first ever submission—and also my first Solana project!
+
+Web Page Link
+**[Solana OpenAPI](https://openapi-lilac.vercel.app)**
+
+![Screenshot 2025-05-17 at 9 52 16 AM](https://github.com/user-attachments/assets/3d38bdad-17fe-48c7-8b5d-57cd0492fbb9)
 
 ## LayerZero V2 Integration
 
 Our platform leverages LayerZero V2 contracts to enable seamless cross-chain operations with enhanced security and efficiency. These contracts facilitate trustless message passing between Solana and other blockchains, allowing for interoperable NFT minting, token bridging, and multi-chain data synchronization. The V2 protocol's improved security model with decentralized verification, optimized gas efficiency, and enhanced message delivery guarantees robust cross-chain functionality while maintaining Solana's high performance standards.
+
+![Screenshot 2025-05-17 at 9 56 24 AM](https://github.com/user-attachments/assets/21513163-affd-4f80-bd63-6758f9c61f64)
+
+![Screenshot 2025-05-17 at 9 56 36 AM](https://github.com/user-attachments/assets/11a7e319-260e-4bd7-bde7-dcff1cfe4c92)
+
+![Screenshot 2025-05-17 at 9 56 10 AM](https://github.com/user-attachments/assets/c54b3fab-9f69-4f30-9ee0-9602c2020e7c)
+
 
 ### Benefits of LayerZero V2 Integration
 
@@ -28,6 +43,11 @@ Our platform leverages LayerZero V2 contracts to enable seamless cross-chain ope
 | Developer Experience | Complex integration | Simplified API and SDK |
 | User Experience | Multiple transaction approvals | Seamless single-transaction flows |
 
+### The Graph's Substreams
+
+**Substreams Integration**: Our project leverages The Graph's Substreams technology to process and index Solana blockchain data with unprecedented speed and efficiency. The Rust-based Substreams package in the `/substreams` directory processes data for: **NFT Events** (mints, transfers, burns, and metadata updates), **Marketplace Activities** (listings, sales, offers, and cancellations), **Cross-chain Bridging** (asset transfers between Solana and other blockchains), and **Wallet Activities** (comprehensive transaction histories and account analysis). The Substreams package is deployed to substreams.dev and can be accessed via our API endpoints. Our implementation demonstrates the power of Substreams' parallel processing capabilities, allowing for real-time data access even on Solana's high-throughput blockchain.
+
+![Screenshot 2025-05-17 at 9 54 53 AM](https://github.com/user-attachments/assets/8ca9b285-8f59-4ee8-ab4e-d1392ef5a551)
 
 ### Key Features
 
