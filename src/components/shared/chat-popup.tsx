@@ -90,7 +90,11 @@ function ChatPopupContent() {
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
-        inputRef.current?.focus();
+        // Focus the input element using document.querySelector instead of ref
+        const inputElement = document.querySelector('input[data-chat-input="true"]');
+        if (inputElement instanceof HTMLInputElement) {
+          inputElement.focus();
+        }
       }, 100);
     }
   }, [isOpen]);
@@ -247,8 +251,13 @@ function ChatPopupContent() {
   // Handle clicking on the Ask Anything form
   const handleExpandClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Immediately redirect to OpenAPI page
-    window.location.href = '/openapi';
+    setIsExpanded(true);
+    setTimeout(() => {
+      const expandedInput = document.querySelector('input[data-expanded-input="true"]');
+      if (expandedInput instanceof HTMLInputElement) {
+        expandedInput.focus();
+      }
+    }, 100);
   };
 
   // Handle submitting the form
@@ -267,10 +276,7 @@ function ChatPopupContent() {
   };
 
   return (
-    <div className="fixed z-50" style={{
-      bottom: '1.5rem',
-      right: '1.5rem'
-    }}>
+    <div className="fixed z-50 bottom-6 right-6">
       <div className="relative">
         <form 
           data-chat-popup="true" 
@@ -315,7 +321,7 @@ function ChatPopupContent() {
       </div>
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="bg-white text-black sm:max-w-md md:max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogContent className="bg-white text-black sm:max-w-md md:max-w-2xl max-h-[70vh] flex flex-col">
 
           <DialogHeader className="flex justify-between items-center">
             <DialogTitle>Solana OpenAPI Assistant</DialogTitle>
@@ -337,7 +343,7 @@ function ChatPopupContent() {
 
             <TabsContent value="chat" className="flex-1 flex flex-col">
               {/* Chat messages area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 mb-4 max-h-[50vh]">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 mb-4 max-h-[40vh]">
                 {!currentConversation || !(currentConversation as Conversation | undefined)?.messages || (currentConversation as Conversation).messages.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <h3 className="text-lg font-medium mb-2">Welcome to Solana OpenAPI Assistant!</h3>
@@ -370,10 +376,11 @@ function ChatPopupContent() {
                   (currentConversation as Conversation).messages?.map(renderMessage)
                 )}
 
-                {/* Loading indicator */}
+                {/* Loading indicator with 'Thinking...' message */}
                 {isLoading && (
-                  <div className="flex justify-center items-center py-2">
+                  <div className="flex flex-col justify-center items-center py-2 gap-1">
                     <RefreshCw className="h-5 w-5 animate-spin text-gray-500" />
+                    <span className="text-sm text-gray-500">Thinking...</span>
                   </div>
                 )}
 
@@ -386,7 +393,7 @@ function ChatPopupContent() {
                 <div className="bg-white rounded-3xl shadow-md border border-gray-200 p-3 relative">
                   <div className="relative">
                     <Input
-                      ref={inputRef}
+                      data-chat-input="true"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={handleKeyDown}
