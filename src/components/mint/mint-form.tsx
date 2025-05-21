@@ -203,8 +203,50 @@ export function MintForm() {
       setClaimUrl(standardClaimUrl);
 
       // Create QR code with the Solana Pay URL for direct wallet interaction
-      const qrCodeDataUrl = await generateQrCodeDataUrl(solanaPayUrl);
-      setQrCodeUrl(qrCodeDataUrl);
+      if (!solanaPayUrl) {
+        console.error('Invalid Solana Pay URL generated');
+        alert('Could not generate a valid Solana Pay URL for the QR code.');
+        return;
+      }
+      
+      console.log('Generating QR code for URL:', solanaPayUrl);
+      
+      try {
+        // Create QR code with a more direct approach
+        const qrResult = await generateQrCodeDataUrl(solanaPayUrl, {
+          size: 300, // Increase size for better visibility
+          errorCorrectionLevel: 'H', // Higher error correction
+          includeMargin: true,
+          color: {
+            dark: '#000000',
+            light: '#ffffff'
+          }
+        });
+        
+        console.log('QR code generation result:', qrResult.success);
+        
+        if (qrResult.success && qrResult.dataUrl) {
+          console.log('QR code data URL generated, length:', qrResult.dataUrl.length);
+          // Ensure the URL is properly formatted
+          if (qrResult.dataUrl.startsWith('data:image/')) {
+            setQrCodeUrl(qrResult.dataUrl);
+          } else {
+            console.error('Generated QR code has invalid format');
+            // Force a basic QR code format
+            setQrCodeUrl(`data:image/png;base64,${btoa('QR code generation error')}`);
+          }
+        } else {
+          console.error('Failed to generate QR code:', qrResult.message);
+          alert(`Error generating QR code: ${qrResult.message}`);
+          // Set a placeholder
+          setQrCodeUrl('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTRweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzg4OCIgZHk9Ii4xZW0iPkZhaWxlZCB0byBsb2FkIFFSIGNvZGU8L3RleHQ+PC9zdmc+');
+        }
+      } catch (error) {
+        console.error('Exception during QR code generation:', error);
+        alert(`Exception during QR code generation: ${error instanceof Error ? error.message : String(error)}`);
+        // Set a fallback QR code
+        setQrCodeUrl('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTRweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzg4OCIgZHk9Ii4xZW0iPkZhaWxlZCB0byBsb2FkIFFSIGNvZGU8L3RleHQ+PC9zdmc+');
+      }
 
       setMintSuccess(true);
     } catch (error) {
@@ -258,7 +300,52 @@ export function MintForm() {
 
             <div className="flex justify-center my-6">
               <div className="border border-border p-4 rounded-lg inline-block bg-white shadow-lg transition-all hover:shadow-xl">
-                <img src={qrCodeUrl} alt="Solana Pay QR Code" width={250} height={250} className="animate-fade-in" />
+                {qrCodeUrl ? (
+                  <>
+                    {/* Hidden preloaded fallback image */}
+                    <img 
+                      src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTRweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzg4OCIgZHk9Ii4xZW0iPkZhbGxiYWNrIFFSIENvZGU8L3RleHQ+PC9zdmc+" 
+                      style={{ display: 'none' }} 
+                      alt="Hidden Fallback" 
+                    />
+                    
+                    {/* Actual QR code image with robust error handling */}
+                    <img 
+                      src={qrCodeUrl} 
+                      alt="Solana Pay QR Code" 
+                      width={250} 
+                      height={250} 
+                      className="animate-fade-in" 
+                      onLoad={() => console.log('QR code image loaded successfully')} 
+                      onError={(e) => {
+                        console.error('QR code image failed to load');
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null; // Prevent infinite error loop
+                        target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTRweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzg4OCIgZHk9Ii4xZW0iPkZhaWxlZCB0byBsb2FkIFFSIGNvZGU8L3RleHQ+PC9zdmc+'; // Fallback to base64 SVG
+                        
+                        // Also display error message below the image
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-red-500 text-xs mt-2';
+                        errorDiv.textContent = 'QR code failed to load - please try downloading it';
+                        
+                        const parent = target.parentNode;
+                        if (parent) {
+                          parent.appendChild(errorDiv);
+                        }
+                      }}
+                    />
+                  </>
+                ) : (
+                  <div className="w-[250px] h-[250px] flex items-center justify-center bg-gray-100">
+                    <div className="text-center">
+                      <svg className="animate-spin h-8 w-8 mx-auto mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <p className="text-gray-500 text-sm">Generating QR code...</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

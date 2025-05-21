@@ -88,11 +88,17 @@ pub fn process(
         .map_err(|_| ProgramError::InvalidInstructionData)?;
 
     // Create cross-chain message
+    // Store payload size and clone the payload before it's moved
+    let payload_size = payload.len();
+    
+    // Clone the payload for the message creation to avoid ownership issues
+    let payload_for_message = payload.clone();
+    
     let message = CrossChainMessage::new(
         config.solana_chain_id,
         query_data.destination_chain_id,
         query_data.query_params.query_type,
-        payload,
+        payload_for_message, // Use the cloned payload
         timestamp, // Use timestamp as nonce
         Some(options.clone()),
     );
@@ -114,12 +120,12 @@ pub fn process(
     message_record.serialize(&mut *message_account.data.borrow_mut())
         .map_err(|_| ProgramError::AccountDataTooSmall)?;
 
-    // Get fee quote
+    // Get fee quote using the saved payload size
     let fee = get_fee_quote(
         program_id,
         layerzero_endpoint,
         query_data.destination_chain_id,
-        payload.len(),
+        payload_size, // We saved this before moving payload
         &options,
     )?;
 

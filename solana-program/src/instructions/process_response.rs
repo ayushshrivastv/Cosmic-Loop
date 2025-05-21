@@ -14,8 +14,10 @@ use solana_program::{
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::error::SolanaOpenApiError;
-use crate::layerzero::{CrossChainMessage, verify_from_endpoint, LayerZeroInstruction};
+use crate::layerzero::{CrossChainMessage, verify_from_endpoint};
 use crate::state::{MessageRecord, ProgramConfig, MessageStatus};
+
+// Unused imports have been removed
 
 /// Response data instruction parameters
 #[derive(BorshSerialize, BorshDeserialize, Debug)]

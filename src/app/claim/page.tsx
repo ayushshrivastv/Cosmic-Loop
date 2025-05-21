@@ -6,9 +6,29 @@ import { AirdropForm } from '@/components/claim/airdrop-form';
 import { Suspense, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+// Import wallet adapter components
+import { WalletProvider, ConnectionProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { clusterApiUrl } from '@solana/web3.js';
+
+// Import wallet adapter styles
+import '@solana/wallet-adapter-react-ui/styles.css';
+
 export default function ClaimPage() {
+  // Set up wallet adapters
+  const wallets = [
+    new PhantomWalletAdapter(),
+    new SolflareWalletAdapter(),
+  ];
+  
+  // Use Solana devnet for development
+  const endpoint = clusterApiUrl('devnet');
   return (
-    <div className="container mx-auto pt-32 pb-16 flex-1">
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <div className="container mx-auto pt-32 pb-16 flex-1">
       <h1 className="text-3xl font-bold mb-8">Claim Your Token</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -74,6 +94,24 @@ export default function ClaimPage() {
               </TabsContent>
             </Tabs>
           </div>
+          
+          {/* Developer Note */}
+          <div className="mt-6 pt-6 border-t border-gray-800">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-900/70 rounded-xl p-6 backdrop-blur-sm border border-white/5">
+              <div className="flex items-start">
+                <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-900/30 text-blue-400 mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-blue-300 mb-2">Developer Note</h3>
+                  <p className="text-gray-400 mb-2">I'm still going through docs and debugging. Built everything in 48 hours and still so many places to look into.</p>
+                  <p className="text-sm text-gray-500">Thanks for your patience as I continue to improve this application.</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -126,6 +164,9 @@ export default function ClaimPage() {
           </div>
         </div>
       </div>
-    </div>
+          </div>
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }
