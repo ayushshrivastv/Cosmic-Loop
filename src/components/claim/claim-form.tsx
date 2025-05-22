@@ -1,6 +1,14 @@
+/**
+ * @file claim-form.tsx
+ * @description ClaimForm component for enabling users to claim their proof-of-participation tokens
+ * This component handles token claiming via direct input of a token address or through URL parameters.
+ * It integrates with Light Protocol for compressed token transfers and provides user feedback throughout
+ * the claiming process.
+ */
+
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PublicKey } from '@solana/web3.js';
@@ -13,349 +21,247 @@ import { transferCompressedTokens, createConnection } from '@/lib/utils/solana';
 import { DEFAULT_CLUSTER, DEVNET_RPC_ENDPOINT } from '@/lib/constants';
 import { Keypair } from '@solana/web3.js';
 import { QrScanner } from './qr-scanner';
-import { claimEventNFT } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { isValidSolanaPublicKey } from '@/lib/utils/qrcode';
-import { Progress } from '@/components/ui/progress';
+import { claimEventNFT } from '@/lib/api-client';
+import { SupportedChain } from '@/lib/utils/layer-zero';
 
 /**
  * ClaimForm Component
- * Enhanced with improved error handling, loading states, and backend integration
+ * Handles the token claiming process, supporting both direct input and URL-based claiming
  */
 export function ClaimForm() {
   // Access to the user's Solana wallet
-  const { publicKey, connected, signTransaction, sendTransaction, connecting: walletConnecting } = useWallet();
+  const { publicKey, connected, signTransaction, sendTransaction } = useWallet();
   // Get URL parameters (used for direct claim links)
   const searchParams = useSearchParams();
   const router = useRouter();
-
+  
   // Component state
+  /** Stores the claim code or token address entered by the user */
   const [claimCode, setClaimCode] = useState('');
+  /** Tracks the submission status for UI feedback */
   const [isSubmitting, setIsSubmitting] = useState(false);
+  /** Indicates if the claim was successful */
   const [claimSuccess, setClaimSuccess] = useState(false);
+  /** Stores any error messages to display to the user */
   const [error, setError] = useState<string | null>(null);
+  /** Stores event information extracted from URL parameters */
   const [eventDetails, setEventDetails] = useState<{
-    name: string;
-    mint: string;
-    id?: string;
+    name: string;  // Event name
+    mint: string;  // Token mint address
   } | null>(null);
+  /** Controls the visibility of the QR code scanner */
   const [showQrScanner, setShowQrScanner] = useState(false);
-
-  // Loading states and progress
-  const [loadingState, setLoadingState] = useState<'idle' | 'validating' | 'processing' | 'confirming'>('idle');
-  const [processingProgress, setProcessingProgress] = useState(0);
-  const [transactionHash, setTransactionHash] = useState<string | null>(null);
 
   /**
    * Effect hook to process URL parameters when the component loads
+   * Extracts event name and token mint address from the URL and validates them
    */
   useEffect(() => {
     const event = searchParams.get('event');
     const mint = searchParams.get('mint');
-    const eventId = searchParams.get('eventId');
-
+    
     if (event && mint) {
       try {
-        // Validate mint address format
-        if (!isValidSolanaPublicKey(mint)) {
-          setError('Invalid token address format in URL');
-          return;
-        }
-
-        // Store event details
+        // Validate that the mint address is a valid Solana public key
+        new PublicKey(mint);
+        
+        // Store the event details for display and processing
         setEventDetails({
           name: decodeURIComponent(event),
-          mint: mint,
-          id: eventId || undefined
+          mint: mint
         });
-
+        
         // Auto-populate claim code if provided in URL
+        // This enables direct claiming from QR codes
         const code = searchParams.get('code');
         if (code) {
           setClaimCode(code);
         }
       } catch (err) {
+        // Handle invalid mint address format
         setError('Invalid token information in URL');
       }
     }
   }, [searchParams]);
 
-  // Reset error when wallet connects
-  useEffect(() => {
-    if (connected && error === 'Please connect your wallet first') {
-      setError(null);
-    }
-  }, [connected, error]);
-
-  /**
-   * Simulate transaction progress for better user feedback
-   */
-  useEffect(() => {
-    let progressInterval: NodeJS.Timeout;
-
-    if (loadingState === 'processing') {
-      // Start at 10% instantly for better perceived performance
-      setProcessingProgress(10);
-
-      progressInterval = setInterval(() => {
-        setProcessingProgress((prev) => {
-          // Increase progress randomly but never reach 100% until confirmed
-          const randomIncrement = Math.random() * 5;
-          const newProgress = prev + randomIncrement;
-          // Cap at 90% until we get confirmation
-          return Math.min(newProgress, 90);
-        });
-      }, 800);
-    } else if (loadingState === 'confirming') {
-      // Jump to 100% when confirmed
-      setProcessingProgress(100);
-    } else if (loadingState === 'idle') {
-      // Reset when idle
-      setProcessingProgress(0);
-    }
-
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
-  }, [loadingState]);
-
-  /**
-   * Validates input parameters before claim
-   */
-  const validateClaimParams = useCallback(() => {
-    // Verify wallet connection
-    if (!connected || !publicKey) {
-      setError('Please connect your wallet first');
-      return false;
-    }
-
-    // Ensure we have a claim code or event details
-    if (!eventDetails && !claimCode) {
-      setError('Please enter a claim code or scan a QR code');
-      return false;
-    }
-
-    // Validate the mint address
-    try {
-      const mintAddress = eventDetails?.mint || claimCode;
-      new PublicKey(mintAddress);
-      return true;
-    } catch (err) {
-      setError('Invalid token address format');
-      return false;
-    }
-  }, [connected, publicKey, eventDetails, claimCode]);
-
   /**
    * Handles the form submission for token claiming
+   * Performs validation, creates a connection to Solana, and executes the token transfer
+   * 
+   * @param e - Form event object
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Clear previous errors
-    setError(null);
-
-    // Validate parameters
-    if (!validateClaimParams()) {
+    
+    // Verify wallet connection
+    if (!connected || !publicKey) {
+      setError('Please connect your wallet first');
+      toast.error('Please connect your wallet first');
       return;
     }
-
+    
+    // Ensure we have a claim code or event details
+    if (!eventDetails && !claimCode) {
+      setError('Please enter a claim code or scan a QR code');
+      toast.error('Please enter a claim code or scan a QR code');
+      return;
+    }
+    
     try {
-      // Indicate processing has started
+      // Reset previous errors and indicate processing has started
+      setError(null);
       setIsSubmitting(true);
-      setLoadingState('validating');
-
-      // Get the mint address either from the URL parameters or the claim code input
-      const mintAddress = eventDetails?.mint || claimCode;
-      const eventId = eventDetails?.id || 'unknown';
-
-      // Validate the mint address is a valid Solana PublicKey
-      const mintPublicKey = new PublicKey(mintAddress);
-
-      // Create a connection to the Solana cluster
-      // Using type assertion to bypass TypeScript errors
-      const connection = createConnection(DEVNET_RPC_ENDPOINT as any);
-
-      // After validation, move to processing state
-      setLoadingState('processing');
-
-      try {
-        // First attempt to claim through backend API
-        if (eventDetails?.id) {
-          try {
-            const claimResult = await claimEventNFT(
-              eventDetails.id,
-              publicKey.toBase58(),
-              'SOLANA' // Assuming claiming on Solana chain
-            );
-
-            if (claimResult && claimResult.claimTransactionHash) {
-              setTransactionHash(claimResult.claimTransactionHash);
-              setLoadingState('confirming');
-              setTimeout(() => {
-                setClaimSuccess(true);
-                setLoadingState('idle');
-              }, 1000); // Small delay for visual feedback
-              return;
-            }
-          } catch (apiError) {
-            console.warn('Backend claim failed, falling back to direct transfer:', apiError);
-            // Continue with direct transfer as fallback
-          }
-        }
-
-        // Fallback to direct token transfer if API claim fails or event ID not available
-        // @ts-ignore - This matches the actual implementation in your project
-        const result = await transferCompressedTokens(
-          connection,
-          publicKey,
-          mintPublicKey,
-          sendTransaction
-        );
-
-        if (result && result.signature) {
-          setTransactionHash(result.signature);
-          setLoadingState('confirming');
-
-          // Wait a moment before showing success for better UX
-          setTimeout(() => {
-            setClaimSuccess(true);
-            setLoadingState('idle');
-            toast.success('Token claimed successfully', {
-              description: `Transaction confirmed: ${result.signature.slice(0, 8)}...${result.signature.slice(-8)}`
-            });
-          }, 1000);
-        } else {
-          throw new Error('Transfer completed but no signature was returned');
-        }
-      } catch (transferError) {
-        const errorMessage = transferError instanceof Error ? transferError.message : String(transferError);
-        setError('Failed to claim token: ' + errorMessage);
-        toast.error('Token Claim Failed', {
-          description: errorMessage
-        });
-      }
-    } catch (err) {
-      console.error('Error claiming token:', err);
-      setError('Failed to claim token: ' + (err instanceof Error ? err.message : String(err)));
-    } finally {
-      setIsSubmitting(false);
-      if (!claimSuccess) setLoadingState('idle');
-    }
-  };
-
-  // Handle QR scan success
-  const handleQrScanSuccess = (result: string) => {
-    console.log('QR scan successful:', result);
-    try {
-      // Parse the URL
-      const url = new URL(result);
-
-      // Extract parameters from URL
-      const params = new URLSearchParams(url.search);
-      const eventName = params.get('event');
-      const mintAddress = params.get('mint');
-      const eventId = params.get('eventId');
-
-      if (mintAddress) {
+      
+      console.log('Starting token claim process...');
+      
+      // Determine which token to claim (from event details or direct input)
+      const mintToUse = eventDetails?.mint || claimCode;
+      const eventNameToUse = eventDetails?.name || 'Unknown Event';
+      
+      console.log('Attempting to claim token:', mintToUse, 'for event:', eventNameToUse);
+      
+      // Try to claim through the API first (if we have event details)
+      if (eventDetails) {
         try {
-          // Validate the mint address
-          if (!isValidSolanaPublicKey(mintAddress)) {
-            setError('Invalid token address in QR code');
+          console.log('Attempting API claim for event:', eventNameToUse);
+          
+          // Attempt to claim through backend API
+          const claimResult = await claimEventNFT(
+            eventDetails.name, // Using event name as ID
+            publicKey.toBase58(),
+            'SOLANA' as any // Force type casting to bypass type error
+          );
+          
+          console.log('API claim result:', claimResult);
+          
+          if (claimResult && claimResult.success) {
+            setClaimSuccess(true);
+            toast.success('Token claimed successfully!');
+            setIsSubmitting(false);
             return;
-          }
-
-          // Set event details
-          if (eventName) {
-            setEventDetails({
-              name: decodeURIComponent(eventName),
-              mint: mintAddress,
-              id: eventId || undefined
-            });
           } else {
-            setClaimCode(mintAddress);
+            console.log('API claim failed, falling back to direct transfer');
           }
-
-          // Show success toast
-          toast.success('QR code scanned successfully', {
-            description: eventName
-              ? `Ready to claim token for ${decodeURIComponent(eventName)}`
-              : 'Token address detected'
-          });
-
-          // Close the scanner
-          setShowQrScanner(false);
-
-          // If we have everything we need, submit automatically after a delay
-          if (connected && publicKey) {
-            setTimeout(() => {
-              // Create a synthetic event object that's compatible with our handler
-              const syntheticEvent = {
-                preventDefault: () => {}
-              } as React.FormEvent;
-              handleSubmit(syntheticEvent);
-            }, 800);
-          }
-        } catch (err) {
-          setError('Invalid token address in QR code');
+        } catch (apiError) {
+          console.error('API claim error:', apiError);
+          // Continue to fallback method
         }
-      } else {
-        setError('QR code does not contain a valid token address');
       }
-    } catch (err) {
-      setError('Invalid QR code format. Please scan a Solana Pay QR code.');
+      
+      // Get the mint address either from the URL parameters or the claim code input
+      const mintAddress = mintToUse;
+      
+      // Validate the mint address is a valid Solana PublicKey
+      let mintPublicKey;
+      try {
+        mintPublicKey = new PublicKey(mintAddress);
+      } catch (err) {
+        toast.error('Invalid token address format');
+        throw new Error('Invalid token address format');
+      }
+      
+      // Log claiming details for debugging
+      console.log("Claiming token with:", {
+        mint: mintPublicKey.toBase58(),
+        recipient: publicKey.toBase58()
+      });
+      
+      try {
+        // Set up connection to Solana with appropriate RPC endpoint
+        const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || DEVNET_RPC_ENDPOINT;
+        const appConfig = { 
+          rpcEndpoint,
+          cluster: process.env.NEXT_PUBLIC_CLUSTER as "devnet" | "mainnet-beta" | "testnet" | "localnet" || DEFAULT_CLUSTER
+        };
+        
+        /**
+         * IMPORTANT FOR PRODUCTION:
+         * In a real production application, the token transfer should happen server-side
+         * or through a different mechanism where private keys aren't exposed.
+         * This demo uses a temporary keypair for illustration purposes only.
+         */
+        const senderKeypair = new Keypair();
+        console.log('Using temporary keypair for demo purposes');
+        
+        // Execute the token transfer using Light Protocol
+        const { signature } = await transferCompressedTokens(
+          createConnection(appConfig),
+          senderKeypair, // Payer for the transaction fees
+          mintPublicKey, // The token mint address to claim
+          1, // Amount to transfer (typically 1 for NFT/POP token)
+          senderKeypair, // Owner of the token (in production, this would be the event organizer's wallet)
+          publicKey // Destination (the user's connected wallet)
+        );
+        
+        // Log successful transaction for debugging and user reference
+        console.log("Token claimed successfully, signature:", signature);
+        
+        // Update UI to show success state
+        setClaimSuccess(true);
+        toast.success('Token claimed successfully!');
+      } catch (error) {
+        // Type cast the error to access message property safely
+        const transferError = error as Error;
+        console.error('Token transfer error:', transferError);
+        toast.error(`Failed to claim token: ${transferError.message || 'Unknown error'}`);
+        setError(`Failed to claim token: ${transferError.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      // Handle and display any errors during the claim process
+      console.error("Error claiming token:", error);
+      setError(`Error claiming token: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      // Always reset submission state regardless of outcome
+      setIsSubmitting(false);
     }
   };
 
-  // Render success message if claim was successful
+  /**
+   * Success view shown after a successful token claim
+   * Provides user feedback and navigation options
+   */
   if (claimSuccess) {
     return (
       <Card className="w-full card-hover animate-fade-in">
         <CardHeader>
-          <CardTitle className="flex items-center text-green-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <CardTitle className="text-center text-green-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            Token Claimed Successfully
+            Token Claimed Successfully!
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Your proof-of-participation token has been successfully claimed and transferred to your wallet.
-          </p>
-
-          {eventDetails && (
-            <div className="p-4 bg-muted rounded-lg shadow-sm">
-              <p className="font-medium">Event: {eventDetails.name}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Token: {eventDetails.mint.slice(0, 8)}...{eventDetails.mint.slice(-8)}
-              </p>
-              {transactionHash && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Transaction: {transactionHash.slice(0, 8)}...{transactionHash.slice(-8)}
-                </p>
-              )}
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          {eventDetails?.mint && (
-            <Button
-              onClick={() => router.push(`/bridge?mint=${eventDetails.mint}&token=${eventDetails.name}&event=${eventDetails.name}`)}
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+        <CardContent className="text-center">
+          <div className="flex justify-center mb-6 animate-slide-up" style={{animationDelay: '100ms'}}>
+            <div className="bg-green-50 rounded-full p-4 shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              Bridge to Another Chain
-            </Button>
-          )}
-          <Button
-            onClick={() => router.push('/')}
-            className="w-full"
-          >
-            Return to Home
+            </div>
+          </div>
+          <p className="text-lg mb-2">
+            You have successfully claimed your token for:
+          </p>
+          <p className="font-semibold text-xl mb-6">
+            {eventDetails?.name || "Event Token"}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            The token has been added to your wallet. You can view it in your profile.
+          </p>
+        </CardContent>
+        <CardFooter className="flex justify-center gap-4 animate-slide-up" style={{animationDelay: '200ms'}}>
+          <Button variant="outline" className="transition-all hover:bg-secondary" onClick={() => router.push('/')}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
+            Back to Home
+          </Button>
+          <Button onClick={() => router.push('/profile')} className="transition-all hover:bg-primary/90">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+            </svg>
+            View in Profile
           </Button>
         </CardFooter>
       </Card>
@@ -370,31 +276,12 @@ export function ClaimForm() {
             <path fillRule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clipRule="evenodd" />
             <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z" />
           </svg>
-          Claim Your Token
+          {eventDetails ? `Claim Token for ${eventDetails.name}` : 'Claim Your Token'}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {showQrScanner && (
-          <div className="mb-6">
-            <QrScanner
-              onScanSuccess={handleQrScanSuccess}
-              onScanError={(errorMsg) => {
-                console.error('QR scan error:', errorMsg);
-                setError(errorMsg);
-                toast.error('QR Scan Failed', {
-                  description: errorMsg
-                });
-              }}
-              onClose={() => {
-                console.log('Closing QR scanner');
-                setShowQrScanner(false);
-              }}
-            />
-          </div>
-        )}
-
         {error && (
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="destructive" className="mb-4 animate-fade-in">
             <AlertTitle className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -404,21 +291,7 @@ export function ClaimForm() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-
-        {loadingState !== 'idle' && (
-          <div className="mb-6 animate-fade-in">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium">
-                {loadingState === 'validating' && 'Validating token...'}
-                {loadingState === 'processing' && 'Processing claim...'}
-                {loadingState === 'confirming' && 'Confirming transaction...'}
-              </span>
-              <span className="text-xs text-muted-foreground">{Math.round(processingProgress)}%</span>
-            </div>
-            <Progress value={processingProgress} className="h-2" />
-          </div>
-        )}
-
+        
         {eventDetails ? (
           <div className="space-y-4 animate-fade-in">
             <div className="p-4 bg-muted rounded-lg shadow-sm transition-all hover:shadow-md">
@@ -437,16 +310,109 @@ export function ClaimForm() {
                 Token: {eventDetails.mint.slice(0, 8)}...{eventDetails.mint.slice(-8)}
               </p>
             </div>
-
+            
             <div className="text-center py-2 animate-slide-up" style={{animationDelay: '100ms'}}>
               <p className="text-sm text-muted-foreground">
-                {connected
-                  ? 'Click the button below to claim your token'
-                  : 'Connect your wallet to claim your token'}
+                Connect your wallet and click the button below to claim your token
               </p>
             </div>
           </div>
-        ) : !showQrScanner ? (
+        ) : showQrScanner ? (
+          <QrScanner 
+            onScanSuccess={(result) => {
+              console.log('QR scan successful:', result);
+              try {
+                // Variables to store parsed data
+                let mintAddress = null;
+                let eventName = null;
+                
+                // Check if this is a Solana Pay URL (starts with 'solana:')
+                if (result.startsWith('solana:')) {
+                  console.log('Detected Solana Pay URL format');
+                  
+                  // Parse Solana Pay URL format: solana:address?spl-token=tokenAddress&...
+                  const [protocol, rest] = result.split(':', 2);
+                  if (rest) {
+                    // Split at the first ? to separate address from parameters
+                    const [recipientAddress, queryString] = rest.split('?', 2);
+                    console.log('Recipient address:', recipientAddress);
+                    
+                    if (queryString) {
+                      const params = new URLSearchParams('?' + queryString);
+                      // Get token from spl-token parameter
+                      mintAddress = params.get('spl-token');
+                      // Get event name from label parameter
+                      eventName = params.get('label');
+                      
+                      console.log('Parsed from Solana Pay URL - Token:', mintAddress, 'Label:', eventName);
+                    }
+                  }
+                } else {
+                  // Try to parse as a standard URL
+                  try {
+                    const url = new URL(result);
+                    const params = new URLSearchParams(url.search);
+                    eventName = params.get('event');
+                    mintAddress = params.get('mint');
+                    const code = params.get('code');
+                    
+                    console.log('Parsed standard URL - Event:', eventName, 'Mint:', mintAddress);
+                  } catch (error) {
+                    console.error('Not a valid URL:', error);
+                    // If it's not a URL format, check if it might be a direct token address
+                    if (result.length >= 32 && result.length <= 44) {
+                      try {
+                        new PublicKey(result); // Will throw if invalid
+                        mintAddress = result;
+                        console.log('Using QR content directly as token address:', mintAddress);
+                      } catch (pkError) {
+                        console.error('Not a valid public key either:', pkError);
+                      }
+                    }
+                  }
+                }
+                
+                if (mintAddress) {
+                  // Validate mint address format
+                  try {
+                    new PublicKey(mintAddress);
+                    
+                    // If we have an event name, set event details
+                    if (eventName) {
+                      setEventDetails({
+                        name: decodeURIComponent(eventName),
+                        mint: mintAddress
+                      });
+                    } else {
+                      // Otherwise just set the claim code
+                      setClaimCode(mintAddress);
+                    }
+                    
+                    // Close the scanner
+                    setShowQrScanner(false);
+                    
+                    // If we have everything we need, submit automatically
+                    if (connected && publicKey) {
+                      setTimeout(() => {
+                        handleSubmit(new Event('submit') as any);
+                      }, 500);
+                    }
+                  } catch (err) {
+                    setError('Invalid token address in QR code');
+                  }
+                } else {
+                  setError('QR code does not contain a valid token address');
+                }
+              } catch (err) {
+                setError('Invalid QR code format. Please scan a Solana Pay QR code.');
+              }
+            }}
+            onScanError={(errorMsg: string) => {
+              setError(errorMsg);
+            }}
+            onClose={() => setShowQrScanner(false)}
+          />
+        ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="claimCode">Claim Code or Token Address</Label>
@@ -458,16 +424,11 @@ export function ClaimForm() {
                   onChange={(e) => setClaimCode(e.target.value)}
                   className="flex-1"
                   required
-                  disabled={isSubmitting}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    console.log('Opening QR scanner...');
-                    setShowQrScanner(true);
-                  }}
-                  disabled={isSubmitting}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowQrScanner(true)}                     
                   className="flex-shrink-0 border-dashed hover:border-primary hover:bg-primary/5"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -484,36 +445,22 @@ export function ClaimForm() {
               </p>
             </div>
           </form>
-        ) : null}
+        )
+      }
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button
-          onClick={handleSubmit}
-          disabled={isSubmitting || walletConnecting || loadingState !== 'idle' || !connected}
-          className="relative transition-all bg-primary text-primary-foreground hover:bg-primary/90"
+        <Button 
+          onClick={handleSubmit} 
+          disabled={isSubmitting || !connected}
+          className="relative transition-all bg-white text-black hover:bg-slate-100"
         >
           {isSubmitting ? (
             <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Processing...
-            </span>
-          ) : !connected ? (
-            <span className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clipRule="evenodd" />
-              </svg>
-              Connect Wallet First
-            </span>
-          ) : walletConnecting ? (
-            <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Connecting...
+              Claiming...
             </span>
           ) : (
             <span className="flex items-center">
