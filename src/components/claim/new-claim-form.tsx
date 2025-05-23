@@ -117,7 +117,64 @@ export function ClaimForm() {
       setIsSubmitting(true);
       
       // Get the mint address either from the URL parameters or the claim code input
-      const mintAddress = eventDetails?.mint || claimCode;
+      let mintAddress = eventDetails?.mint || claimCode || '';
+      
+      // Check if the input might be a URL containing a token address
+      if (mintAddress.includes('http') || mintAddress.includes('solana:')) {
+        try {
+          // Try parsing as Solana Pay URL
+          if (mintAddress.startsWith('solana:')) {
+            const solanaPayUrl = mintAddress.split('?');
+            if (solanaPayUrl.length > 1) {
+              const queryParams = new URLSearchParams('?' + solanaPayUrl[1]);
+              const tokenParam = queryParams.get('spl-token');
+              if (tokenParam) {
+                mintAddress = tokenParam;
+              }
+            }
+          } else {
+            // Try parsing as regular URL
+            const url = new URL(mintAddress);
+            const params = new URLSearchParams(url.search);
+            
+            // Check various parameters that might contain the token address
+            const possibleParams = [
+              params.get('mint'),
+              params.get('token'),
+              params.get('address'),
+              params.get('spl-token'),
+              params.get('tokenAddress')
+            ].filter(Boolean) as string[];
+            
+            // Find first valid address
+            for (const param of possibleParams) {
+              try {
+                new PublicKey(param);
+                mintAddress = param;
+                break;
+              } catch {}
+            }
+            
+            // If no parameter found, check if the path itself contains a token address
+            if (mintAddress.includes('http')) {
+              const pathSegments = url.pathname.split('/');
+              const lastSegment = pathSegments[pathSegments.length - 1];
+              
+              if (lastSegment && lastSegment.length >= 32) {
+                try {
+                  new PublicKey(lastSegment);
+                  mintAddress = lastSegment;
+                } catch {}
+              }
+            }
+          }
+        } catch (urlError) {
+          console.error('Error parsing URL in claim code:', urlError);
+          // Continue with original input if URL parsing fails
+        }
+      }
+      
+      console.log('Using mint address:', mintAddress);
       
       // Validate the mint address is a valid Solana PublicKey
       const mintPublicKey = new PublicKey(mintAddress);
@@ -454,7 +511,8 @@ export function ClaimForm() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Scan a Solana Pay QR code or enter a token address manually
+                Scan a Solana Pay QR code or enter a token address manually. <br/>
+                <span className="text-xs text-primary/80">Supports token addresses, Solana Pay URLs, and direct URLs from mint</span>
               </p>
             </div>
           </form>
