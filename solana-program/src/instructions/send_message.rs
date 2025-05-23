@@ -28,9 +28,9 @@ pub struct SendMessageData {
 }
 
 /// Process a send message instruction
-pub fn process(
+pub fn process<'a>(
     program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    accounts: &'a [AccountInfo<'a>],
     instruction_data: &[u8],
 ) -> ProgramResult {
     let accounts_iter = &mut accounts.iter();

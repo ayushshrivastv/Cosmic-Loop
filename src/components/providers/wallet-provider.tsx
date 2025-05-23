@@ -6,12 +6,10 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
-  BackpackWalletAdapter,
   CoinbaseWalletAdapter,
-  SlopeWalletAdapter,
   TorusWalletAdapter,
-  BraveWalletAdapter,
   CloverWalletAdapter,
+  LedgerWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { type Cluster, DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
@@ -51,16 +49,14 @@ export const SolanaWalletProvider: FC<SolanaWalletProviderProps> = ({
       : DEVNET_RPC_ENDPOINT;
   }, [cluster, endpoint]);
 
-  // Set up supported wallets
+  // Set up supported wallets with proper configuration
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
-    new BackpackWalletAdapter(),
     new CoinbaseWalletAdapter(),
-    new SlopeWalletAdapter(),
     new TorusWalletAdapter(),
-    new BraveWalletAdapter(),
     new CloverWalletAdapter(),
+    new LedgerWalletAdapter()
   ], []);
 
   // State to determine if the component has been mounted client-side
@@ -75,7 +71,18 @@ export const SolanaWalletProvider: FC<SolanaWalletProviderProps> = ({
 
   return (
     <ConnectionProvider endpoint={rpcEndpoint}>
-      <WalletProvider wallets={wallets} autoConnect={mounted}>
+      <WalletProvider 
+        wallets={wallets} 
+        autoConnect={mounted}
+        localStorageKey="solana-wallet-adapter"
+        onError={(error) => {
+          console.error('[Wallet] Error:', error);
+          // Detailed error logging for debugging
+          if (error.name === 'WalletConnectionError' && error.message.includes('Origin not approved')) {
+            console.log('[Wallet] Origin approval needed. Current origin:', window.location.origin);
+          }
+        }}
+      >
         <WalletModalProvider>
           {children}
         </WalletModalProvider>

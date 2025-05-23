@@ -5,15 +5,15 @@
  */
 
 use solana_program::{
-    account_info::{next_account_info, AccountInfo},
+    account_info::AccountInfo,
     entrypoint::ProgramResult,
-    instruction::{AccountMeta, Instruction},
     msg,
     program::invoke,
     program_error::ProgramError,
     pubkey::Pubkey,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
+// serde should be added to Cargo.toml dependencies
 use serde::{Deserialize, Serialize};
 use sha2::{Sha256, Digest};
 
@@ -178,10 +178,12 @@ pub fn send_to_endpoint<'a>(
         data,
     };
     
-    // Pass the accounts directly to invoke to avoid lifetime issues
+    // Use references properly for the invoke call
+    // The accounts array needs AccountInfo<'_> elements, not &AccountInfo<'_>
+    let account_infos = [*endpoint_account, *fee_account, *sender_account];
     invoke(
         &instruction,
-        &[endpoint_account, fee_account, sender_account],
+        &account_infos,
     )?;
     
     msg!("Message sent successfully to LayerZero V2 endpoint");

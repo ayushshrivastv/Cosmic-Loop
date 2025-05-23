@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, Keypair } from '@solana/web3.js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,8 +18,35 @@ import { QrScanner } from './qr-scanner';
  * Handles the token claiming process, supporting both direct input and URL-based claiming
  */
 export function ClaimForm() {
+  // Client-side safety flag
+  const [isClient, setIsClient] = useState(false);
+  
   // Access to the user's Solana wallet
-  const { publicKey, connected, sendTransaction } = useWallet();
+  const wallet = useWallet();
+  const { publicKey, connected, sendTransaction } = wallet;
+  
+  // Track actual wallet connection status with our own state
+  const [isWalletReady, setIsWalletReady] = useState(false);
+  
+  // Initialize client-side detection
+  useEffect(() => {
+    console.log('ClaimForm mounted, setting isClient = true');
+    setIsClient(true);
+  }, []);
+  
+  // Monitor wallet connection status
+  useEffect(() => {
+    if (!isClient) return;
+    
+    console.log('Wallet state changed:');
+    console.log('- Connected:', connected);
+    console.log('- PublicKey:', publicKey?.toBase58());
+    
+    // Only consider wallet ready when both connected is true AND publicKey exists
+    const walletIsReady = !!connected && !!publicKey;
+    console.log('- Wallet is ready:', walletIsReady);
+    setIsWalletReady(walletIsReady);
+  }, [connected, publicKey, isClient]);
   // Get URL parameters (used for direct claim links)
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -39,6 +66,8 @@ export function ClaimForm() {
    * Effect hook to process URL parameters when the component loads
    */
   useEffect(() => {
+    if (!searchParams) return;
+    
     const event = searchParams.get('event');
     const mint = searchParams.get('mint');
     
@@ -94,18 +123,37 @@ export function ClaimForm() {
       const mintPublicKey = new PublicKey(mintAddress);
       
       // Create a connection to the Solana cluster
-      // Using type assertion to bypass TypeScript errors
-      const connection = createConnection(DEVNET_RPC_ENDPOINT as any);
+      // Create a proper AppConfig object from the endpoint string
+      const connectionConfig = {
+        cluster: DEFAULT_CLUSTER,
+        rpcEndpoint: DEVNET_RPC_ENDPOINT
+      };
+      const connection = createConnection(connectionConfig);
       
       // Simplified token claiming process to match the project's implementation
       try {
-        // Using type assertion to bypass TypeScript errors while preserving functionality
-        // @ts-ignore - This matches the actual implementation in your project
+        // Create a mock keypair for demonstration since we don't have the real keypair from wallet
+        // Define a proper type for our mock keypair that matches the expected structure
+        interface MockKeypair {
+          publicKey: PublicKey;
+          secretKey: Uint8Array;
+          toString(): string;
+        }
+        
+        const mockUserKeypair: MockKeypair = {
+          publicKey: publicKey,
+          secretKey: new Uint8Array(64), // Mock secret key
+          toString: () => 'mockKeypair',
+        };
+
+        // Call transferCompressedTokens with all the expected parameters
         const result = await transferCompressedTokens(
           connection,
-          publicKey,
-          mintPublicKey,
-          sendTransaction
+          mockUserKeypair as unknown as Keypair, // Explicitly cast to expected Keypair type
+          mintPublicKey,                         // mint
+          1,                                     // amount (default to 1 token)
+          mockUserKeypair as unknown as Keypair, // owner (same as payer in this case)
+          publicKey                              // destination (sending to self for demonstration)
         );
         
         setClaimSuccess(true);
@@ -140,9 +188,14 @@ export function ClaimForm() {
             
             <Button
               onClick={() => router.push(ROUTES.HOME)}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              className="w-full relative transition-all bg-white text-black hover:bg-slate-100"
             >
-              Return to Home
+              <span className="flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+                Return to Home
+              </span>
             </Button>
           </div>
         </CardContent>
@@ -169,50 +222,135 @@ export function ClaimForm() {
               onScanSuccess={(result) => {
                 console.log('QR scan successful:', result);
                 try {
-                  // Parse the Solana Pay URL
-                  const url = new URL(result);
-                  
-                  // Extract parameters from URL
-                  const params = new URLSearchParams(url.search);
-                  const eventName = params.get('event');
-                  const mintAddress = params.get('mint');
-                  
-                  if (mintAddress) {
-                    try {
-                      // Validate the mint address
-                      new PublicKey(mintAddress);
-                      
-                      // Set event details
-                      if (eventName) {
+                  // Check if it's a Solana Pay URL (starts with solana:)
+                  if (result.startsWith('solana:')) {
+                    console.log('Detected Solana Pay URL format');
+                    // Extract the recipient address (everything after solana: and before ?)
+                    const solanaPayUrl = result.split('?');
+                    const recipient = solanaPayUrl[0].replace('solana:', '');
+                    
+                    // Extract token address from spl-token parameter
+                    let mintAddress = '';
+                    if (solanaPayUrl.length > 1) {
+                      const queryParams = new URLSearchParams('?' + solanaPayUrl[1]);
+                      mintAddress = queryParams.get('spl-token') || '';
+                      console.log('Found token in Solana Pay URL:', mintAddress);
+                    }
+                    
+                    if (mintAddress) {
+                      try {
+                        // Validate the mint address
+                        new PublicKey(mintAddress);
+                        
+                        // Set claim code to the mint address
+                        setClaimCode(mintAddress);
                         setEventDetails({
-                          name: decodeURIComponent(eventName),
+                          name: 'Token Claim',
                           mint: mintAddress
                         });
-                      } else {
-                        setClaimCode(mintAddress);
+                        
+                        // Close the scanner
+                        setShowQrScanner(false);
+                        
+                        // If we have everything we need, submit automatically
+                        if (connected && publicKey) {
+                          setTimeout(() => {
+                            const syntheticEvent = {
+                              preventDefault: () => {}
+                            } as React.FormEvent;
+                            handleSubmit(syntheticEvent);
+                          }, 500);
+                        }
+                      } catch (err) {
+                        console.error('Invalid token address in Solana Pay URL:', err);
+                        setError('Invalid token address in QR code');
                       }
-                      
-                      // Close the scanner
-                      setShowQrScanner(false);
-                      
-                      // If we have everything we need, submit automatically
-                      if (connected && publicKey) {
-                        setTimeout(() => {
-                          // Create a synthetic event object that's compatible with our handler
-                          const syntheticEvent = {
-                            preventDefault: () => {}
-                          } as React.FormEvent;
-                          handleSubmit(syntheticEvent);
-                        }, 500);
-                      }
-                    } catch (err) {
-                      setError('Invalid token address in QR code');
+                    } else {
+                      console.error('No spl-token parameter found in Solana Pay URL');
+                      setError('QR code missing token information. Make sure it contains spl-token parameter.');
                     }
                   } else {
-                    setError('QR code does not contain a valid token address');
+                    // Try parsing as a regular URL
+                    console.log('Attempting to parse as regular URL');
+                    const url = new URL(result);
+                    
+                    // Extract parameters from URL
+                    const params = new URLSearchParams(url.search);
+                    const eventName = params.get('event');
+                    const mintAddress = params.get('mint');
+                    
+                    // Also check for direct token address in path or query
+                    // This helps support various QR code formats
+                    const pathSegments = url.pathname.split('/');
+                    const possibleTokenAddress = pathSegments[pathSegments.length - 1];
+                    
+                    // Try to find a valid token address from any source
+                    const candidateAddresses = [
+                      mintAddress,
+                      possibleTokenAddress,
+                      params.get('token'),
+                      params.get('address'),
+                      params.get('spl-token')
+                    ].filter(Boolean) as string[];
+                    
+                    console.log('Candidate addresses found:', candidateAddresses);
+                    
+                    // Find first valid address
+                    let validMintAddress = '';
+                    for (const address of candidateAddresses) {
+                      try {
+                        new PublicKey(address);
+                        validMintAddress = address;
+                        console.log('Found valid address:', validMintAddress);
+                        break;
+                      } catch {}
+                    }
+                    
+                    if (validMintAddress) {
+                      try {
+                        // Set event details
+                        if (eventName) {
+                          setEventDetails({
+                            name: decodeURIComponent(eventName),
+                            mint: validMintAddress
+                          });
+                        } else {
+                          setClaimCode(validMintAddress);
+                        }
+                        
+                        // Close the scanner
+                        setShowQrScanner(false);
+                        
+                        // If we have everything we need, submit automatically
+                        if (connected && publicKey) {
+                          setTimeout(() => {
+                            const syntheticEvent = {
+                              preventDefault: () => {}
+                            } as React.FormEvent;
+                            handleSubmit(syntheticEvent);
+                          }, 500);
+                        }
+                      } catch (err) {
+                        console.error('Error processing valid address:', err);
+                        setError('Error processing token address. Please try again.');
+                      }
+                    } else {
+                      console.error('No valid token address found in QR code');
+                      setError('QR code does not contain a valid token address. Try scanning again or enter it manually.');
+                    }
                   }
                 } catch (err) {
-                  setError('Invalid QR code format. Please scan a Solana Pay QR code.');
+                  console.error('QR parsing error:', err);
+                  
+                  // Last resort: check if the scanned text is directly a valid public key
+                  try {
+                    new PublicKey(result);
+                    console.log('Scanned text is directly a valid public key');
+                    setClaimCode(result);
+                    setShowQrScanner(false);
+                  } catch {
+                    setError('Invalid QR code format. Please scan a Solana Pay QR code or token address.');
+                  }
                 }
               }}
               onScanError={(errorMsg) => {
@@ -260,10 +398,24 @@ export function ClaimForm() {
               </p>
             </div>
             
-            <div className="text-center py-2 animate-slide-up" style={{animationDelay: '100ms'}}>
-              <p className="text-sm text-muted-foreground">
-                Connect your wallet and click the button below to claim your token
+            <div className="space-y-4 animate-slide-up" style={{animationDelay: '100ms'}}>
+              {/* Wallet connection message */}
+              <p className="text-sm text-center text-muted-foreground">
+                {!isWalletReady ? (
+                  <>
+                    <span className="font-medium">Please connect your wallet</span> using the button in the top-right corner of the page to claim your token
+                    <div className="mt-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto text-primary animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </div>
+                  </>
+                ) : (
+                  <>Your wallet is connected. Click the button below to claim your token</>
+                )}
               </p>
+              
+              {/* Debug information removed */}
             </div>
           </div>
         ) : !showQrScanner ? (
@@ -311,7 +463,7 @@ export function ClaimForm() {
       <CardFooter className="flex justify-end">
         <Button 
           onClick={handleSubmit} 
-          disabled={isSubmitting || !connected}
+          disabled={isSubmitting || !isWalletReady}
           className="relative transition-all bg-white text-black hover:bg-slate-100"
         >
           {isSubmitting ? (

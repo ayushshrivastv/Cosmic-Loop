@@ -96,7 +96,6 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
-    // BackpackWalletAdapter and GlowWalletAdapter removed as they're not available in the current version
     new TorusWalletAdapter()
   ], []);
 
@@ -105,6 +104,7 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
     console.error('[Wallet] Error:', error);
 
     let message = 'An error occurred with your wallet';
+    let description = 'Please try again or use a different wallet';
 
     // Provide specific error messages based on error type
     if (error instanceof WalletNotConnectedError) {
@@ -122,12 +122,16 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
       message = 'You closed the wallet connection window';
     } else if (error.name.includes('WalletTimeoutError')) {
       message = 'Wallet connection timed out. Please try again';
+    } else if (error.name === 'WalletConnectionError' && error.message.includes('Origin not approved')) {
+      message = 'Origin not approved by wallet';
+      description = 'Please approve this site in your wallet extension settings';
+      console.log('[Wallet] Origin approval needed. Current origin:', window.location.origin);
     } else if (error.message) {
       message = error.message;
     }
 
     toast.error(message, {
-      description: 'Please try again or use a different wallet',
+      description: description,
       duration: 5000,
     });
   }, [connectionAttempts]);
@@ -154,6 +158,7 @@ export const WalletAdapterProvider: FC<WalletAdapterProviderProps> = ({
         wallets={wallets}
         autoConnect={walletInitialized}
         onError={onError}
+        localStorageKey="solana-wallet-adapter"
       >
         <WalletEventListener onWalletConnected={onWalletConnected} preferredWallet={walletPreference} />
         <WalletModalProvider>{children}</WalletModalProvider>
