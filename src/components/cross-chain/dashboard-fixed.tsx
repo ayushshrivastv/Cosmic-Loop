@@ -39,6 +39,9 @@ export function CrossChainDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const { connectionState, messages, trackMessage } = useWebSocket();
   
+  // State for development banner visibility
+  const [showDevBanner, setShowDevBanner] = useState(true);
+  
   // Check if this is a new user (no previous interactions)
   const [isNewUser, setIsNewUser] = useState<boolean>(true);
   
@@ -145,6 +148,37 @@ export function CrossChainDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Development Banner */}
+      {showDevBanner && (
+        <div className="relative bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded shadow-sm">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-grow">
+              <h3 className="text-blue-800 font-semibold text-sm">This page is under development</h3>
+              <p className="text-blue-700 text-sm mt-1">
+                The cross-chain functionality is currently being implemented. Please check the{' '}
+                <a href="https://docs.layerzero.network/" target="_blank" rel="noopener noreferrer" className="underline font-medium">LayerZero documentation</a>{' '}
+                to understand how cross-chain messaging works. Solana OpenAPI integration allows your application to 
+                seamlessly communicate across multiple blockchains through a unified interface.
+              </p>
+            </div>
+            <button 
+              onClick={() => setShowDevBanner(false)} 
+              className="text-blue-500 hover:text-blue-700 transition-colors ml-4"
+              aria-label="Close development banner"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Dashboard Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
