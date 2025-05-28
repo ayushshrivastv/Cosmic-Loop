@@ -88,6 +88,30 @@ export class PerplexityService {
    * @param blockchainData Optional blockchain data to provide to the model
    * @returns The generated response text
    */
+  /**
+   * Check if a query is asking for simple factual information like prices
+   * @param query The user query
+   * @returns True if the query is asking for simple factual information
+   */
+  private isSimpleFactQuery(query: string): boolean {
+    // Convert to lowercase for case-insensitive matching
+    const lowerQuery = query.toLowerCase();
+    
+    // Check for price queries
+    const isPriceQuery = (
+      lowerQuery.includes('price') && 
+      (lowerQuery.includes('today') || lowerQuery.includes('now') || lowerQuery.includes('current'))
+    );
+    
+    // Check for other simple factual queries (can be expanded)
+    const isSimpleFactual = (
+      lowerQuery.match(/^(what|when|where|who|how much|how many)\s+(is|are|was|were)\s+/i) !== null &&
+      lowerQuery.split(' ').length < 8 // Simple queries are usually short
+    );
+    
+    return isPriceQuery || isSimpleFactual;
+  }
+
   async generateFinancialAnalysis(query: string, blockchainData?: BlockchainData): Promise<string> {
     try {
       // Since we're now using a proxy API, we don't need to check for the API key here
@@ -96,15 +120,22 @@ export class PerplexityService {
       // Log that we're using the real API
       console.log('Using Perplexity API with model:', PERPLEXITY_MODEL);
 
-      // Construct the messages array with system prompt and user query
-      const messages = [
+      // Check if this is a simple query that needs a direct answer
+      const isSimpleQuery = this.isSimpleFactQuery(query);
+      
+      // Create messages array for the API request
+      const messages: PerplexityRequest['messages'] = [
         {
-          role: 'system' as const,
-          content: FINANCIAL_ANALYSIS_PROMPT
+          role: 'system',
+          content: isSimpleQuery 
+            ? 'You are a helpful assistant that provides direct, concise answers to financial and blockchain questions. For price queries, just provide the current price and minimal context (1-2 sentences maximum). Be extremely brief and to the point. DO NOT include citation numbers like [1] or [2] in your response.'
+            : FINANCIAL_ANALYSIS_PROMPT + ' DO NOT include citation numbers like [1] or [2] in your response text. If you need to cite sources, include them in a separate Sources section at the end.'
         },
         {
-          role: 'user' as const,
-          content: query
+          role: 'user',
+          content: isSimpleQuery
+            ? `Please provide a direct and extremely concise answer to: ${query}. Just give me the facts without elaboration. Do not include citation numbers in your response.`
+            : `${query} Please do not include citation numbers like [1] or [2] in your response text.`
         }
       ];
 
@@ -226,7 +257,7 @@ export class PerplexityService {
         requestData,
         { 
           headers: this.headers,
-          timeout: 10000 // 10 second timeout
+          timeout: 60000 // 60 second timeout for better reliability
         }
       );
 
@@ -386,7 +417,7 @@ Cross-chain bridge transactions have increased by 22% this week, with Solana-Eth
         { 
           headers: this.headers,
           responseType: 'stream',
-          timeout: 30000 // 30 second timeout for streaming
+          timeout: 90000 // 90 second timeout for streaming to handle longer responses
         }
       );
 

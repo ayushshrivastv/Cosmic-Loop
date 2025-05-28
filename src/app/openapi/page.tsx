@@ -11,8 +11,10 @@ import { useAIAssistant } from '@/hooks/use-ai-assistant';
 import { substreamsService } from '@/services/substreams-service';
 import { substreamsGeminiService } from '@/services/substreams-gemini-service';
 import { substreamsPerplexityService } from '@/services/substreams-perplexity-service';
+import { enhancedAIService } from '@/services/enhanced-ai-service';
 import { AIQueryType } from '@/services/ai-assistant-service';
 import { promptEngineeringService } from '@/services/prompt-engineering-service';
+import { ChatAIResponseFormatter } from '@/components/AISearch/ChatAIResponseFormatter';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -44,10 +46,33 @@ type Message = {
   text: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  metadata?: {
+    latency?: {
+      total: number;
+    };
+    tokens?: {
+      total: number;
+    };
+  };
 };
 
 // Define available AI models
-type AIModel = 'gemini' | 'perplexity';
+type AIModel = 'gemini' | 'perplexity' | 'enhanced';
+// Define a subset of models for specific operations
+type SubsetAIModel = 'gemini' | 'perplexity';
+
+// Add this to the ChatInput component props
+interface ChatInputProps {
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleSendMessage: () => void;
+  isLoading: boolean;
+  selectedModel: 'gemini' | 'perplexity'; // Match the imported component's prop type
+}
+
+// Define response format options
+type ResponseFormat = 'standard' | 'concise';
 
 // Import types from react-markdown
 import type { Components } from 'react-markdown';
@@ -57,7 +82,8 @@ export default function OpenAPIPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState<AIModel>('perplexity');
+  const [selectedModel, setSelectedModel] = useState<AIModel>('enhanced');
+  const [responseFormat, setResponseFormat] = useState<ResponseFormat>('concise');
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const modelDropdownRef = useRef<HTMLDivElement>(null);
@@ -221,9 +247,64 @@ export default function OpenAPIPage() {
       // Create a new conversation
       const newConversation = await startNewConversation();
 
+      // Use our enhanced AI service if selected
+      if (selectedModel === 'enhanced') {
+        try {
+          // Update the assistant message to show we're processing
+          setMessages((prev: Message[]) => {
+            return prev.map(msg => {
+              if (msg.id === assistantMessageId) {
+                return {
+                  ...msg,
+                  text: 'Thinking...',
+                  timestamp: new Date()
+                };
+              }
+              return msg;
+            });
+          });
+          
+          // Start timing for response latency
+          const startTime = Date.now();
+          
+          // Use the enhanced AI service with the correct method
+          const enhancedResponse = await enhancedAIService.generateResponse(currentInputValue, responseFormat === 'concise');
+          
+          // Calculate latency
+          const latency = Date.now() - startTime;
+          
+          // Update the assistant message with the enhanced response
+          setMessages((prev: Message[]) => {
+            return prev.map(msg => {
+              if (msg.id === assistantMessageId) {
+                return {
+                  ...msg,
+                  text: enhancedResponse,
+                  timestamp: new Date(),
+                  metadata: {
+                    latency: { total: latency }
+                  }
+                };
+              }
+              return msg;
+            });
+          });
+          
+          // Scroll to bottom with the update
+          scrollToBottom();
+          return; // Exit early as we've handled the response
+        } catch (enhancedError) {
+          console.error('Error processing with Enhanced AI Service:', enhancedError);
+          // Fall back to other processing methods
+        }
+      }
+      
       // Determine if we should use Perplexity based on model selection or query content
-      const usePerplexity = selectedModel === 'perplexity' || 
-        (selectedModel === 'gemini' && currentInputValue.toLowerCase().match(/financ|invest|stock|market|asset|portfolio|fund|return|roi|analysis|trend|forecast|predict/i));
+      // Only proceed with this logic if we're not using the enhanced model
+      const usePerplexity = selectedModel !== 'enhanced' && (
+        selectedModel === 'perplexity' || 
+        (selectedModel === 'gemini' && currentInputValue.toLowerCase().match(/financ|invest|stock|market|asset|portfolio|fund|return|roi|analysis|trend|forecast|predict/i))
+      );
       
       if (usePerplexity) {
         // Process with Perplexity's Sonar API for financial analysis
@@ -428,7 +509,7 @@ export default function OpenAPIPage() {
                 handleKeyDown={handleKeyDown}
                 handleSendMessage={handleSendMessage}
                 isLoading={isLoading}
-                selectedModel={selectedModel}
+                selectedModel={selectedModel !== 'enhanced' ? (selectedModel as 'gemini' | 'perplexity') : 'gemini'}
               />
             </div>
           </div>
@@ -466,7 +547,7 @@ export default function OpenAPIPage() {
                             : 'bg-white text-black'
                         }`}
                       >
-                        <div className="flex items-center mb-1">
+                        <div className="flex items-center space-x-2 mb-2">
                           {message.sender === 'assistant' && (
                             <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-2">
                               <span className="text-xs text-black">AI</span>
@@ -487,59 +568,22 @@ export default function OpenAPIPage() {
                           </span>
                         </div>
                         {message.sender === 'assistant' ? (
-                          <div className="markdown-content text-sm max-w-full overflow-hidden">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                h1: ({ ...props }) => <h1 className="text-lg font-bold my-2 text-black" {...props} />,
-                                h2: ({ ...props }) => <h2 className="text-md font-bold my-2 text-black" {...props} />,
-                                h3: ({ ...props }) => <h3 className="text-sm font-bold my-1 text-black" {...props} />,
-                                p: ({ children, ...props }) => {
-                                  // Check if any child is a React element (not just text)
-                                  const hasComponentChildren = React.Children.toArray(children).some(
-                                    child => React.isValidElement(child)
-                                  );
-                                  // If it has component children, use div instead of p to avoid nesting issues
-                                  return hasComponentChildren ?
-                                    <div className="my-2 text-black" {...props}>{children}</div> :
-                                    <p className="my-2 text-black" {...props}>{children}</p>;
-                                },
-                                ul: ({ ...props }) => <ul className="list-disc pl-5 my-2 text-black" {...props} />,
-                                ol: ({ ...props }) => <ol className="list-decimal pl-5 my-2 text-black" {...props} />,
-                                li: ({ ...props }) => <li className="my-1 text-black" {...props} />,
-                                a: ({ ...props }) => <a className="text-blue-600 hover:text-blue-800 underline break-words" target="_blank" rel="noopener noreferrer" {...props} />,
-                                code: ({ inline, ...props }: ComponentPropsWithoutRef<'code'> & { inline?: boolean }) => {
-                                  const isInline = inline || false;
-                                  return isInline ? (
-                                    <code className="bg-gray-700 text-blue-200 px-1 rounded text-xs font-medium" {...props} />
-                                  ) : (
-                                    <pre className="bg-gray-900 border border-gray-700 rounded-md p-3 my-3 overflow-x-auto w-full max-w-full">
-                                      <div className="flex items-center mb-2">
-                                        <Code className="h-4 w-4 mr-2 text-blue-400" />
-                                        <span className="text-xs font-mono text-blue-400">Code</span>
-                                      </div>
-                                      <code className="block text-xs font-mono text-gray-200 whitespace-pre-wrap break-all" {...props} />
-                                    </pre>
-                                  );
-                                },
-                                blockquote: ({ ...props }) => (
-                                  <aside className="border-l-2 border-blue-500 bg-gray-700 pl-3 my-3 py-2 rounded-r">
-                                    <div className="flex items-center mb-1">
-                                      <Info className="h-4 w-4 mr-2 text-blue-400" />
-                                      <span className="text-xs text-blue-300 font-medium">Note</span>
-                                    </div>
-                                    <div className="text-gray-200">
-                                      <blockquote {...props} />
-                                    </div>
-                                  </aside>
-                                ),
-                              }}
-                            >
+                          message.text.includes('Thinking...') ? (
+                            <div className="whitespace-pre-wrap text-sm">
                               {message.text}
-                            </ReactMarkdown>
-                          </div>
+                            </div>
+                          ) : (
+                            <div className="whitespace-pre-wrap">
+                              <ChatAIResponseFormatter 
+                                content={message.text} 
+                                metadata={message.metadata}
+                              />
+                            </div>
+                          )
                         ) : (
-                          <p className="text-sm">{message.text}</p>
+                          <div className="whitespace-pre-wrap text-sm">
+                            {message.text}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -556,7 +600,7 @@ export default function OpenAPIPage() {
                 handleKeyDown={handleKeyDown}
                 handleSendMessage={handleSendMessage}
                 isLoading={isLoading}
-                selectedModel={selectedModel}
+                selectedModel={selectedModel !== 'enhanced' ? (selectedModel as 'gemini' | 'perplexity') : 'gemini'}
               />
             </div>
           </div>

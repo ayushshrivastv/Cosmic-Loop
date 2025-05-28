@@ -39,7 +39,9 @@ export async function POST(request: NextRequest) {
           'Accept': 'application/json',
           'Authorization': `Bearer ${PERPLEXITY_API_KEY}`
         },
-        timeout: 30000 // 30 second timeout for longer responses
+        timeout: 60000, // 60 second timeout for better reliability
+        maxContentLength: 50 * 1024 * 1024, // 50MB max content length
+        maxBodyLength: 50 * 1024 * 1024 // 50MB max body length
       }
     );
 
@@ -53,20 +55,36 @@ export async function POST(request: NextRequest) {
         statusText?: string;
         data?: unknown;
       };
+      code?: string;
     };
+    
     // Log error details
     console.error('Error proxying request to Perplexity API:', {
       message: axiosError.message,
       status: axiosError.response?.status,
       statusText: axiosError.response?.statusText,
+      code: axiosError.code,
       data: axiosError.response?.data
     });
+
+    // Create a user-friendly error message based on the error type
+    let userMessage = 'Error connecting to Perplexity API';
+    if (axiosError.code === 'ECONNABORTED') {
+      userMessage = 'The request to Perplexity API timed out. Please try again with a simpler query.';
+    } else if (axiosError.code === 'ERR_BAD_REQUEST') {
+      userMessage = 'Invalid request to Perplexity API. Please check your query and try again.';
+    } else if (axiosError.response?.status === 429) {
+      userMessage = 'Perplexity API rate limit exceeded. Please wait a moment and try again.';
+    } else if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+      userMessage = 'Authentication error with Perplexity API. Please check your API key configuration.';
+    }
 
     // Return error response
     return NextResponse.json(
       { 
-        error: 'Error proxying request to Perplexity API',
+        error: userMessage,
         message: axiosError.message,
+        code: axiosError.code,
         details: axiosError.response?.data
       },
       { status: axiosError.response?.status || 500 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen, Cpu, Database, Layers, LineChart, RefreshCw, Zap } from 'lucide-react';
+import ClientAISearchPanel from '@/components/AISearch/ClientAISearchPanel';
 
 export default function DocumentationPage() {
   return (
@@ -75,6 +76,11 @@ export default function DocumentationPage() {
 
         {/* Features Grid - Removed */}
 
+        {/* AI Agent Section */}
+        <section className="py-12 md:py-16 bg-gradient-to-b from-black/50 to-black/30 backdrop-blur-sm">
+          {/* Enhanced AI Agent section removed - functionality integrated into OpenAPI chat */}
+        </section>
+        
         {/* Getting Started Section - Removed */}
       </div>
     </div>
