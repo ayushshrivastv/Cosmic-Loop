@@ -4,20 +4,18 @@
 [![Solana](https://img.shields.io/badge/Solana-Compatible-9945FF)](https://solana.com/)
 [![LayerZero](https://img.shields.io/badge/LayerZero-V2-2D374B)](https://layerzero.network/)
 [![The Graph](https://img.shields.io/badge/The%20Graph-Substreams-0C0A1C)](https://thegraph.com/docs/en/substreams/)
-[![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2)](https://ai.google.dev/)
+[![Perplexity Sonar](https://img.shields.io/badge/Perplexity-Sonar-blue)](https://www.perplexity.ai/)
 
 ## Overview
 Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero-supported networks through V2 contracts and The Graph Substreams, Solana OpenAPI creates a unified experience across multiple blockchains.
 
 This Substreams package indexes Solana blockchain data for NFTs, marketplace activities, and cross-chain bridging events. It's designed to work with the Solana OpenAPI project to provide real time blockchain data through an AI powered interface.
 
-The project integrates Perplexity's Sonar API to provide real-time, accurate blockchain information through an intuitive chat interface. This integration allows users to query blockchain data, get financial analysis, and receive concise responses about Solana and other supported chains without requiring technical blockchain knowledge. The enhanced AI service combines Perplexity's search capabilities with Gemini's summarization to deliver optimized responses for both simple factual queries and complex analytical questions.
+The project integrates Perplexity's Sonar API to provide real time, accurate blockchain information through an intuitive chat interface. This integration allows users to query blockchain data, get financial analysis, and receive concise responses about Solana and other supported chains without requiring technical blockchain knowledge. The enhanced AI service combines Perplexity's search capabilities to summarization and deliver optimized responses for both simple factual queries and complex analytical questions.
 
 For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./architecture.md) document.
 
-P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead. Initially, I considered creating a mock data interface for the hackathon, but I’ve decided to connect to a real blockchain network instead. Writing the smart contract is taking some time.
-
-I came across this project on Superteam on March 10th, and this is my first ever submission on superteam—and also my first Solana project!
+P.S. After 48 hours of coding, debugging, and more coffee than water—here’s the project. The backend isn’t quite where I want it yet—there’s still a lot of work ahead.
 
 Web Page Link
 **[Solana OpenAPI](https://openapi-lilac.vercel.app)**
