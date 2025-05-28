@@ -234,7 +234,7 @@ export default function OpenAPIPage() {
               if (msg.id === assistantMessageId) {
                 return {
                   ...msg,
-                  text: 'Analyzing financial data with Perplexity Sonar...',
+                  text: 'Thinking...',
                   timestamp: new Date()
                 };
               }
@@ -472,7 +472,7 @@ export default function OpenAPIPage() {
                               <span className="text-xs text-black">AI</span>
                             </div>
                           )}
-                          {message.sender === 'assistant' && message.text.includes('Analyzing financial data with Perplexity Sonar') && (
+                          {message.sender === 'assistant' && message.text.includes('Thinking...') && (
                             <div className="px-2 py-0.5 bg-blue-100 rounded-full text-xs text-blue-700 ml-1 flex items-center">
                               <span>Sonar</span>
                             </div>
@@ -612,37 +612,45 @@ export default function OpenAPIPage() {
             </div>
             
             <div className="space-y-3 mt-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-white">Enhanced Financial Analysis with Perplexity's Sonar API</h2>
-              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">New Integration</div>
+              <h3 className="text-2xl md:text-3xl font-semibold text-blue-100">AI's New Search Paradigm: How Perplexity Sonar is Revolutionizing Blockchain Analysis</h3>
+              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Technology Report</div>
             </div>
 
             <div className="space-y-6 text-gray-300">
               <p>
-                We've now integrated Perplexity's powerful Sonar API to provide enhanced financial analysis capabilities. This integration allows our platform to deliver more sophisticated insights when analyzing blockchain financial data and market trends.
+                As blockchain networks grow more complex and interconnected, a quiet revolution is taking shape in how data is analyzed and understood. At the center of this shift is Perplexity's Sonar API—a technology that represents a fundamental departure from traditional search paradigms.
               </p>
 
               <p>
-                The Sonar API leverages Perplexity's advanced large language model (LLama-3.1-Sonar-Small-128k) specifically optimized for financial analysis. When you ask questions related to financial metrics, market analysis, investment strategies, or economic trends, your query is automatically routed to this specialized model.
+                "We've moved beyond the era of keyword matching and link retrieval," explains a senior developer at the company. "What users need is contextual understanding of blockchain activity across multiple networks, synthesized in real-time."
               </p>
 
               <p>
-                Key benefits of the Perplexity Sonar integration include:
-              </p>
-
-              <ul className="list-disc pl-5 space-y-2">
-                <li>More accurate financial analysis of blockchain data</li>
-                <li>Better understanding of market trends and patterns</li>
-                <li>Enhanced interpretation of on-chain metrics in financial contexts</li>
-                <li>Deeper insights into DeFi protocols and tokenomics</li>
-                <li>Improved explanations of complex financial concepts</li>
-              </ul>
-
-              <p>
-                This integration works seamlessly with our existing Substreams data pipeline, combining real-time blockchain data with sophisticated financial analysis capabilities. When you ask a question with financial keywords, you'll see a "Sonar" indicator showing that your query is being processed by Perplexity's specialized model.
+                The Sonar approach stands apart from conventional search engines by focusing on answer synthesis rather than document retrieval. For blockchain applications, where data exists in siloed networks and disparate formats, this capability has proven transformative.
               </p>
 
               <p>
-                Try asking questions about market trends, token performance, investment strategies, or financial metrics to experience the enhanced capabilities.
+                Industry analysts point to three distinctive capabilities that make Sonar particularly valuable for blockchain intelligence: its web-scale information retrieval, its ability to maintain factual accuracy even with rapidly changing data, and its natural language interface that democratizes access to complex blockchain metrics.
+              </p>
+
+              <p>
+                In practical applications, Sonar API acts as the connective tissue between raw on-chain data—streamed through technologies like Substreams—and the summarization capabilities of models like Google's Gemini. This creates what developers call an "intelligence pipeline" that flows from raw blockchain events to actionable insights.
+              </p>
+
+              <p>
+                The integration is especially powerful when examining cross-chain activity. As capital and data flow between Solana, Ethereum, and emerging Layer 2 networks via protocols like LayerZero, Sonar can track and contextualize these movements in ways traditional analytics platforms cannot.
+              </p>
+
+              <p>
+                "Before this integration, users had to manually piece together information from multiple block explorers, Twitter feeds, and developer forums," notes a DeFi researcher who requested anonymity. "Now they can simply ask natural language questions about complex cross-chain interactions and receive synthesized answers."
+              </p>
+
+              <p>
+                As blockchain ecosystems continue to evolve toward greater interconnectivity, technologies like Sonar that can seamlessly traverse network boundaries while maintaining coherent narratives about on-chain activity are likely to become essential infrastructure for both developers and users.
+              </p>
+              
+              <p>
+                Early adopters can experience this capability by querying the platform about recent Solana developments, cross-chain transactions, or specific protocols—revealing a glimpse of how AI is reshaping our understanding of decentralized networks.
               </p>
             </div>
           </article>

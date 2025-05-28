@@ -33,4 +33,5 @@ export const ROUTES = {
   PROFILE: "/profile",
   OPENAPI: "/openapi",
   CROSS_CHAIN: "/cross-chain",
+  DOCS: "/docs",
 };

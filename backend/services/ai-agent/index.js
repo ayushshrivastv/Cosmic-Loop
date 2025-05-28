@@ -3,12 +3,12 @@
  * @description AI agent service that connects to Substreams data and provides insights for the chat interface
  */
 
-const { createClient } = require('@pinecone-database/pinecone');
-const { createEmbedding } = require('./embeddings');
-const { querySubstreams, fetchChainStats } = require('./substreams-client');
-const { generateResponse } = require('./llm-client');
-const { extractEntities, formatResponse } = require('./utils');
-const logger = require('../../utils/logger');
+import { createClient } from '@pinecone-database/pinecone';
+import { createEmbedding } from './embeddings';
+import { querySubstreams, fetchChainStats } from './substreams-client';
+import { generateResponse } from './llm-client';
+import { extractEntities, formatResponse } from './utils';
+import logger from '../../utils/logger';
 
 // Initialize Pinecone client
 let pineconeClient = null;
@@ -243,6 +243,5 @@ const getMarketplaceStats = async (config) => {
   }
 };
 
-module.exports = {
-  initialize,
-};
+// Export the initialize function using ES Module syntax
+export { initialize };

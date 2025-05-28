@@ -6,7 +6,8 @@
 export const USE_GEMINI_API = true;
 
 // The Gemini API key from environment variables
-export const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyDQSk9hHJCJX6yUWEZwQnGNEtRQnVODj_A';
+// NEVER hardcode API keys in source code - always use environment variables
+export const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
 
 // The Gemini model to use
 export const GEMINI_MODEL = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';

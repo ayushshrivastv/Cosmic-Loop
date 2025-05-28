@@ -12,6 +12,7 @@
     "cdylib",
     "centralise",
     "cfgs",
+    "codellama",
     "computeUnitLimit",
     "computeUnitPrice",
     "conv",
@@ -66,7 +67,10 @@
     "txError",
     "vercel",
     "Webstyles",
-    "Yakovenko"
+    "Yakovenko",
+    "Kowalski",
+    "reimagining",
+    "interconnectivity"
   ],
   "ignorePaths": [
     "node_modules/**",

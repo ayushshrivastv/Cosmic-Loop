@@ -9,6 +9,8 @@ import {
   PERPLEXITY_MODEL, 
   PERPLEXITY_MAX_TOKENS, 
   PERPLEXITY_TEMPERATURE,
+  PERPLEXITY_TOP_P,
+  PERPLEXITY_PRESENCE_PENALTY,
   FINANCIAL_ANALYSIS_PROMPT,
   BLOCKCHAIN_FINANCIAL_PROMPT
 } from '../config/perplexity.config';
@@ -26,6 +28,10 @@ interface PerplexityRequest {
   max_tokens: number;
   temperature: number;
   stream?: boolean;
+  top_p?: number;
+  presence_penalty?: number;
+  web_search?: boolean;
+  search_depth?: 'basic' | 'advanced' | 'extended';
 }
 
 /**
@@ -57,11 +63,16 @@ export class PerplexityService {
   private readonly headers: Record<string, string>;
 
   constructor() {
-    this.apiUrl = `${PERPLEXITY_BASE_URL}/chat/completions`;
+    // Update to use our local API proxy instead of calling Perplexity directly
+    // This avoids CORS issues when making requests from the browser
+    this.apiUrl = `/api/perplexity`;
     this.headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${PERPLEXITY_API_KEY}`
+      'Content-Type': 'application/json'
+      // No need for Authorization header since our proxy will add it
     };
+    
+    // Log the API URL for debugging
+    console.log('Using Perplexity API proxy:', this.apiUrl);
     
     // Log initialization status
     const isDev = process.env.NODE_ENV === 'development';
@@ -79,11 +90,11 @@ export class PerplexityService {
    */
   async generateFinancialAnalysis(query: string, blockchainData?: BlockchainData): Promise<string> {
     try {
-      // If API key is not set or is the dev placeholder, use mock response in development
-      if (!PERPLEXITY_API_KEY || (process.env.NODE_ENV === 'development' && PERPLEXITY_API_KEY === 'dev-placeholder-key')) {
-        console.warn('Perplexity API key not set or using placeholder. Generating mock response.');
-        return this.generateMockFinancialResponse(query, blockchainData);
-      }
+      // Since we're now using a proxy API, we don't need to check for the API key here
+      // The API key check happens in the API route
+      
+      // Log that we're using the real API
+      console.log('Using Perplexity API with model:', PERPLEXITY_MODEL);
 
       // Construct the messages array with system prompt and user query
       const messages = [
@@ -105,18 +116,22 @@ export class PerplexityService {
     } catch (error) {
       console.error('Error generating financial analysis from Perplexity:', error);
       
-      // If in development mode, provide a mock response instead of error
-      if (process.env.NODE_ENV === 'development') {
-        console.info('Development mode: Providing mock response instead of error');
-        return this.generateMockFinancialResponse(query, blockchainData);
-      }
+      // Type guard for better error handling
+      const typedError = error as Error;
       
-      // In production, return a helpful error message
+      // Log the detailed error for debugging
+      console.error('API Error Details:', {
+        status: error instanceof AxiosError ? (error as AxiosError).response?.status : 'unknown',
+        statusText: error instanceof AxiosError ? (error as AxiosError).response?.statusText : 'unknown',
+        message: typedError?.message || 'unknown error'
+      });
+      
+      // Return a helpful error message instead of a mock response
       if (error instanceof AxiosError && error.message === 'Network Error') {
-        return 'I cannot connect to the financial analysis service right now. Please check your internet connection and API key configuration.';
+        return 'I cannot connect to the Perplexity API right now. Please check your internet connection and API key configuration.';
       }
       
-      return 'I encountered an error while analyzing financial data. Please try again later.';
+      return `Error connecting to Perplexity API: ${typedError?.message || 'Unknown error'}. Please check your API configuration and try again.`;
     }
   }
 
@@ -128,11 +143,11 @@ export class PerplexityService {
    */
   async generateBlockchainFinancialAnalysis(query: string, blockchainData: string): Promise<string> {
     try {
-      // If API key is not set or is the dev placeholder, use mock response in development
-      if (!PERPLEXITY_API_KEY || (process.env.NODE_ENV === 'development' && PERPLEXITY_API_KEY === 'dev-placeholder-key')) {
-        console.warn('Perplexity API key not set or using placeholder. Generating mock response.');
-        return this.generateMockBlockchainResponse(query, blockchainData);
-      }
+      // Since we're now using a proxy API, we don't need to check for the API key here
+      // The API key check happens in the API route
+      
+      // Log that we're using the real API
+      console.log('Using Perplexity API with model:', PERPLEXITY_MODEL);
 
       // Construct the messages array with system prompt, blockchain data, and user query
       const messages = [
@@ -154,18 +169,22 @@ export class PerplexityService {
     } catch (error) {
       console.error('Error generating blockchain financial analysis from Perplexity:', error);
       
-      // If in development mode, provide a mock response instead of error
-      if (process.env.NODE_ENV === 'development') {
-        console.info('Development mode: Providing mock response instead of error');
-        return this.generateMockBlockchainResponse(query, blockchainData);
-      }
+      // Type guard for better error handling
+      const typedError = error as Error;
       
-      // In production, return a helpful error message
+      // Log the detailed error for debugging
+      console.error('API Error Details:', {
+        status: error instanceof AxiosError ? (error as AxiosError).response?.status : 'unknown',
+        statusText: error instanceof AxiosError ? (error as AxiosError).response?.statusText : 'unknown',
+        message: typedError?.message || 'unknown error'
+      });
+      
+      // Return a helpful error message based on the error type
       if (error instanceof AxiosError && error.message === 'Network Error') {
-        return 'I cannot connect to the blockchain analysis service right now. Please check your internet connection and API key configuration.';
+        return 'I cannot connect to the Perplexity API right now. Please check your internet connection and API key configuration.';
       }
       
-      return 'I encountered an error while analyzing blockchain financial data. Please try again later.';
+      return `Error connecting to Perplexity API: ${typedError?.message || 'Unknown error'}. Please check your API configuration and try again.`;
     }
   }
 
@@ -176,12 +195,23 @@ export class PerplexityService {
    */
   private async makePerplexityRequest(messages: PerplexityRequest['messages']): Promise<PerplexityResponse> {
     try {
+      // Updated request format for Sonar API
       const requestData: PerplexityRequest = {
         model: PERPLEXITY_MODEL,
         messages,
         max_tokens: PERPLEXITY_MAX_TOKENS,
-        temperature: PERPLEXITY_TEMPERATURE
+        temperature: PERPLEXITY_TEMPERATURE,
+        stream: false,
+        top_p: PERPLEXITY_TOP_P,
+        presence_penalty: PERPLEXITY_PRESENCE_PENALTY
       };
+      
+      // Add web_search parameter for Sonar models
+      if (PERPLEXITY_MODEL.startsWith('sonar')) {
+        requestData.web_search = true;
+        // Add search_depth for better results
+        requestData.search_depth = 'advanced';
+      }
 
       console.log('Making request to Perplexity API:', {
         url: this.apiUrl,
@@ -330,11 +360,8 @@ Cross-chain bridge transactions have increased by 22% this week, with Solana-Eth
     onUpdate: (partialResponse: string) => void
   ): Promise<string> {
     try {
-      // If API key is not set or is the dev placeholder, use mock streaming response in development
-      if (!PERPLEXITY_API_KEY || (process.env.NODE_ENV === 'development' && PERPLEXITY_API_KEY === 'dev-placeholder-key')) {
-        console.warn('Perplexity API key not set or using placeholder. Generating mock streaming response.');
-        return this.simulateMockStreamingResponse(messages, onUpdate);
-      }
+      // Since we're now using a proxy API, we don't need to check for the API key here
+      // The API key check happens in the API route
       
       const requestData: PerplexityRequest = {
         model: PERPLEXITY_MODEL,
@@ -404,13 +431,22 @@ Cross-chain bridge transactions have increased by 22% this week, with Solana-Eth
     } catch (error) {
       console.error('Error in streaming request:', error);
       
-      // If in development mode, provide a mock streaming response instead of error
-      if (process.env.NODE_ENV === 'development') {
-        console.info('Development mode: Providing mock streaming response instead of error');
-        return this.simulateMockStreamingResponse(messages, onUpdate);
-      }
+      // Type guard for better error handling
+      const typedError = error as Error;
       
-      throw error;
+      // Log the detailed error for debugging
+      console.error('Streaming API Error Details:', {
+        status: error instanceof AxiosError ? (error as AxiosError).response?.status : 'unknown',
+        statusText: error instanceof AxiosError ? (error as AxiosError).response?.statusText : 'unknown',
+        message: typedError?.message || 'unknown error'
+      });
+      
+      // Send an error message to the client via the update callback
+      const errorMessage = `Error connecting to Perplexity API: ${typedError?.message || 'Unknown error'}. Please check your API configuration and try again.`;
+      onUpdate(errorMessage);
+      
+      // Return the error message as the final response
+      return errorMessage;
     }
   }
   
