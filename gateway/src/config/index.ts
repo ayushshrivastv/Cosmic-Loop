@@ -34,8 +34,8 @@ export const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 
 // Validate critical configuration
 if (!PERPLEXITY_API_KEY && NODE_ENV !== 'test') {
-  console.error('FATAL ERROR: PERPLEXITY_API_KEY is not set in the environment variables.');
-  process.exit(1);
+  console.warn('WARNING: PERPLEXITY_API_KEY is not set. AI features will be limited or unavailable.');
+  // Don't exit the process, allow the application to run with limited functionality
 }
 
 if (IS_PRODUCTION && JWT_SECRET === 'perplexity-gateway-dev-secret') {

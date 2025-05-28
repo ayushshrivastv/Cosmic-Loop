@@ -64,8 +64,9 @@ export class PerplexityClient {
   private readonly defaultParams: Partial<PerplexityRequestParams>;
 
   constructor() {
+    // Handle missing API key gracefully
     if (!PERPLEXITY_API_KEY && process.env.NODE_ENV !== 'test') {
-      console.error("FATAL ERROR: PERPLEXITY_API_KEY is not set in the environment variables.");
+      console.warn("WARNING: PERPLEXITY_API_KEY is not set. Some AI features may be limited.");
     }
 
     // Create axios instance with default configuration
@@ -73,7 +74,8 @@ export class PerplexityClient {
       baseURL: `${PERPLEXITY_BASE_URL}/chat/completions`,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`
+        // Only add Authorization header if API key is available
+        ...(PERPLEXITY_API_KEY ? { 'Authorization': `Bearer ${PERPLEXITY_API_KEY}` } : {})
       }
     });
 
