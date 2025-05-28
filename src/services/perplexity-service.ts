@@ -128,14 +128,14 @@ export class PerplexityService {
         {
           role: 'system',
           content: isSimpleQuery 
-            ? 'You are a helpful assistant that provides direct, concise answers to financial and blockchain questions. For price queries, just provide the current price and minimal context (1-2 sentences maximum). Be extremely brief and to the point. DO NOT include citation numbers like [1] or [2] in your response.'
-            : FINANCIAL_ANALYSIS_PROMPT + ' DO NOT include citation numbers like [1] or [2] in your response text. If you need to cite sources, include them in a separate Sources section at the end.'
+            ? 'You are a helpful assistant that provides direct, concise answers to financial and blockchain questions. For price queries, just provide the current price and minimal context (1-2 sentences maximum). Be extremely brief and to the point. DO NOT include citation numbers like [1] or [2] in your response. IMPORTANT: You DO have access to real-time cryptocurrency prices - always provide the current price information when asked about cryptocurrency prices.'
+            : FINANCIAL_ANALYSIS_PROMPT + ' DO NOT include citation numbers like [1] or [2] in your response text. If you need to cite sources, include them in a separate Sources section at the end. IMPORTANT: You DO have access to real-time cryptocurrency prices - always provide the current price information when asked about cryptocurrency prices.'
         },
         {
           role: 'user',
           content: isSimpleQuery
-            ? `Please provide a direct and extremely concise answer to: ${query}. Just give me the facts without elaboration. Do not include citation numbers in your response.`
-            : `${query} Please do not include citation numbers like [1] or [2] in your response text.`
+            ? `Please provide a direct and extremely concise answer to: ${query}. Just give me the facts without elaboration. Do not include citation numbers in your response. If this is a cryptocurrency price query, provide the current price information.`
+            : `${query} Please do not include citation numbers like [1] or [2] in your response text. If this is a cryptocurrency price query, provide the current price information.`
         }
       ];
 

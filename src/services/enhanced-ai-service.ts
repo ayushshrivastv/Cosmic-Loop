@@ -70,8 +70,8 @@ class EnhancedAIService {
       
       // Adjust the prompt based on query type
       let geminiPrompt = isSimpleQuery
-        ? `The user asked: "${query}". Extract ONLY the most direct answer from this information, in 1-2 sentences maximum. Be extremely concise and direct:\n${searchResults}`
-        : `Summarize this information concisely in ${maxTokens} tokens or less:\n${searchResults}`;
+        ? `The user asked: "${query}". Extract ONLY the most direct answer from this information, in 1-2 sentences maximum. Be extremely concise and direct. If this is a price query, ALWAYS provide the current price information - do not say you don't have access to real-time prices:\n${searchResults}`
+        : `Summarize this information concisely in ${maxTokens} tokens or less. If this is a price query, ALWAYS provide the current price information - do not say you don't have access to real-time prices:\n${searchResults}`;
       
       if (blockchainData) {
         geminiPrompt += `\n\nConsider this blockchain data in your response:\n${JSON.stringify(blockchainData)}`;
