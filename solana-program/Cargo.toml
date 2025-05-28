@@ -17,6 +17,7 @@ spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
 sha2 = "0.10.8"
 bs58 = "0.5.0"
 byteorder = "1.5.0"
+serde = { version = "1.0", features = ["derive"] }
 
 [lib]
 crate-type = ["cdylib", "lib"]

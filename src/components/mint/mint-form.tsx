@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler, Control } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -25,34 +25,159 @@ import type { MintFormData } from '@/lib/types';
 import { createCompressedTokenMint, mintCompressedTokens, createConnection } from '@/lib/utils/solana';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { createClaimUrl, createSolanaPayUrl, createSolanaPayClaimUrl, generateQrCodeDataUrl } from '@/lib/utils/qrcode';
-import { SupportedChain, formatChainName } from '@/lib/utils/layer-zero';
+import { SupportedChain } from '@/lib/utils/layer-zero';
+import { useMemo } from 'react';
 import { CHAIN_CONFIGS } from '@/lib/layer-zero-config';
 
-// Type definition for form values inferred from the Zod schema
+// Helper function to format chain names for display
+const formatChainName = (chainId: SupportedChain): string => {
+  // Direct mapping for numeric enum values
+  const numericChainMap: Record<number, string> = {
+    1: 'Ethereum',      // ETHEREUM = 1
+    10: 'Optimism',     // OPTIMISM = 10
+    56: 'Binance Smart Chain', // BSC = 56
+    42161: 'Arbitrum',  // ARBITRUM = 42161
+    43114: 'Avalanche', // AVALANCHE = 43114
+    109: 'Polygon',     // POLYGON = 109
+    168: 'Solana'       // SOLANA = 168
+  };
+  
+  // If chainId is a number, use the numeric map
+  if (typeof chainId === 'number') {
+    return numericChainMap[chainId] || `Unknown Chain (${chainId})`;
+  }
+  
+  // Map string enum values to readable names
+  const stringChainMap: Record<string, string> = {
+    'ETHEREUM': 'Ethereum',
+    'POLYGON': 'Polygon',
+    'ARBITRUM': 'Arbitrum',
+    'OPTIMISM': 'Optimism',
+    'AVALANCHE': 'Avalanche',
+    'BSC': 'Binance Smart Chain',
+    'SOLANA': 'Solana'
+  };
+  
+  // Convert to string and try the string map
+  const enumValue = String(chainId);
+  if (enumValue in stringChainMap) {
+    return stringChainMap[enumValue];
+  }
+  
+  // Fallback to CHAIN_CONFIGS if available
+  const chainConfig = CHAIN_CONFIGS[chainId as unknown as keyof typeof CHAIN_CONFIGS];
+  if (chainConfig?.name) {
+    return chainConfig.name;
+  }
+  
+  // Last resort: format the enum value itself
+  return enumValue.charAt(0).toUpperCase() + enumValue.slice(1).toLowerCase();
+};
+
+// Helper function to safely convert a chain to string, handling undefined and different enum formats
+const safeChainToString = (chain: SupportedChain | undefined | null): string => {
+  if (chain === undefined || chain === null) {
+    return "";
+  }
+  // Handle both string and number enum values
+  return typeof chain === 'number' ? chain.toString() : String(chain);
+};
+
+// Function to generate a crosschain key to ensure uniqueness
+// Generate a unique key for each chain checkbox
+const generateCrossChainKey = (chain: SupportedChain | undefined | null) => {
+  if (chain === undefined || chain === null) {
+    return `chain-checkbox-unknown-${Math.random().toString(36).substring(2, 9)}`;
+  }
+  // Use the safe conversion helper
+  return `chain-checkbox-${safeChainToString(chain)}`;
+};
+
+// Infer FormValues from the Zod schema to ensure type consistency
 type FormValues = z.infer<typeof formSchema>;
+
+// Type definition for cross-chain settings
+interface CrossChainSettings {
+  enabled: boolean;
+  supportedChains: string[]; // Use strings to avoid path resolution issues
+}
+
+// Type for the token creation payload
+interface TokenCreationPayload {
+  eventDetails: {
+    name: string;
+    description: string;
+    date: string;
+    location?: string;
+    organizerName: string;
+    maxAttendees?: number;
+    enableCrossChain: boolean;
+    supportedChains: SupportedChain[];
+  };
+  tokenMetadata: {
+    name: string;
+    symbol: string;
+    description: string;
+    image?: string;
+    originChain: SupportedChain;
+    crossChainEnabled: boolean;
+    attributes: Array<{trait_type: string; value: string | number}>;
+  };
+  supply: number;
+  decimals: number;
+  crossChainSettings?: {
+    enabled: boolean;
+    supportedChains: SupportedChain[];
+  };
+}
 
 // Form validation schema
 // Defines the structure and validation rules for the form data
 const formSchema = z.object({
   // Event Details
-  eventName: z.string().min(3, { message: "Event name must be at least 3 characters" }),
-  eventDescription: z.string().min(10, { message: "Description must be at least 10 characters" }),
+  eventName: z.string().min(1, { message: "Event name is required" }),
+  eventDescription: z.string().min(1, { message: "Event description is required" }),
   eventDate: z.string().min(1, { message: "Event date is required" }),
   eventLocation: z.string().optional(),
-  organizerName: z.string().min(2, { message: "Organizer name is required" }),
-  maxAttendees: z.coerce.number().int().positive().optional(),
+  organizerName: z.string().min(1, { message: "Organizer name is required" }),
+  maxAttendees: z.number().min(1, { message: "Supply must be at least 1" }).optional().nullable(), // Allow null
 
   // Token Metadata
-  tokenName: z.string().min(3, { message: "Token name must be at least 3 characters" }),
-  tokenSymbol: z.string().min(2, { message: "Token symbol must be at least 2 characters" }),
-  tokenDescription: z.string().min(10, { message: "Token description must be at least 10 characters" }),
-  tokenImage: z.string().url({ message: "Please enter a valid URL" }).optional(),
-  tokenSupply: z.coerce.number().int().positive({ message: "Supply must be a positive number" }),
+  tokenName: z.string().min(1, { message: "Token name is required" }),
+  tokenSymbol: z.string().min(1, { message: "Token symbol is required" }),
+  tokenDescription: z.string().min(1, { message: "Token description is required" }),
+  tokenImage: z.string().url({ message: "Please enter a valid URL for the token image" }).optional(),
+  tokenSupply: z.coerce.number().min(1, { message: "Token supply must be at least 1" }),
 
   // Cross-chain settings
-  enableCrossChain: z.boolean().default(false),
-  supportedChains: z.array(z.string()).optional(),
+  enableCrossChain: z.boolean().optional(), // Use .optional(), default handled by useForm
+  supportedChains: z.array(z.string()).optional(), // Use .optional(), default handled by useForm
 });
+
+// Type for the form's resolver
+type FormSchemaType = z.infer<typeof formSchema>;
+
+// Type guard to check if a value is a valid SupportedChain
+function isSupportedChain(value: unknown): value is SupportedChain {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return (Object.values(SupportedChain) as string[]).includes(value);
+}
+
+// Convert string to SupportedChain enum
+function stringToSupportedChain(value: string): SupportedChain | undefined {
+  // Check if the value exists as a key in the enum
+  if (Object.keys(SupportedChain).includes(value)) {
+    return SupportedChain[value as keyof typeof SupportedChain];
+  }
+  // Check if the value exists as a value in the enum
+  const enumValues = Object.values(SupportedChain) as string[];
+  if (enumValues.includes(value)) { // value is string here.
+    return value as unknown as SupportedChain;
+  }
+  return undefined;
+}
 
 /**
  * MintForm Component
@@ -60,59 +185,106 @@ const formSchema = z.object({
  * Includes form validation, on-chain token creation, and QR code generation
  */
 export function MintForm() {
-  // Always call hooks unconditionally in the same order
+  // Always call hooks unconditionally at the top level
   const wallet = useWallet();
-  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
+  
+  // Component state
+  const [isClient, setIsClient] = useState(false);
   const [activeTab, setActiveTab] = useState("event");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [claimUrl, setClaimUrl] = useState<string | null>(null);
+  
+  // Cross-chain state management
+  const [crossChainSettings, setCrossChainSettings] = useState<CrossChainSettings | undefined>();
+  const [supportedChains, setSupportedChains] = useState<SupportedChain[]>([]);
 
+  // Set isClient to true when component mounts on client
   useEffect(() => {
     setIsClient(true);
   }, []);
-
+  
   // Extract wallet properties safely - only use them when client-side
+  // This prevents errors during server-side rendering
   const publicKey = isClient ? wallet.publicKey : null;
   const connected = isClient ? wallet.connected : false;
   const signTransaction = isClient ? wallet.signTransaction : null;
   const sendTransaction = isClient ? wallet.sendTransaction : null;
 
   // Available chains for cross-chain support
+  // Using explicit numeric values from the enum definition in layerzero.d.ts
   const availableChains = [
-    SupportedChain.Ethereum,
-    SupportedChain.Polygon,
-    SupportedChain.Arbitrum,
-    SupportedChain.Optimism,
-    SupportedChain.Avalanche,
-    SupportedChain.BinanceSmartChain,
-  ];
+    1,     // ETHEREUM = 1
+    109,   // POLYGON = 109
+    42161, // ARBITRUM = 42161
+    10,    // OPTIMISM = 10
+    43114, // AVALANCHE = 43114
+    56,    // BSC = 56
+  ] as SupportedChain[];
 
   // Initialize form
+  // Initialize form with react-hook-form
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema), 
     defaultValues: {
       eventName: "",
       eventDescription: "",
-      eventDate: new Date().toISOString().split('T')[0],
-      eventLocation: "",
+      eventDate: new Date().toISOString().split('T')[0], // Default to today
+      eventLocation: "", // Empty string instead of undefined for controlled inputs
       organizerName: "",
-      maxAttendees: 100,
+      maxAttendees: null, // Use null for initial empty state
       tokenName: "",
-      tokenSymbol: "POP",
+      tokenSymbol: "",
       tokenDescription: "",
-      tokenImage: "https://picsum.photos/300/300", // Placeholder image
-      tokenSupply: 100,
+      tokenImage: "", // Empty string instead of undefined for controlled inputs
+      tokenSupply: 1, // Default to 1 to satisfy min(1)
       enableCrossChain: false,
       supportedChains: [],
     },
   });
 
+  // Show Solana as default
+  const defaultChainSelectState = useMemo(() => {
+    return new Set([SupportedChain.SOLANA]);
+  }, []);
+
+  // Update form state when cross-chain settings change
+  useEffect(() => {
+    if (crossChainSettings?.enabled) {
+      form.setValue('supportedChains', crossChainSettings.supportedChains);
+    } else {
+      form.setValue('supportedChains', []);
+    }
+  }, [crossChainSettings, form]);
+
   if (!isClient) {
     return null; // Or a loading spinner, e.g., <p>Loading form...</p>
   }
+
+  // Handler for cross-chain toggle
+  const handleCrossChainToggle = (enabled: boolean) => {
+    form.setValue('enableCrossChain', enabled);
+    if (enabled) {
+      // Get only the string enum values (not numeric indices)
+      const enumValues = Object.keys(SupportedChain)
+        .filter(key => isNaN(Number(key)))
+        .filter(key => SupportedChain[key as keyof typeof SupportedChain] !== SupportedChain.SOLANA)
+        .map(key => SupportedChain[key as keyof typeof SupportedChain].toString()); // Convert to strings for form compatibility
+      
+      setCrossChainSettings({
+        enabled: true,
+        supportedChains: enumValues,
+      });
+      
+      // Update form value with string array
+      form.setValue('supportedChains', enumValues);
+    } else {
+      setCrossChainSettings(undefined);
+      form.setValue('supportedChains', []);
+    }
+  };
 
   /**
    * Form submission handler
@@ -120,7 +292,34 @@ export function MintForm() {
    *
    * @param values - Form values collected from the user input
    */
-  const onSubmit = async (values: FormValues) => {
+  // Define the submit handler with explicit type
+  const onSubmit: SubmitHandler<FormValues> = async (values) => {
+    // Type assertion function to convert string chains to SupportedChain enum
+    const convertToSupportedChains = (chains?: string[]): SupportedChain[] => {
+      if (!chains || chains.length === 0) return [];
+      
+      return chains
+        .map(chainStr => { // Renamed chain to chainStr for clarity
+          // Try to match by enum value
+          const enumValues = Object.values(SupportedChain) as string[];
+          if (enumValues.includes(chainStr)) {
+            return chainStr as unknown as SupportedChain;
+          }
+          // Try to match by enum key (case-insensitive)
+          const enumKeys = Object.keys(SupportedChain)
+            .filter(k => isNaN(Number(k)));
+          
+          const matchingKey = enumKeys.find(k => 
+            k.toLowerCase() === chainStr.toLowerCase());
+          
+          if (matchingKey) {
+            return SupportedChain[matchingKey as keyof typeof SupportedChain];
+          }
+          
+          return null;
+        })
+        .filter((chain): chain is SupportedChain => chain !== null);
+    };
     if (!connected || !publicKey) {
       alert("Please connect your wallet first");
       return;
@@ -129,42 +328,46 @@ export function MintForm() {
     try {
       setIsSubmitting(true);
 
-      // Format data for token minting
-      const mintData: MintFormData = {
+      // Convert string chains to SupportedChain enum values
+      const supportedChainsEnum = convertToSupportedChains(values.supportedChains);
+      
+      // Create the token creation payload
+      const payload: TokenCreationPayload = {
         eventDetails: {
           name: values.eventName,
           description: values.eventDescription,
           date: values.eventDate,
           location: values.eventLocation,
           organizerName: values.organizerName,
-          maxAttendees: values.maxAttendees,
-          enableCrossChain: values.enableCrossChain,
-          supportedChains: values.supportedChains?.map(chain => chain as SupportedChain),
+          // Convert null to undefined for payload compatibility
+          maxAttendees: values.maxAttendees === null ? undefined : values.maxAttendees,
+          enableCrossChain: values.enableCrossChain ?? false, // Coalesce undefined to false
+          supportedChains: convertToSupportedChains(values.supportedChains ?? []), // Coalesce undefined to []
         },
         tokenMetadata: {
           name: values.tokenName,
           symbol: values.tokenSymbol,
           description: values.tokenDescription,
           image: values.tokenImage,
-          originChain: SupportedChain.Solana,
-          crossChainEnabled: values.enableCrossChain,
+          // Using as const to ensure TypeScript knows this is a valid SupportedChain value
+          originChain: SupportedChain.SOLANA as const,
+          crossChainEnabled: values.enableCrossChain ?? false, // Coalesce undefined to false
           attributes: [
             { trait_type: "Event", value: values.eventName },
-            { trait_type: "Date", value: values.eventDate },
             { trait_type: "Organizer", value: values.organizerName },
-            { trait_type: "Cross-Chain Enabled", value: values.enableCrossChain ? "Yes" : "No" },
-            ...(values.enableCrossChain ? [{ trait_type: "Origin Chain", value: "Solana" }] : []),
+            { trait_type: "Date", value: values.eventDate },
+            { trait_type: "Supply", value: values.tokenSupply.toString() },
           ],
         },
         supply: values.tokenSupply,
         decimals: DEFAULT_TOKEN_DECIMALS,
         crossChainSettings: values.enableCrossChain ? {
           enabled: true,
-          supportedChains: values.supportedChains?.map(chain => chain as SupportedChain) || [],
+          supportedChains: supportedChainsEnum,
         } : undefined,
       };
 
-      console.log("Creating mock token mint with data:", mintData);
+      console.log("Creating mock token mint with data:", payload);
 
       // Simulate a delay to mimic the backend processing
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -261,12 +464,13 @@ export function MintForm() {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
-
+  
   // Handle next button in event details tab
   const handleNextTab = () => {
-    const eventFields = ["eventName", "eventDescription", "eventDate", "organizerName"];
+    const eventFields = ["eventName", "eventDescription", "eventDate", "organizerName"] as const;
     const isValid = eventFields.every(field => {
-      const result = form.trigger(field as keyof FormValues);
+      // Use proper type assertion - field is already a valid key of FormValues
+      const result = form.trigger(field);
       return result;
     });
 
@@ -274,6 +478,39 @@ export function MintForm() {
       setActiveTab("token");
     }
   };
+
+  // Handler for chain selection in the form
+  const handleChainSelection = (chain: SupportedChain | undefined | null, isSelected: boolean) => {
+    if (chain === undefined || chain === null) return; // Skip if chain is invalid
+    
+    const currentChains = form.getValues('supportedChains') || [];
+    const chainStr = safeChainToString(chain);
+    
+    let updatedChains: string[];
+    if (isSelected) {
+      // Add the chain if it's not already in the array
+      if (!currentChains.includes(chainStr)) {
+        updatedChains = [...currentChains, chainStr];
+      } else {
+        updatedChains = [...currentChains];
+      }
+    } else {
+      // Remove the chain from the array
+      updatedChains = currentChains.filter(c => c !== chainStr);
+    }
+    
+    form.setValue('supportedChains', updatedChains);
+    
+    // Update the cross-chain settings state
+    setCrossChainSettings(prev => {
+      if (!prev) return undefined;
+      return {
+        ...prev,
+        supportedChains: updatedChains,
+      };
+    });
+  };
+
 
   if (mintSuccess && qrCodeUrl) {
     return (
@@ -338,7 +575,7 @@ export function MintForm() {
                 ) : (
                   <div className="w-[250px] h-[250px] flex items-center justify-center bg-gray-100">
                     <div className="text-center">
-                      <svg className="animate-spin h-8 w-8 mx-auto mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-8 w-8 mx-auto mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -349,9 +586,17 @@ export function MintForm() {
               </div>
             </div>
 
-            <div className="bg-muted p-3 rounded-md text-sm">
-              <p className="font-medium mb-1">💡 How It Works</p>
-              <p className="text-muted-foreground text-xs">This QR code contains a Solana Pay URL that will trigger a token claim transaction when scanned with a compatible wallet app like Phantom or Solflare.</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 my-6 text-blue-800">
+              <h4 className="font-medium flex items-center text-blue-700">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                Bridge Fees Information
+              </h4>
+              <p className="mt-1 text-sm">
+                When attendees bridge their tokens to other chains, they will need to pay a small network fee to cover the
+                LayerZero messaging costs. These fees vary by destination chain.
+              </p>
             </div>
 
             {claimUrl && (
@@ -402,10 +647,9 @@ export function MintForm() {
             <TabsTrigger value="crosschain">Cross-Chain Settings</TabsTrigger>
           </TabsList>
 
-          {/* Event Details Tab */}
           <TabsContent value="event" className="space-y-4">
             <FormField
-              control={form.control}
+              control={form.control as Control<FormValues>}
               name="eventName"
               render={({ field }) => (
                 <FormItem>
@@ -420,7 +664,7 @@ export function MintForm() {
             />
 
             <FormField
-              control={form.control}
+              control={form.control as Control<FormValues>}
               name="eventDescription"
               render={({ field }) => (
                 <FormItem>
@@ -440,7 +684,7 @@ export function MintForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as Control<FormValues>}
                 name="eventDate"
                 render={({ field }) => (
                   <FormItem>
@@ -454,7 +698,7 @@ export function MintForm() {
               />
 
               <FormField
-                control={form.control}
+                control={form.control as Control<FormValues>}
                 name="eventLocation"
                 render={({ field }) => (
                   <FormItem>
@@ -470,7 +714,7 @@ export function MintForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as Control<FormValues>}
                 name="organizerName"
                 render={({ field }) => (
                   <FormItem>
@@ -484,14 +728,28 @@ export function MintForm() {
               />
 
               <FormField
-                control={form.control}
+                control={form.control as Control<FormValues>}
                 name="maxAttendees"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Max Attendees (Optional)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="e.g., 1000"
+                        {...field} // Spread field props first
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // If input is cleared, set form value to null, otherwise parse to int
+                          field.onChange(value === "" ? null : parseInt(value, 10));
+                        }}
+                        // Ensure input value is an empty string if field.value is null (or undefined)
+                        value={field.value ?? ""}
+                      />
                     </FormControl>
+                    <FormDescription>
+                      Maximum number of attendees for the event. This can also represent the token supply if not set separately.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -512,7 +770,7 @@ export function MintForm() {
           {/* Token Configuration Tab */}
           <TabsContent value="token" className="space-y-4">
             <FormField
-              control={form.control}
+              control={form.control as Control<FormValues>}
               name="tokenName"
               render={({ field }) => (
                 <FormItem>
@@ -528,7 +786,7 @@ export function MintForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as Control<FormValues>}
                 name="tokenSymbol"
                 render={({ field }) => (
                   <FormItem>
@@ -542,7 +800,7 @@ export function MintForm() {
               />
 
               <FormField
-                control={form.control}
+                control={form.control as Control<FormValues>}
                 name="tokenSupply"
                 render={({ field }) => (
                   <FormItem>
@@ -558,7 +816,7 @@ export function MintForm() {
             </div>
 
             <FormField
-              control={form.control}
+              control={form.control as Control<FormValues>}
               name="tokenDescription"
               render={({ field }) => (
                 <FormItem>
@@ -576,7 +834,7 @@ export function MintForm() {
             />
 
             <FormField
-              control={form.control}
+              control={form.control as Control<FormValues>}
               name="tokenImage"
               render={({ field }) => (
                 <FormItem>
@@ -591,14 +849,17 @@ export function MintForm() {
             />
 
             <FormField
-              control={form.control}
+              control={form.control as Control<FormValues>}
               name="enableCrossChain"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={field.onChange}
+                      onCheckedChange={(value) => {
+                        field.onChange(value);
+                        handleCrossChainToggle(value === true);
+                      }}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
@@ -640,7 +901,7 @@ export function MintForm() {
             {form.watch('enableCrossChain') ? (
               <div className="space-y-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as Control<FormValues>}
                   name="supportedChains"
                   render={() => (
                     <FormItem>
@@ -652,40 +913,140 @@ export function MintForm() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {availableChains.map((chain) => (
-                          <FormField
-                            key={chain}
-                            control={form.control}
-                            name="supportedChains"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  className="flex flex-row items-start space-x-3 space-y-0 border rounded-md p-3"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(chain)}
-                                      onCheckedChange={(checked) => {
-                                        const currentValue = field.value || [];
-                                        return checked
-                                          ? field.onChange([...currentValue, chain])
-                                          : field.onChange(currentValue.filter((value) => value !== chain));
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <div className="flex items-center space-x-2">
-                                    <img
-                                      src={CHAIN_CONFIGS[chain].logo}
-                                      alt={CHAIN_CONFIGS[chain].name}
-                                      className="w-6 h-6"
-                                    />
-                                    <FormLabel className="font-normal">
-                                      {CHAIN_CONFIGS[chain].name}
+                          <div key={generateCrossChainKey(chain)} className="flex items-center space-x-2">
+                            <FormField
+                              key={`chain-checkbox-${chain}`}
+                              control={form.control as Control<FormValues>}
+                              name="supportedChains"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        id={generateCrossChainKey(chain)}
+                                        checked={field.value?.includes(safeChainToString(chain))}
+                                        onCheckedChange={(checked) => {
+                                          handleChainSelection(chain, checked === true);
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="text-sm font-normal">
+                                      {formatChainName(chain)}
                                     </FormLabel>
-                                  </div>
-                                </FormItem>
-                              );
-                            }}
-                          />
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                            <FormDescription>
+                              Allow attendees to bridge their tokens to other blockchains using LayerZero
+                            </FormDescription>
+                          </div>
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 my-6 text-blue-800">
+                  <h4 className="font-medium flex items-center text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    Bridge Fees Information
+                  </h4>
+                  <p className="mt-1 text-sm">
+                    When attendees bridge their tokens to other chains, they will need to pay a small network fee to cover the
+                    LayerZero messaging costs. These fees vary by destination chain.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="bg-zinc-100 dark:bg-zinc-800 p-6 rounded-full mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium mb-2">Cross-Chain Functionality Disabled</h3>
+                <p className="text-muted-foreground text-center max-w-md mb-4">
+                  To configure cross-chain settings, please enable cross-chain functionality in the Token Configuration tab.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    form.setValue('enableCrossChain', true);
+                    setActiveTab("token");
+                  }}
+                >
+                  Enable Cross-Chain Functionality
+                </Button>
+              </div>
+            )}
+
+            <div className="flex justify-between mt-6">
+              <Button type="button" variant="outline" onClick={() => setActiveTab("token")}>
+                Back to Token Configuration
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setActiveTab("review")}
+                className="bg-white text-black hover:bg-slate-100 transition-all"
+              >
+                Next: Review & Submit
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Review & Submit Tab */}
+          <TabsContent value="review" className="space-y-4">
+            <div className="bg-muted rounded-lg p-4 mb-4">
+              <h3 className="font-medium text-lg mb-2">Review & Submit</h3>
+              <p className="text-muted-foreground text-sm">
+                Review your event and token details before creating your token.
+              </p>
+            </div>
+
+            {form.watch('enableCrossChain') ? (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control as Control<FormValues>}
+                  name="supportedChains"
+                  render={() => (
+                    <FormItem>
+                      <div className="mb-4">
+                        <FormLabel className="text-base">Supported Blockchains</FormLabel>
+                        <FormDescription>
+                          Select which blockchains attendees can bridge their tokens to
+                        </FormDescription>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {availableChains.map((chain) => chain !== SupportedChain.SOLANA && (
+                          <div key={generateCrossChainKey(chain)} className="flex items-center space-x-2">
+                            <FormField
+                              key={`chain-checkbox-${chain}`}
+                              control={form.control as Control<FormValues>}
+                              name="supportedChains"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        id={generateCrossChainKey(chain)}
+                                        checked={field.value?.includes(safeChainToString(chain))}
+                                        onCheckedChange={(checked) => {
+                                          handleChainSelection(chain, checked === true);
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="text-sm font-normal">
+                                      {formatChainName(chain)}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          </div>
                         ))}
                       </div>
                       <FormMessage />
@@ -742,7 +1103,7 @@ export function MintForm() {
                 {isSubmitting ? (
                   <>
                     <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>

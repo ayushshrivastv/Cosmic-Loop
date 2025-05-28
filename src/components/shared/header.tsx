@@ -3,11 +3,24 @@
 import type { FC } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { WalletConnectButton } from '@/components/ui/wallet-connect-button';
+import dynamic from 'next/dynamic';
 import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
 import { APP_NAME } from '@/lib/constants';
 import { Linkedin, Menu } from 'lucide-react';
 import { useState } from 'react';
+
+// Dynamically import WalletConnectButton
+const WalletConnectButton = dynamic(
+  () => import('@/components/ui/wallet-connect-button').then(mod => mod.WalletConnectButton),
+  {
+    ssr: false,
+    loading: () => (
+      <Button variant="outline" size="sm" disabled className="opacity-50">
+        Loading Wallet...
+      </Button>
+    ),
+  }
+);
 
 // Define routes directly to ensure they're available
 const ROUTES = {

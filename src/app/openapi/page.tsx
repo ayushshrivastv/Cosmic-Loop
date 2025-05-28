@@ -5,11 +5,12 @@ import dynamic from 'next/dynamic';
 // No need for AppleLayout as it's now in the root layout
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Send, User, Code, Info, ArrowRightLeft } from 'lucide-react';
-import React, { useState, useRef, useEffect, ReactNode } from 'react';
+import { Send, Code, Info, User } from 'lucide-react';
+import React, { useState, useRef, useEffect, ReactNode, ChangeEvent, ComponentPropsWithoutRef } from 'react';
 import { useAIAssistant } from '@/hooks/use-ai-assistant';
 import { substreamsService } from '@/services/substreams-service';
 import { substreamsGeminiService } from '@/services/substreams-gemini-service';
+import { substreamsPerplexityService } from '@/services/substreams-perplexity-service';
 import { AIQueryType } from '@/services/ai-assistant-service';
 import { promptEngineeringService } from '@/services/prompt-engineering-service';
 import ReactMarkdown from 'react-markdown';
@@ -20,6 +21,7 @@ import { CrossChainQueryForm } from '@/components/cross-chain/query-form';
 import { MessageStatus } from '@/components/cross-chain/message-status';
 import { TrackedMessages } from '@/components/cross-chain/tracked-messages';
 import { CrossChainDashboard } from '@/components/cross-chain/dashboard-redirect';
+import { ChatInput } from '@/components/chat-input';
 
 // Custom CSS for the chat container scrollbar
 const scrollbarStyles = `
@@ -44,13 +46,27 @@ type Message = {
   timestamp: Date;
 };
 
+// Define available AI models
+type AIModel = 'gemini' | 'perplexity';
+
+// Import types from react-markdown
+import type { Components } from 'react-markdown';
+
 export default function OpenAPIPage() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<AIModel>('perplexity');
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
   const { sendMessage, startNewConversation } = useAIAssistant();
+  
+  // Handle model selection change
+  const handleModelChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedModel(e.target.value as AIModel);
+  };
 
   // Add the custom scrollbar styles to the document
   useEffect(() => {
@@ -64,6 +80,22 @@ export default function OpenAPIPage() {
       document.head.removeChild(styleElement);
     };
   }, []);
+
+  // Handle click outside to close model dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modelDropdownRef.current && 
+          !modelDropdownRef.current.contains(event.target as Node) &&
+          showModelDropdown) {
+        setShowModelDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showModelDropdown]);
 
   // Check for query parameter and start conversation
   useEffect(() => {
@@ -110,7 +142,7 @@ export default function OpenAPIPage() {
     };
 
     handleQueryParam();
-  }, []);
+  }, [sendMessage, startNewConversation]);
 
   // Scroll to bottom of chat container when messages change
   useEffect(() => {
@@ -148,7 +180,7 @@ export default function OpenAPIPage() {
     }
   };
 
-  // Enabled send message functionality with substreams integration
+  // Enabled send message functionality with substreams and Perplexity Sonar API integration
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
@@ -189,7 +221,57 @@ export default function OpenAPIPage() {
       // Create a new conversation
       const newConversation = await startNewConversation();
 
-      // First, try to process the message with enhanced prompt engineering
+      // Determine if we should use Perplexity based on model selection or query content
+      const usePerplexity = selectedModel === 'perplexity' || 
+        (selectedModel === 'gemini' && currentInputValue.toLowerCase().match(/financ|invest|stock|market|asset|portfolio|fund|return|roi|analysis|trend|forecast|predict/i));
+      
+      if (usePerplexity) {
+        // Process with Perplexity's Sonar API for financial analysis
+        try {
+          // Update the assistant message to show we're processing with Perplexity
+          setMessages((prev: Message[]) => {
+            return prev.map(msg => {
+              if (msg.id === assistantMessageId) {
+                return {
+                  ...msg,
+                  text: 'Analyzing financial data with Perplexity Sonar...',
+                  timestamp: new Date()
+                };
+              }
+              return msg;
+            });
+          });
+          
+          // Detect the query type
+          const queryType: AIQueryType = 'financial_analysis';
+          
+          // Process the query with Perplexity and Substreams integration
+          const perplexityResponse = await substreamsPerplexityService.processFinancialQuery(currentInputValue);
+          
+          // Update the assistant message with the Perplexity response
+          setMessages((prev: Message[]) => {
+            return prev.map(msg => {
+              if (msg.id === assistantMessageId) {
+                return {
+                  ...msg,
+                  text: perplexityResponse.text || 'I analyzed your financial query but couldn\'t generate a response.',
+                  timestamp: new Date()
+                };
+              }
+              return msg;
+            });
+          });
+          
+          // Scroll to bottom with the update
+          scrollToBottom();
+          return; // Exit early as we've handled the response
+        } catch (perplexityError) {
+          console.error('Error processing with Perplexity:', perplexityError);
+          // Fall back to enhanced prompts or regular AI processing
+        }
+      }
+      
+      // If not a financial query or Perplexity processing failed, try enhanced prompts
       let useEnhancedPrompts = false;
       let enhancedResponse: string | null = null;
       
@@ -217,13 +299,26 @@ export default function OpenAPIPage() {
         // Fetch blockchain data if it's a blockchain-related query
         let blockchainData = null;
         if (queryType !== 'general') {
-          // Process the query with substreams data
-          const substreamsResponse = await substreamsGeminiService.processBlockchainQuery(
-            currentInputValue,
-            queryType as AIQueryType
-          );
+          // Determine if we should use Perplexity or Gemini for blockchain data
+          const usePerplexityForBlockchain = currentInputValue.toLowerCase().match(/financ|invest|market|asset|portfolio|return|analysis|trend/i);
           
-          blockchainData = substreamsResponse.data || substreamsResponse.relatedEvents;
+          if (usePerplexityForBlockchain) {
+            // Process the query with Perplexity for blockchain financial analysis
+            const substreamsResponse = await substreamsPerplexityService.processBlockchainQuery(
+              currentInputValue,
+              queryType as AIQueryType
+            );
+            
+            blockchainData = substreamsResponse.data || substreamsResponse.relatedEvents;
+          } else {
+            // Process the query with Gemini for general blockchain analysis
+            const substreamsResponse = await substreamsGeminiService.processBlockchainQuery(
+              currentInputValue,
+              queryType as AIQueryType
+            );
+            
+            blockchainData = substreamsResponse.data || substreamsResponse.relatedEvents;
+          }
         }
         
         // Generate enhanced response using prompt engineering
@@ -260,7 +355,7 @@ export default function OpenAPIPage() {
         await sendMessage(
           currentInputValue, 
           newConversation.id, 
-          (partialResponse: any) => {
+          (partialResponse: { text?: string }) => {
             // Update the assistant message with each partial response
             setMessages((prev: Message[]) => {
               // Find the assistant message by ID and update it
@@ -325,29 +420,16 @@ export default function OpenAPIPage() {
             {/* Heading inside the container */}
             <h1 className="text-4xl font-medium text-center mb-8">What can I help with?</h1>
 
-            {/* Input area - centered in page */}
-            <div className="bg-gray-200 rounded-3xl shadow-md border border-gray-300 p-3 mx-auto" style={{ width: '80%' }}>
-              <div className="relative">
-                <input
-                  className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-600 bg-transparent"
-                  placeholder="Ask about Solana, NFTs, or blockchain data..."
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-
-                <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                  <button
-                    className={`rounded-full w-8 h-8 flex items-center justify-center ${
-                      inputValue.trim() ? 'bg-black text-white hover:bg-gray-800' : 'bg-transparent text-gray-300'
-                    }`}
-                    onClick={handleSendMessage}
-                    disabled={!inputValue.trim() || isLoading}
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+            {/* Input area - centered in page with modern design */}
+            <div className="mx-auto" style={{ width: '80%', maxWidth: '800px' }}>
+              <ChatInput 
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                handleKeyDown={handleKeyDown}
+                handleSendMessage={handleSendMessage}
+                isLoading={isLoading}
+                selectedModel={selectedModel}
+              />
             </div>
           </div>
         ) : (
@@ -390,6 +472,11 @@ export default function OpenAPIPage() {
                               <span className="text-xs text-black">AI</span>
                             </div>
                           )}
+                          {message.sender === 'assistant' && message.text.includes('Analyzing financial data with Perplexity Sonar') && (
+                            <div className="px-2 py-0.5 bg-blue-100 rounded-full text-xs text-blue-700 ml-1 flex items-center">
+                              <span>Sonar</span>
+                            </div>
+                          )}
                           {message.sender === 'user' && (
                             <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mr-2">
                               <User className="h-3 w-3 text-blue-600" />
@@ -421,8 +508,8 @@ export default function OpenAPIPage() {
                                 ol: ({ ...props }) => <ol className="list-decimal pl-5 my-2 text-black" {...props} />,
                                 li: ({ ...props }) => <li className="my-1 text-black" {...props} />,
                                 a: ({ ...props }) => <a className="text-blue-600 hover:text-blue-800 underline break-words" target="_blank" rel="noopener noreferrer" {...props} />,
-                                code: ({ node, ...props }: any) => {
-                                  const isInline = props.inline || false;
+                                code: ({ inline, ...props }: ComponentPropsWithoutRef<'code'> & { inline?: boolean }) => {
+                                  const isInline = inline || false;
                                   return isInline ? (
                                     <code className="bg-gray-700 text-blue-200 px-1 rounded text-xs font-medium" {...props} />
                                   ) : (
@@ -461,31 +548,16 @@ export default function OpenAPIPage() {
               </div>
             </div>
 
-            {/* Input area at bottom */}
+            {/* Chat input component */}
             <div className="w-full mb-8">
-              <div className="bg-gray-200 rounded-3xl shadow-md border border-gray-300 p-3 w-full">
-                <div className="relative">
-                  <input
-                    className="w-full border-0 shadow-none pl-4 pr-16 py-3 text-base rounded-lg focus-visible:outline-none focus:outline-none text-gray-600 bg-transparent"
-                    placeholder="Ask about Solana, NFTs, or blockchain data..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                  />
-
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                    <button
-                      className={`rounded-full w-8 h-8 flex items-center justify-center ${
-                        inputValue.trim() ? 'bg-black text-white hover:bg-gray-800' : 'bg-transparent text-gray-300'
-                      }`}
-                      onClick={handleSendMessage}
-                      disabled={!inputValue.trim() || isLoading}
-                    >
-                      <Send className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <ChatInput 
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                handleKeyDown={handleKeyDown}
+                handleSendMessage={handleSendMessage}
+                isLoading={isLoading}
+                selectedModel={selectedModel}
+              />
             </div>
           </div>
         )}
@@ -536,6 +608,41 @@ export default function OpenAPIPage() {
 
               <p>
                 For Solana developers focused on performance, composability, and scale, Substreams isn't just another tool—it's becoming the new foundation. In a network built for speed, Substreams finally offers a data layer that can keep up.
+              </p>
+            </div>
+            
+            <div className="space-y-3 mt-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white">Enhanced Financial Analysis with Perplexity's Sonar API</h2>
+              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">New Integration</div>
+            </div>
+
+            <div className="space-y-6 text-gray-300">
+              <p>
+                We've now integrated Perplexity's powerful Sonar API to provide enhanced financial analysis capabilities. This integration allows our platform to deliver more sophisticated insights when analyzing blockchain financial data and market trends.
+              </p>
+
+              <p>
+                The Sonar API leverages Perplexity's advanced large language model (LLama-3.1-Sonar-Small-128k) specifically optimized for financial analysis. When you ask questions related to financial metrics, market analysis, investment strategies, or economic trends, your query is automatically routed to this specialized model.
+              </p>
+
+              <p>
+                Key benefits of the Perplexity Sonar integration include:
+              </p>
+
+              <ul className="list-disc pl-5 space-y-2">
+                <li>More accurate financial analysis of blockchain data</li>
+                <li>Better understanding of market trends and patterns</li>
+                <li>Enhanced interpretation of on-chain metrics in financial contexts</li>
+                <li>Deeper insights into DeFi protocols and tokenomics</li>
+                <li>Improved explanations of complex financial concepts</li>
+              </ul>
+
+              <p>
+                This integration works seamlessly with our existing Substreams data pipeline, combining real-time blockchain data with sophisticated financial analysis capabilities. When you ask a question with financial keywords, you'll see a "Sonar" indicator showing that your query is being processed by Perplexity's specialized model.
+              </p>
+
+              <p>
+                Try asking questions about market trends, token performance, investment strategies, or financial metrics to experience the enhanced capabilities.
               </p>
             </div>
           </article>

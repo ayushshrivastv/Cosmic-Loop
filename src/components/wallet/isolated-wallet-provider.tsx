@@ -4,9 +4,9 @@ import React, { FC, ReactNode, useMemo, useState, useEffect, useCallback } from 
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { 
-  SolflareWalletAdapter,
-  TorusWalletAdapter
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
 
@@ -48,10 +48,16 @@ export const IsolatedWalletProvider: FC<IsolatedWalletProviderProps> = ({ childr
   const wallets = useMemo(() => {
     const now = performance.now();
     console.log(`[PW] IsolatedWalletProvider: useMemo (wallets) at ${now.toFixed(0)}ms. Network: ${network}`);
-    return [
-      new SolflareWalletAdapter({ network }),
-      new TorusWalletAdapter(),
+    
+    // Use only the most reliable wallet adapters to avoid import errors
+    // These adapters cover the most popular Solana wallets
+    const walletAdapters = [
+      new PhantomWalletAdapter({ network }),
+      new SolflareWalletAdapter({ network })
     ];
+
+    console.log(`[PW] Created ${walletAdapters.length} wallet adapters`);
+    return walletAdapters;
   }, [network]);
 
   useEffect(() => {
@@ -89,23 +95,35 @@ export const IsolatedWalletProvider: FC<IsolatedWalletProviderProps> = ({ childr
         wallets={wallets} 
         autoConnect={true}
         onError={(error) => {
-          console.error('[PW] IsolatedWalletProvider: WalletProvider onError:', error);
+          // Log wallet errors without crashing the application
           if (error.name === 'WalletNotReadyError') {
             console.debug('[PW] WalletProvider onError: WalletNotReadyError, will retry automatically');
             return;
           }
           if (error.name === 'WalletNotConnectedError') {
+            // This is expected when no wallet is connected yet
             console.debug('[PW] WalletProvider onError: WalletNotConnectedError, user needs to connect manually');
             return;
           }
           if (error.name === 'WalletConnectionError') {
+            // This typically happens when no wallet extension is installed
             console.warn('[PW] WalletProvider onError: WalletConnectionError:', error.message);
+            console.info('[PW] To resolve this, install a Solana wallet extension like Phantom or Solflare');
             return;
           }
           if (error.name === 'WalletDisconnectedError') {
             console.info('[PW] WalletProvider onError: WalletDisconnectedError');
             return;
           }
+          if (error.name === 'WalletAccountError') {
+            console.warn('[PW] WalletProvider onError: WalletAccountError, wallet may need to be unlocked');
+            return;
+          }
+          if (error.name === 'WalletPublicKeyError') {
+            console.warn('[PW] WalletProvider onError: WalletPublicKeyError, cannot retrieve public key');
+            return;
+          }
+          // Any other errors
           console.error('[PW] WalletProvider onError: Unknown error:', error);
         }}
         localStorageKey="solana-wallet-adapter-type"

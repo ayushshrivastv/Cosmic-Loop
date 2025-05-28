@@ -6,29 +6,9 @@ import { AirdropForm } from '@/components/claim/airdrop-form';
 import { Suspense, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Import wallet adapter components
-import { WalletProvider, ConnectionProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { clusterApiUrl } from '@solana/web3.js';
-
-// Import wallet adapter styles
-import '@solana/wallet-adapter-react-ui/styles.css';
-
 export default function ClaimPage() {
-  // Set up wallet adapters
-  const wallets = [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter(),
-  ];
-  
-  // Use Solana devnet for development
-  const endpoint = clusterApiUrl('devnet');
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <div className="container mx-auto pt-32 pb-16 flex-1">
+    <div className="container mx-auto pt-32 pb-16 flex-1">
       <h1 className="text-3xl font-bold mb-8">Claim Your Token</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -164,9 +144,6 @@ export default function ClaimPage() {
           </div>
         </div>
       </div>
-          </div>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    </div>
   );
 }

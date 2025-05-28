@@ -23,7 +23,12 @@ export function ClaimForm() {
   
   // Access to the user's Solana wallet
   const wallet = useWallet();
-  const { publicKey, connected, sendTransaction } = wallet;
+  
+  // Only access wallet properties after client-side rendering
+  // This prevents the "WalletContext without providing one" error during SSR
+  const publicKey = isClient ? wallet.publicKey : null;
+  const connected = isClient ? wallet.connected : false;
+  const sendTransaction = isClient ? wallet.sendTransaction : null;
   
   // Track actual wallet connection status with our own state
   const [isWalletReady, setIsWalletReady] = useState(false);

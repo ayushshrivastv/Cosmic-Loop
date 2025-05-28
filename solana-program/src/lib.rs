@@ -27,9 +27,9 @@ entrypoint!(process_instruction);
 
 /// Main instruction processor
 /// Handles all incoming instructions to the program
-pub fn process_instruction(
+pub fn process_instruction<'a>(
     program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    accounts: &'a [AccountInfo<'a>],
     instruction_data: &[u8],
 ) -> ProgramResult {
     // Verify instruction data is not empty
@@ -48,36 +48,36 @@ pub fn process_instruction(
 }
 
 /// Send a message to another chain via LayerZero
-fn send_cross_chain_message(
+fn send_cross_chain_message<'a>(
     program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    accounts: &'a [AccountInfo<'a>],
     instruction_data: &[u8],
 ) -> ProgramResult {
     instructions::send_message::process(program_id, accounts, instruction_data)
 }
 
 /// Receive a message from another chain via LayerZero
-fn receive_cross_chain_message(
+fn receive_cross_chain_message<'a>(
     program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    accounts: &'a [AccountInfo<'a>],
     instruction_data: &[u8],
 ) -> ProgramResult {
     instructions::receive_message::process(program_id, accounts, instruction_data)
 }
 
 /// Query data across chains via LayerZero
-fn query_cross_chain_data(
+fn query_cross_chain_data<'a>(
     program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    accounts: &'a [AccountInfo<'a>],
     instruction_data: &[u8],
 ) -> ProgramResult {
     instructions::query_data::process(program_id, accounts, instruction_data)
 }
 
 /// Process a response from a cross-chain query
-fn process_cross_chain_response(
+fn process_cross_chain_response<'a>(
     program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    accounts: &'a [AccountInfo<'a>],
     instruction_data: &[u8],
 ) -> ProgramResult {
     instructions::process_response::process(program_id, accounts, instruction_data)

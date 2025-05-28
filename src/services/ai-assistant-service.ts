@@ -1,5 +1,6 @@
 import { NFTEvent, BridgeEvent, MarketplaceEvent } from './substreams-service';
 import { substreamsGeminiService } from './substreams-gemini-service';
+import { substreamsPerplexityService } from './substreams-perplexity-service';
 
 // Define the types of queries the AI assistant can handle
 export type AIQueryType = 
@@ -9,12 +10,13 @@ export type AIQueryType =
   | 'bridge_status' 
   | 'web_search'
   | 'repo_info'
+  | 'financial_analysis'
   | 'general';
 
 // Define the AI assistant response structure
 export interface AIAssistantResponse {
   text: string;
-  data?: any;
+  data?: Record<string, unknown>;
   queryType?: AIQueryType;
   relatedEvents?: Array<NFTEvent | BridgeEvent | MarketplaceEvent>;
 }
@@ -61,7 +63,7 @@ export class AIAssistantService {
       let response;
       
       // Use Promise.race to implement a timeout for slow responses
-      const timeoutPromise = new Promise<any>((_, reject) => {
+      const timeoutPromise = new Promise<void>((_, reject) => {
         setTimeout(() => {
           // If it's taking too long, send a partial response
           if (onUpdate) {
@@ -79,7 +81,17 @@ export class AIAssistantService {
         case 'market_analysis':
         case 'bridge_status':
           // For blockchain data queries, use the blockchain processing
-          response = await substreamsGeminiService.processBlockchainQuery(query, queryType);
+          // Determine if we should use Perplexity or Gemini based on query content
+          if (this.shouldUsePerplexity(query)) {
+            response = await substreamsPerplexityService.processBlockchainQuery(query, queryType);
+          } else {
+            response = await substreamsGeminiService.processBlockchainQuery(query, queryType);
+          }
+          break;
+        
+        case 'financial_analysis':
+          // For financial analysis queries, use Perplexity's Sonar API
+          response = await substreamsPerplexityService.processFinancialQuery(query);
           break;
         
         case 'web_search':
@@ -94,8 +106,12 @@ export class AIAssistantService {
         
         case 'general':
         default:
-          // For general queries
-          response = await substreamsGeminiService.processGeneralQuery(query);
+          // For general queries, determine if we should use Perplexity or Gemini
+          if (this.shouldUsePerplexity(query)) {
+            response = await substreamsPerplexityService.processGeneralQuery(query);
+          } else {
+            response = await substreamsGeminiService.processGeneralQuery(query);
+          }
           break;
       }
       
@@ -104,7 +120,7 @@ export class AIAssistantService {
       console.log(`Query processed in ${responseTime}ms`);
       
       // Convert the SubstreamsGeminiResponse to AIAssistantResponse
-      const finalResponse = {
+      const finalResponse: AIAssistantResponse = {
         text: response.text,
         data: response.data,
         queryType: response.queryType,
@@ -177,6 +193,23 @@ export class AIAssistantService {
     // Normalize the query for consistent matching
     const normalizedQuery = query.toLowerCase().trim();
     
+    // Check for financial analysis queries
+    if (
+      normalizedQuery.includes('financial') ||
+      normalizedQuery.includes('finance') ||
+      normalizedQuery.includes('investment') ||
+      normalizedQuery.includes('invest') ||
+      normalizedQuery.includes('stock') ||
+      normalizedQuery.includes('portfolio') ||
+      normalizedQuery.includes('asset') ||
+      normalizedQuery.includes('fund') ||
+      normalizedQuery.includes('return') ||
+      normalizedQuery.includes('roi') ||
+      normalizedQuery.includes('analysis')
+    ) {
+      return 'financial_analysis';
+    }
+    
     // Check for NFT-related queries
     if (
       normalizedQuery.includes('nft') ||
@@ -224,6 +257,27 @@ export class AIAssistantService {
     
     // Default to general query type
     return 'general';
+  }
+  
+  /**
+   * Determine if a query should use Perplexity's Sonar API based on content
+   * @param query The user's query text
+   * @returns Boolean indicating if Perplexity should be used
+   */
+  private shouldUsePerplexity(query: string): boolean {
+    // Normalize the query for consistent matching
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    // Check for financial or market analysis keywords that would benefit from Perplexity
+    const financialKeywords = [
+      'financial', 'finance', 'investment', 'invest', 'stock', 'portfolio',
+      'asset', 'fund', 'return', 'roi', 'analysis', 'trend', 'forecast',
+      'predict', 'market', 'price', 'trading', 'volume', 'chart', 'graph',
+      'compare', 'correlation', 'performance', 'metric', 'indicator'
+    ];
+    
+    // Check if any financial keywords are present in the query
+    return financialKeywords.some(keyword => normalizedQuery.includes(keyword));
   }
 
   /**

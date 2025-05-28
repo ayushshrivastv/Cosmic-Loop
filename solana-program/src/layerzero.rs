@@ -13,8 +13,6 @@ use solana_program::{
     pubkey::Pubkey,
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-// serde should be added to Cargo.toml dependencies
-use serde::{Deserialize, Serialize};
 use sha2::{Sha256, Digest};
 
 // All other imports have been removed as they were unused
@@ -22,11 +20,31 @@ use sha2::{Sha256, Digest};
 use crate::error::SolanaOpenApiError;
 
 /// LayerZero V2 Endpoint Interface
+#[allow(dead_code)]
 pub struct LayerZeroEndpoint {
     pub endpoint_id: Pubkey,
     pub fee_account: Pubkey,
     pub admin_account: Pubkey,
     pub protocol_version: u8,
+}
+
+// Implementation to make the struct usable and avoid dead code warnings
+#[allow(dead_code)]
+impl LayerZeroEndpoint {
+    /// Create a new LayerZero endpoint instance
+    pub fn new(endpoint_id: Pubkey, fee_account: Pubkey, admin_account: Pubkey) -> Self {
+        Self {
+            endpoint_id,
+            fee_account,
+            admin_account,
+            protocol_version: 2, // V2 by default
+        }
+    }
+    
+    /// Get the endpoint ID
+    pub fn get_endpoint_id(&self) -> &Pubkey {
+        &self.endpoint_id
+    }
 }
 
 /// LayerZero V2 Message Options
@@ -93,6 +111,7 @@ impl CrossChainMessage {
     }
     
     /// Get the estimated fee for this message
+    #[allow(dead_code)]
     pub fn estimate_fee(&self) -> Result<u64, ProgramError> {
         let base_fee = match self.destination_chain_id {
             1 => 1_000_000, // Ethereum (in lamports, 0.001 SOL)
@@ -178,9 +197,8 @@ pub fn send_to_endpoint<'a>(
         data,
     };
     
-    // Use references properly for the invoke call
     // The accounts array needs AccountInfo<'_> elements, not &AccountInfo<'_>
-    let account_infos = [*endpoint_account, *fee_account, *sender_account];
+    let account_infos = [endpoint_account.clone(), fee_account.clone(), sender_account.clone()];
     invoke(
         &instruction,
         &account_infos,

@@ -4353,6 +4353,7 @@ dependencies = [
  "bs58 0.5.1",
  "byteorder",
  "num-traits",
+ "serde",
  "sha2 0.10.9",
  "solana-cli-config",
  "solana-program 2.2.1",
