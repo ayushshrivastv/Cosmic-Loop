@@ -9,9 +9,9 @@
 ## Overview
 Solana OpenAPI is an innovative omnichain NFT solution designed to revolutionize event attendance verification and digital collectibles distribution. By seamlessly integrating Solana's high-performance blockchain with LayerZero-supported networks through V2 contracts and The Graph Substreams, Solana OpenAPI creates a unified experience across multiple blockchains.
 
-This Substreams package indexes Solana blockchain data for NFTs, marketplace activities, and cross-chain bridging events. It's designed to work with the Solana OpenAPI project to provide real time blockchain data through an AI powered interface.
+The platform indexes Solana blockchain data for NFTs, marketplace activities, and cross-chain bridging events, providing real-time blockchain data through an AI-powered interface. Users can mint, bridge, and claim NFTs across multiple chains with a seamless experience.
 
-The project integrates Perplexity's Sonar API to provide real time, accurate blockchain information through an intuitive chat interface. This integration allows users to query blockchain data, get financial analysis, and receive concise responses about Solana and other supported chains without requiring technical blockchain knowledge. The enhanced AI service combines Perplexity's search capabilities to summarization and deliver optimized responses for both simple factual queries and complex analytical questions.
+The project integrates Perplexity's Sonar API to provide real-time, accurate blockchain information through an intuitive chat interface. This integration allows users to query blockchain data, get financial analysis, and receive concise responses about Solana and other supported chains without requiring technical blockchain knowledge. The enhanced AI service combines Perplexity's search capabilities with specialized blockchain data processing to deliver optimized responses for both simple factual queries and complex analytical questions.
 
 For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./architecture.md) document.
 
@@ -20,7 +20,7 @@ P.S. After 48 hours of coding, debugging, and more coffee than water—here’s 
 Web Page Link
 **[Solana OpenAPI](https://openapi-lilac.vercel.app)**
 
-![Screenshot 2025-05-17 at 9 52 16 AM](https://github.com/user-attachments/assets/3d38bdad-17fe-48c7-8b5d-57cd0492fbb9)
+![Screenshot 2025-05-17 at 9 52 16 AM](https://github.com/user-attachments/assets/3d38bdad-17fe-48c7-8b5d-57cd0492fbb9)
 
 ## LayerZero V2 Integration
 
@@ -71,12 +71,12 @@ Comprehensive documentation is available in the [docs](/substreams)
 
 ## Documentation
 
-Comprehensive documentation is available in the [docs](/docs) directory:
+Comprehensive documentation is available in the [Documentation](/Documentation) directory:
 
-- [Overview](/docs/overview.md) - Introduction and key concepts
-- [Getting Started](/docs/getting-started.md) - Installation and setup
-- [Architecture](/docs/architecture/README.md) - System design and components
-- [API Reference](/docs/api-reference/README.md) - API documentation
+- [Architecture](/Documentation/architecture) - System design and components
+- [API Reference](/Documentation/api-reference) - API documentation
+
+Additional documentation is also available through the application's built-in docs section at [/app/docs](/app/docs) when running the application locally.
 
 ## Quick Start
 
@@ -84,12 +84,13 @@ Comprehensive documentation is available in the [docs](/docs) directory:
 
 - Node.js 18.x or later
 - npm or yarn
-- Rust toolchain (for Substreams development)
+- Rust toolchain (for Solana programs and Substreams development)
+- Solana CLI tools
 - Substreams CLI (for deploying and testing Substreams)
 - PostgreSQL database
-- Redis server (optional for development)
+- Redis server
+- Perplexity Sonar API key
 - Gemini API key (get one from [Google AI Studio](https://ai.google.dev/))
-- Serper API key (optional, for web search capabilities)
 
 ### Project Setup
 
@@ -100,10 +101,16 @@ git clone https://github.com/yourusername/Solana-OpenAPI.git
 cd Solana-OpenAPI
 ```
 
-2. Install dependencies
+2. Install dependencies for frontend and backend
 
 ```bash
+# Install frontend dependencies
 npm install
+
+# Install backend dependencies
+cd backend
+npm install
+cd ..
 ```
 
 3. Set up environment variables
@@ -112,19 +119,25 @@ npm install
 cp .env.example .env.local
 ```
 
-4. Add your Gemini API key to the `.env.local` file
+4. Add your API keys to the `.env.local` file
 
 ```
+NEXT_PUBLIC_PERPLEXITY_API_KEY=your_perplexity_api_key_here
 NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-5. Start the development server
+5. Start the development servers
 
 ```bash
+# Start frontend
+npm run dev
+
+# In another terminal, start backend
+cd backend
 npm run dev
 ```
 
-> **Note**: For Substreams setup and deployment instructions, please refer to the [Substreams README](/substreams/README.md)
+> **Note**: For Solana program and Substreams setup instructions, please refer to the respective README files in `/solana-program` and `/substreams` directories.
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser
 
@@ -148,6 +161,7 @@ When deploying to Vercel or other hosting platforms:
 - Tailwind CSS and shadcn/ui
 - TypeScript
 - Wallet adapters for Solana and EVM chains
+- Dynamic imports with SSR disabled for wallet components
 
 ### Backend
 - Node.js with Express
@@ -155,92 +169,86 @@ When deploying to Vercel or other hosting platforms:
 - PostgreSQL database with Knex.js
 - Redis for caching and pub/sub
 - WebSockets for real-time updates
+- Serverless functions for scalability
 
 ### Blockchain
-- Solana web3.js
+- Solana web3.js and @solana/wallet-adapter-react
 - The Graph Substreams for Solana
 - Rust-based Substreams package
 - Ethers.js for EVM chains
-- LayerZero v2 protocol
+- LayerZero v2 protocol for cross-chain operations
 - Light Protocol for compressed tokens
+- Custom Solana programs for on-chain logic
 
 ## Project Structure
 
 ```
 ├── src/                      # Frontend application
-│   ├── app/                  # Next.js pages and routes
-│   │   └── openapi/          # OpenAPI chat interface
+│   ├── api/                  # API services and integrations
+│   │   ├── gemini/           # Gemini AI integration
+│   │   ├── perplexity/       # Perplexity Sonar API integration
+│   │   └── prompt-engineering/ # Enhanced prompts
+│   ├── app/                  # Next.js pages and routes (App Router)
+│   │   ├── api/              # API routes
+│   │   ├── bridge/           # Cross-chain bridge interface
+│   │   ├── claim/            # NFT claiming interface
+│   │   ├── cross-chain/      # Cross-chain operations
+│   │   ├── dashboard/        # User dashboard
+│   │   ├── docs/             # Documentation pages
+│   │   ├── mint/             # NFT minting interface
+│   │   ├── openapi/          # OpenAPI chat interface
+│   │   └── profile/          # User profile
 │   ├── components/           # React components
-│   │   └── shared/           # Shared components including chat-popup
+│   │   ├── AISearch/         # AI search components
+│   │   ├── bridge/           # Bridge components
+│   │   ├── claim/            # Claim components
+│   │   ├── cross-chain/      # Cross-chain components
+│   │   ├── dashboard/        # Dashboard components
+│   │   ├── layouts/          # Layout components
+│   │   ├── mint/             # Minting components
+│   │   ├── profile/          # Profile components
+│   │   ├── providers/        # Context providers
+│   │   ├── shared/           # Shared components
+│   │   ├── ui/               # UI components
+│   │   └── wallet/           # Wallet components
 │   ├── hooks/                # Custom React hooks
-│   │   └── use-ai-assistant.ts # AI assistant hook
-│   ├── pages/                # API routes
-│   │   └── api/              # Backend API endpoints
-│   │       └── substreams/   # Substreams execution endpoints
+│   ├── lib/                  # Utility libraries
+│   │   ├── layerzero/        # LayerZero integration
+│   │   ├── services/         # Service utilities
+│   │   └── utils/            # General utilities
+│   ├── pages/                # Legacy Pages Router (if any)
 │   ├── services/             # Service layer
-│   │   ├── ai-assistant-service.ts    # AI assistant service
-│   │   ├── gemini-service.ts          # Gemini AI integration
-│   │   ├── prompt-engineering-service.ts # Enhanced prompts
-│   │   ├── substreams-service.ts       # Substreams data service
-│   │   ├── substreams-gemini-service.ts # Integration layer
-│   │   └── web-search-service.ts       # Web search capabilities
 │   └── types/                # TypeScript type definitions
+├── backend/                  # Backend services
+│   ├── config/               # Configuration
+│   ├── database/             # Database connections and models
+│   ├── graphql/              # GraphQL schema and resolvers
+│   ├── middleware/           # Express middleware
+│   ├── serverless/           # Serverless functions
+│   ├── services/             # Backend services
+│   ├── utils/                # Utility functions
+│   └── websockets/           # WebSocket handlers
+├── gateway/                  # API Gateway
+│   ├── dist/                 # Compiled gateway
+│   └── src/                  # Gateway source code
+├── solana-program/           # Solana on-chain programs
+│   ├── instructions/         # Program instructions
+│   ├── src/                  # Program source code
+│   └── tests/                # Program tests
 ├── substreams/               # Rust-based Substreams package
-│   ├── src/                  # Rust source code
-│   │   ├── lib.rs            # Library entry point
-│   │   ├── nft.rs            # NFT event processing
-│   │   ├── marketplace.rs    # Marketplace event processing
-│   │   └── bridge.rs         # Cross-chain bridge processing
 │   ├── build/                # Compiled Substreams package
+│   ├── proto/                # Protocol buffer definitions
+│   ├── src/                  # Rust source code
 │   └── substreams.yaml       # Substreams configuration
+├── Documentation/            # Comprehensive documentation
+│   ├── api-reference/        # API documentation
+│   └── architecture/         # System design and components
 ├── public/                   # Static assets
-└── docs/                     # Documentation
+│   ├── images/               # Image assets
+│   └── videos/               # Video assets
+└── docs/                     # Legacy documentation
 ```
 
-## API Endpoints
-
-### Substreams Execution
-
-```
-POST /api/substreams/execute
-```
-
-Executes specific modules in the Rust-based Substreams package and returns the results.
-
-**Request Body:**
-
-```json
-{
-  "module": "nft_events",
-  "params": {
-    "limit": 10
-  }
-}
-```
-
-**Available Modules:**
-
-- `nft_events`: Get recent NFT events
-- `nft_events_by_token`: Get NFT events for a specific token
-- `nft_events_by_wallet`: Get NFT events for a specific wallet
-- `bridge_events`: Get cross-chain bridge events
-- `marketplace_events`: Get marketplace events
-- `nft_collections`: Get NFT collection data
-- `account_transactions`: Get account transaction history
-
-### AI Assistant
-
-```
-POST /api/ai/ask
-```
-
-Sends a query to the AI assistant, which processes it using Gemini AI and relevant Substreams data.
-
-**Request Body:**
-
-```json
-{
-  "query": "Show me recent NFT sales on Solana",
   "conversationId": "optional-conversation-id"
 }
 ```
@@ -257,6 +265,33 @@ The integration between Substreams and the AI agent works as follows:
 6. The response is streamed back to the user with real-time updates
 
 This architecture allows for efficient, real-time analysis of blockchain data while providing a natural language interface that makes the data accessible to users without technical blockchain knowledge.
+
+
+### Perplexity Sonar API
+
+Perplexity's Sonar API serves as the project's primary information retrieval system, enabling:
+
+- **Real-time Blockchain Data Access**: The API connects directly to multiple blockchain networks, including Solana, Ethereum, Polygon, and other LayerZero-supported chains, providing up-to-the-minute transaction data, token metrics, and network statistics.
+
+- **Natural Language Processing**: Users can query blockchain data using everyday language rather than technical commands or complex query syntax. The system interprets questions like "What's the current SOL price?" or "Show me the top NFT collections on Solana this week" and translates them into appropriate data retrieval operations.
+
+- **Contextual Understanding**: Perplexity's advanced language models maintain conversation context, allowing for follow-up questions and clarifications without repeating previously established parameters.
+
+- **Multi-source Information Synthesis**: Beyond on-chain data, the API aggregates information from cryptocurrency exchanges, NFT marketplaces, developer documentation, and relevant news sources to provide comprehensive responses.
+
+### Enhanced AI Processing Pipeline
+
+The Solana OpenAPI platform extends Perplexity's capabilities through a sophisticated processing pipeline:
+
+1. **Query Classification**: Incoming user queries are classified by type (price inquiry, transaction lookup, NFT data, etc.) to optimize the information retrieval strategy.
+
+2. **Parallel Data Retrieval**: The system simultaneously queries multiple data sources, including Substreams-indexed Solana data, cross-chain bridge information, and external market data.
+
+3. **Response Optimization**: Raw data is transformed into human-readable formats with appropriate context, technical explanations, and visual elements when applicable.
+
+4. **Accuracy Verification**: Critical information (especially financial data) undergoes verification against multiple sources before being presented to users.
+
+This integration allows users to query blockchain data, get financial analysis, and receive concise responses about Solana and other supported chains without requiring technical blockchain knowledge. The enhanced AI service combines Perplexity's search capabilities with specialized blockchain data processing to deliver optimized responses for both simple factual queries and complex analytical questions.
 
 ## Contributing
 
