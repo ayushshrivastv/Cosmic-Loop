@@ -249,10 +249,6 @@ When deploying to Vercel or other hosting platforms:
 └── docs/                     # Legacy documentation
 ```
 
-  "conversationId": "optional-conversation-id"
-}
-```
-
 ## Using Substreams with the AI Agent
 
 The integration between Substreams and the AI agent works as follows:
